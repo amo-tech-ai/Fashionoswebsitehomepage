@@ -13,10 +13,14 @@ export function Footer() {
         { text: "Photography Services", href: "/Services" },
         { text: "Clothing Photography", href: "/Clothing" },
         { text: "Product Photography", href: "/Product" },
+        { text: "Video Services", href: "/Video" },
+        { text: "Amazon Services", href: "/Amazon" },
+        { text: "E-Commerce Web Design", href: "/web-design" },
+        { text: "Instagram Services", href: "/Instagram" },
+        { text: "Start New Shoot", href: "/wizard" },
         { text: "Studio Hire", href: "/Studios" },
         { text: "Campaigns", href: "#" },
         { text: "Runway", href: "#" },
-        { text: "Ecommerce", href: "#" },
         { text: "Video & Social", href: "#" }
       ]
     },

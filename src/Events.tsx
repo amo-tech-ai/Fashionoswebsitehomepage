@@ -480,7 +480,14 @@ export default function Events() {
                 Browse Events
                 <ChevronRight className="w-4 h-4" />
               </button>
-              <button className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border border-white/30 hover:bg-white/20 transition-colors">
+              <button 
+                onClick={() => {
+                  window.history.pushState({}, "", "/events/create");
+                  // Dispatch a popstate event to trigger the App's router
+                  window.dispatchEvent(new PopStateEvent('popstate'));
+                }}
+                className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border border-white/30 hover:bg-white/20 transition-colors"
+              >
                 Create Event
               </button>
             </div>

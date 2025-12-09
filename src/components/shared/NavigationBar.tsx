@@ -9,6 +9,18 @@ interface NavigationBarProps {
 export function NavigationBar({ activeScreen, onMobileMenuToggle }: NavigationBarProps) {
   const getPageTitle = () => {
     switch (activeScreen) {
+      case "overview":
+        return "Project Overview";
+      case "shotlist":
+        return "Shot List Builder";
+      case "products":
+        return "Product Inventory";
+      case "gallery":
+        return "Gallery & Deliverables";
+      case "clients":
+        return "Client Management";
+      case "billing":
+        return "Billing & Payments";
       case "command":
         return "Event Command Center";
       case "runway":

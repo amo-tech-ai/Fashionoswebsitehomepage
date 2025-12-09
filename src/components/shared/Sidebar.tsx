@@ -1,22 +1,25 @@
 import { motion, AnimatePresence } from "motion/react";
 import { 
   LayoutDashboard, 
-  Layout, 
   Users, 
-  Palette, 
-  Building2,
   Sparkles,
   ChevronLeft,
   ChevronRight,
   X,
-  Home,
-  Camera,
-  Shirt,
-  Video,
-  BookUser,
-  UserCircle,
+  Package,
+  DollarSign,
+  Image as ImageIcon,
+  ListOrdered,
   Calendar,
-  CalendarCheck
+  Activity,
+  Handshake,
+  FileSignature,
+  Zap,
+  CheckSquare,
+  BarChart3,
+  MapPin,
+  UserCheck,
+  Scissors
 } from "lucide-react";
 import { useState } from "react";
 
@@ -30,23 +33,26 @@ interface SidebarProps {
 export function Sidebar({ activeScreen, onNavigate, isMobileOpen, onMobileClose }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const marketingPages = [
-    { id: "home", label: "Home", icon: Home, description: "Main Website" },
-    { id: "photography", label: "Photography Services", icon: Camera, description: "Services Overview" },
-    { id: "clothing", label: "Clothing Photography", icon: Shirt, description: "Fashion Photography" },
-    { id: "studio", label: "Studio Hire", icon: Video, description: "Studio Rental" },
-    { id: "directory", label: "Directory", icon: BookUser, description: "Fashion Creatives" },
-    { id: "directorydetail", label: "Profile Detail", icon: UserCircle, description: "Creator Profile" },
-    { id: "events", label: "Events", icon: Calendar, description: "Fashion Events" },
-    { id: "eventdetail", label: "Event Details", icon: CalendarCheck, description: "Event Info" }
-  ];
-
   const dashboardPages = [
-    { id: "command", label: "Command Center", icon: LayoutDashboard, description: "Event Overview" },
-    { id: "runway", label: "Runway & Stage", icon: Layout, description: "Layout Planning" },
-    { id: "casting", label: "Casting & Models", icon: Users, description: "Model Management" },
-    { id: "designer", label: "Designer & Collection", icon: Palette, description: "Collection Planning" },
-    { id: "venue", label: "Venue & Production", icon: Building2, description: "Logistics & Crew" }
+    { id: "wizard", label: "Start New Shoot", icon: Sparkles, description: "Shoot Builder" },
+    { id: "overview", label: "Project Overview", icon: LayoutDashboard, description: "Bookings & Tracker" },
+    { id: "shotlist", label: "Shot List Builder", icon: ListOrdered, description: "Creative Planning" },
+    { id: "products", label: "Products", icon: Package, description: "Inventory Management" },
+    { id: "gallery", label: "Gallery & Delivery", icon: ImageIcon, description: "Assets Review" },
+    { id: "clients", label: "Client Dashboard", icon: Users, description: "CRM & Profiles" },
+    { id: "billing", label: "Billing & Payments", icon: DollarSign, description: "Invoices & Finance" },
+    { id: "events-list", label: "Events List", icon: Calendar, description: "Manage Events" },
+    { id: "event-wizard", label: "Event Wizard", icon: Sparkles, description: "Create New Event" },
+    { id: "command-center", label: "Command Center", icon: Activity, description: "Event Operations" },
+    { id: "sponsors", label: "Sponsor CRM", icon: Handshake, description: "Manage Partnerships" },
+    { id: "designers", label: "Designer Directory", icon: Scissors, description: "Brand Management" },
+    { id: "directory-wizard", label: "Add Designer", icon: UserCheck, description: "New Profile" },
+    { id: "contracts", label: "Contracts", icon: FileSignature, description: "Legal & Agreements" },
+    { id: "activations", label: "Activations", icon: Zap, description: "Brand Experiences" },
+    { id: "tasks", label: "Tasks & Deliverables", icon: CheckSquare, description: "Project Management" },
+    { id: "analytics", label: "ROI & Analytics", icon: BarChart3, description: "Performance Metrics" },
+    { id: "venues", label: "Venue Manager", icon: MapPin, description: "Locations & Spaces" },
+    { id: "casting", label: "Casting", icon: UserCheck, description: "Models & Talent" },
   ];
 
   const handleNavigation = (id: string) => {
@@ -106,50 +112,9 @@ export function Sidebar({ activeScreen, onNavigate, isMobileOpen, onMobileClose 
 
           {/* Navigation Menu */}
           <nav className="flex-1 overflow-y-auto py-6 px-3">
-            {/* Marketing Pages Section */}
-            {!isCollapsed && (
-              <div className="text-xs text-gray-500 uppercase tracking-wider px-3 mb-2">
-                Marketing
-              </div>
-            )}
-            <div className="space-y-1 mb-6">
-              {marketingPages.map((item) => {
-                const Icon = item.icon;
-                const isActive = activeScreen === item.id;
-
-                return (
-                  <motion.button
-                    key={item.id}
-                    onClick={() => handleNavigation(item.id)}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
-                      isActive
-                        ? 'bg-gray-900 text-white'
-                        : 'text-gray-700 hover:bg-gray-50'
-                    }`}
-                    whileHover={{ x: 2 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <Icon className="w-4 h-4 flex-shrink-0" />
-                    {!isCollapsed && (
-                      <div className="flex-1 text-left">
-                        <div className="text-sm">{item.label}</div>
-                        {item.description && (
-                          <div className={`text-xs ${
-                            isActive ? 'text-gray-300' : 'text-gray-500'
-                          }`}>
-                            {item.description}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </motion.button>
-                );
-              })}
-            </div>
-
             {/* Dashboard Section */}
             {!isCollapsed && (
-              <div className="text-xs text-gray-500 uppercase tracking-wider px-3 mb-2 mt-4">
+              <div className="text-xs text-gray-500 uppercase tracking-wider px-3 mb-2">
                 Dashboard
               </div>
             )}
