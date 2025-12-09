@@ -48,7 +48,7 @@ export function SponsorCRM({ onNavigate }: SponsorCRMProps) {
       action: "Review proposal draft", 
       column: "proposal", 
       category: "Luxury",
-      catColor: "bg-slate-100 text-slate-700"
+      catColor: "bg-gray-100 text-gray-700"
     },
     { 
       id: 2, 
@@ -58,7 +58,7 @@ export function SponsorCRM({ onNavigate }: SponsorCRMProps) {
       action: "Prepare contract", 
       column: "negotiation",
       category: "Luxury",
-      catColor: "bg-slate-100 text-slate-700" 
+      catColor: "bg-gray-100 text-gray-700" 
     },
     { 
       id: 3, 
@@ -101,27 +101,27 @@ export function SponsorCRM({ onNavigate }: SponsorCRMProps) {
   ];
 
   const activities = [
-    { text: "Call with Gucci completed", time: "2:14 PM", icon: Phone, color: "bg-green-100 text-green-600" },
-    { text: "Proposal sent to Prada", time: "Yesterday", icon: Mail, color: "bg-blue-100 text-blue-600" },
-    { text: "Marie from Chanel viewed pitch deck", time: "Yesterday", icon: FileText, color: "bg-purple-100 text-purple-600" },
+    { text: "Call with Gucci completed", time: "2:14 PM", icon: Phone, color: "bg-[#DCFCE7] text-[#166534]" },
+    { text: "Proposal sent to Prada", time: "Yesterday", icon: Mail, color: "bg-blue-50 text-blue-700" },
+    { text: "Marie from Chanel viewed pitch deck", time: "Yesterday", icon: FileText, color: "bg-[#F3E8FF] text-[#6B21A8]" },
     { text: "New sponsor lead added: Fendi", time: "2 days ago", icon: Plus, color: "bg-gray-100 text-gray-600" },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans pb-12">
+    <div className="min-h-screen bg-[#F7F7F5] font-sans pb-12">
       
       {/* Header Bar */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-20">
+      <div className="bg-white border-b border-gray-100 sticky top-0 z-20">
         <div className="max-w-[1920px] mx-auto px-4 md:px-6 py-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
+              <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
                 <span>Sponsors</span>
                 <span className="text-gray-300">/</span>
-                <span className="text-indigo-600 font-medium">CRM Dashboard</span>
+                <span className="text-[#1A1A1A]">CRM Dashboard</span>
               </div>
-              <h1 className="text-2xl font-serif text-gray-900">Sponsor CRM</h1>
-              <p className="text-sm text-gray-500">Manage sponsors, leads, and partnerships</p>
+              <h1 className="text-2xl font-serif font-medium text-[#1A1A1A]">Sponsor CRM</h1>
+              <p className="text-sm text-gray-500 font-medium">Manage sponsors, leads, and partnerships</p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 items-center w-full md:w-auto">
@@ -130,15 +130,15 @@ export function SponsorCRM({ onNavigate }: SponsorCRMProps) {
                 <input 
                   type="text" 
                   placeholder="Search sponsors..." 
-                  className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+                  className="w-full pl-10 pr-4 py-2 bg-[#F7F7F5] border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#1A1A1A] focus:bg-white transition-all text-[#1A1A1A]"
                 />
               </div>
               <div className="flex gap-2 w-full sm:w-auto">
-                <button className="flex-1 sm:flex-none px-4 py-2 border border-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                <button className="flex-1 sm:flex-none px-4 py-2 border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
                   <Upload className="w-4 h-4" />
                   Import CSV
                 </button>
-                <button className="flex-1 sm:flex-none px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 shadow-sm">
+                <button className="flex-1 sm:flex-none px-4 py-2 bg-[#1A1A1A] text-white rounded-lg text-sm font-bold hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 shadow-sm">
                   <Plus className="w-4 h-4" />
                   New Sponsor
                 </button>
@@ -158,17 +158,17 @@ export function SponsorCRM({ onNavigate }: SponsorCRMProps) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
-              className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all group"
+              className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all group"
             >
-              <div className="text-sm text-gray-500 mb-2">{kpi.label}</div>
+              <div className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">{kpi.label}</div>
               <div className="flex items-end gap-3">
-                <div className="text-2xl font-semibold text-gray-900">{kpi.value}</div>
-                <div className={`text-xs mb-1.5 font-medium ${kpi.positive ? 'text-green-600' : 'text-red-600'}`}>
+                <div className="text-2xl font-bold text-[#1A1A1A]">{kpi.value}</div>
+                <div className={`text-xs mb-1.5 font-bold ${kpi.positive ? 'text-[#166534]' : 'text-[#991B1B]'}`}>
                   {kpi.trend}
                 </div>
               </div>
               <div className="h-1 w-full bg-gray-100 mt-3 rounded-full overflow-hidden">
-                <div className="h-full bg-indigo-600 w-2/3 rounded-full group-hover:w-full transition-all duration-500" />
+                <div className="h-full bg-[#1A1A1A] w-2/3 rounded-full group-hover:w-full transition-all duration-500" />
               </div>
             </motion.div>
           ))}
@@ -186,10 +186,10 @@ export function SponsorCRM({ onNavigate }: SponsorCRMProps) {
                   const cards = pipelineCards.filter(c => c.column === col.id);
                   return (
                     <div key={col.id} className="flex-1 min-w-[240px]">
-                      <div className={`bg-white rounded-t-lg border-t-4 ${col.color} p-3 border-x border-b border-gray-200 shadow-sm mb-3`}>
+                      <div className={`bg-white rounded-t-lg border-t-4 ${col.color} p-3 border-x border-b border-gray-100 shadow-sm mb-3`}>
                         <div className="flex justify-between items-center">
-                          <span className="font-medium text-sm text-gray-900">{col.label}</span>
-                          <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs font-medium">{col.count}</span>
+                           <span className="font-semibold text-sm text-[#1A1A1A]">{col.label}</span>
+                           <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs font-bold">{col.count}</span>
                         </div>
                       </div>
                       
@@ -199,26 +199,26 @@ export function SponsorCRM({ onNavigate }: SponsorCRMProps) {
                             key={card.id}
                             layoutId={`card-${card.id}`}
                             onClick={() => onNavigate?.('sponsor-detail')}
-                            className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all cursor-pointer group"
+                            className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:border-gray-300 transition-all cursor-pointer group"
                           >
                             <div className="flex justify-between items-start mb-3">
-                              <div className="font-serif font-medium text-gray-900 text-lg">{card.brand}</div>
+                              <div className="font-serif font-bold text-[#1A1A1A] text-lg">{card.brand}</div>
                               <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wide font-bold ${card.catColor}`}>
                                 {card.category}
                               </span>
                             </div>
                             
                             <div className="flex justify-between items-center mb-3">
-                              <div className="text-sm font-medium text-gray-900">{card.value}</div>
-                              <div className="flex items-center gap-1 text-xs text-gray-500" title="Fit Score">
-                                <Sparkles className="w-3 h-3 text-indigo-500" />
+                              <div className="text-sm font-semibold text-[#1A1A1A]">{card.value}</div>
+                              <div className="flex items-center gap-1 text-xs text-gray-500 font-medium" title="Fit Score">
+                                <Sparkles className="w-3 h-3 text-[#A855F7]" />
                                 {card.fit}
                               </div>
                             </div>
 
                             <div className="pt-3 border-t border-gray-50">
-                              <div className="text-xs text-gray-400 mb-1">Next Step</div>
-                              <div className="text-xs font-medium text-indigo-600 flex items-center gap-1 group-hover:text-indigo-700">
+                              <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Next Step</div>
+                              <div className="text-xs font-bold text-[#1A1A1A] flex items-center gap-1 group-hover:underline">
                                 {card.action}
                                 <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                               </div>
@@ -228,7 +228,7 @@ export function SponsorCRM({ onNavigate }: SponsorCRMProps) {
                         
                         {/* Empty State Placeholder */}
                         {cards.length === 0 && (
-                          <div className="h-24 border-2 border-dashed border-gray-100 rounded-xl flex items-center justify-center text-xs text-gray-400">
+                          <div className="h-24 border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center text-xs text-gray-400 font-medium">
                             No deals
                           </div>
                         )}
@@ -240,9 +240,9 @@ export function SponsorCRM({ onNavigate }: SponsorCRMProps) {
             </div>
 
             {/* Sponsor List Table */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                <h3 className="font-medium text-gray-900">All Sponsors</h3>
+                <h3 className="font-serif font-bold text-[#1A1A1A]">All Sponsors</h3>
                 <div className="flex gap-2">
                   <button className="p-2 hover:bg-gray-50 rounded-lg text-gray-500 transition-colors">
                     <Filter className="w-4 h-4" />
@@ -254,39 +254,39 @@ export function SponsorCRM({ onNavigate }: SponsorCRMProps) {
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
-                  <thead className="bg-gray-50/50 text-gray-500 border-b border-gray-100">
+                  <thead className="bg-[#F9FAFB] text-gray-500 border-b border-gray-100">
                     <tr>
-                      <th className="px-6 py-3 font-medium">Brand</th>
-                      <th className="px-6 py-3 font-medium">Category</th>
-                      <th className="px-6 py-3 font-medium">Budget</th>
-                      <th className="px-6 py-3 font-medium">Fit Score</th>
-                      <th className="px-6 py-3 font-medium">Owner</th>
-                      <th className="px-6 py-3 font-medium">Status</th>
-                      <th className="px-6 py-3 font-medium text-right">Action</th>
+                      <th className="px-6 py-3 font-semibold text-xs uppercase tracking-wide">Brand</th>
+                      <th className="px-6 py-3 font-semibold text-xs uppercase tracking-wide">Category</th>
+                      <th className="px-6 py-3 font-semibold text-xs uppercase tracking-wide">Budget</th>
+                      <th className="px-6 py-3 font-semibold text-xs uppercase tracking-wide">Fit Score</th>
+                      <th className="px-6 py-3 font-semibold text-xs uppercase tracking-wide">Owner</th>
+                      <th className="px-6 py-3 font-semibold text-xs uppercase tracking-wide">Status</th>
+                      <th className="px-6 py-3 font-semibold text-xs uppercase tracking-wide text-right">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {tableData.map((row, i) => (
                       <tr key={i} className="hover:bg-gray-50/50 transition-colors group">
-                        <td className="px-6 py-4 font-medium text-gray-900">{row.brand}</td>
-                        <td className="px-6 py-4 text-gray-600">{row.category}</td>
-                        <td className="px-6 py-4 text-gray-600">{row.budget}</td>
+                        <td className="px-6 py-4 font-bold text-[#1A1A1A]">{row.brand}</td>
+                        <td className="px-6 py-4 text-gray-600 font-medium">{row.category}</td>
+                        <td className="px-6 py-4 text-gray-600 font-medium">{row.budget}</td>
                         <td className="px-6 py-4">
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                            row.fit >= 90 ? 'bg-green-50 text-green-700' :
-                            row.fit >= 80 ? 'bg-indigo-50 text-indigo-700' :
-                            'bg-amber-50 text-amber-700'
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${
+                            row.fit >= 90 ? 'bg-[#DCFCE7] text-[#166534]' :
+                            row.fit >= 80 ? 'bg-[#F3E8FF] text-[#6B21A8]' :
+                            'bg-[#FEF3C7] text-[#92400E]'
                           }`}>
                             {row.fit}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-gray-600">{row.owner}</td>
+                        <td className="px-6 py-4 text-gray-600 font-medium">{row.owner}</td>
                         <td className="px-6 py-4">
-                          <span className="inline-flex items-center gap-1.5">
+                          <span className="inline-flex items-center gap-1.5 font-medium">
                             <span className={`w-1.5 h-1.5 rounded-full ${
-                              row.status === 'Proposal Sent' ? 'bg-amber-500' :
-                              row.status === 'Qualified' ? 'bg-indigo-500' :
-                              row.status === 'Discovery' ? 'bg-purple-500' :
+                              row.status === 'Proposal Sent' ? 'bg-[#D97706]' :
+                              row.status === 'Qualified' ? 'bg-[#1A1A1A]' :
+                              row.status === 'Discovery' ? 'bg-[#A855F7]' :
                               'bg-gray-400'
                             }`} />
                             {row.status}
@@ -295,7 +295,7 @@ export function SponsorCRM({ onNavigate }: SponsorCRMProps) {
                         <td className="px-6 py-4 text-right">
                           <button 
                             onClick={() => onNavigate?.('sponsor-detail')}
-                            className="text-indigo-600 hover:text-indigo-800 font-medium text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="text-[#1A1A1A] hover:underline font-bold text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                           >
                             View Profile
                           </button>
@@ -313,7 +313,7 @@ export function SponsorCRM({ onNavigate }: SponsorCRMProps) {
           <div className="lg:col-span-3 space-y-6">
             
             {/* AI Insights Card */}
-            <div className="bg-gradient-to-br from-indigo-900 via-indigo-800 to-violet-900 rounded-xl p-6 text-white shadow-lg relative overflow-hidden">
+            <div className="bg-gradient-to-br from-[#1A1A1A] to-[#333333] rounded-xl p-6 text-white shadow-lg relative overflow-hidden">
               <div className="absolute top-0 right-0 p-6 opacity-10">
                 <Sparkles className="w-24 h-24" />
               </div>
@@ -321,40 +321,40 @@ export function SponsorCRM({ onNavigate }: SponsorCRMProps) {
               <div className="relative z-10">
                 <div className="flex items-center gap-2 mb-6">
                   <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
-                    <Sparkles className="w-5 h-5 text-indigo-200" />
+                    <Sparkles className="w-5 h-5 text-purple-200" />
                   </div>
-                  <h3 className="font-medium text-lg">AI Insights</h3>
+                  <h3 className="font-serif font-bold text-lg">AI Insights</h3>
                 </div>
 
                 <div className="space-y-4 mb-8">
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/10 transition-transform hover:scale-[1.02]">
-                    <p className="text-sm text-indigo-50 leading-relaxed">
-                      <span className="text-white font-medium">Dior</span> has a <span className="text-green-300 font-bold">92%</span> probability of conversion based on recent engagement.
+                  <div className="bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-white/10 transition-transform hover:scale-[1.02]">
+                    <p className="text-sm text-gray-200 leading-relaxed font-medium">
+                      <span className="text-white font-bold">Dior</span> has a <span className="text-[#DCFCE7] font-bold">92%</span> probability of conversion based on recent engagement.
                     </p>
                   </div>
                   
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/10 transition-transform hover:scale-[1.02]">
-                    <div className="flex items-center gap-2 mb-1 text-amber-300 text-xs font-bold uppercase tracking-wider">
+                  <div className="bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-white/10 transition-transform hover:scale-[1.02]">
+                    <div className="flex items-center gap-2 mb-1 text-[#FEF3C7] text-[10px] font-bold uppercase tracking-wider">
                       <AlertCircle className="w-3 h-3" />
                       Risk Alert
                     </div>
-                    <p className="text-sm text-indigo-50 leading-relaxed">
-                      <span className="text-white font-medium">Adidas</span> shows risk: no interaction in 14 days.
+                    <p className="text-sm text-gray-200 leading-relaxed font-medium">
+                      <span className="text-white font-bold">Adidas</span> shows risk: no interaction in 14 days.
                     </p>
                   </div>
 
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/10 transition-transform hover:scale-[1.02]">
-                    <p className="text-sm text-indigo-50 leading-relaxed">
-                      <span className="text-white font-medium">Chanel's</span> engagement trend is <span className="text-green-300 font-bold">+12%</span> week-over-week.
+                  <div className="bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-white/10 transition-transform hover:scale-[1.02]">
+                    <p className="text-sm text-gray-200 leading-relaxed font-medium">
+                      <span className="text-white font-bold">Chanel's</span> engagement trend is <span className="text-[#DCFCE7] font-bold">+12%</span> week-over-week.
                     </p>
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <button className="w-full py-2.5 bg-white text-indigo-900 rounded-lg text-sm font-medium hover:bg-indigo-50 transition-colors shadow-sm">
+                  <button className="w-full py-2.5 bg-white text-black rounded-lg text-sm font-bold hover:bg-gray-100 transition-colors shadow-sm">
                     Generate Proposal Suggestions
                   </button>
-                  <button className="w-full py-2.5 bg-indigo-800/50 border border-indigo-700/50 text-indigo-100 rounded-lg text-sm font-medium hover:bg-indigo-800 transition-colors">
+                  <button className="w-full py-2.5 bg-transparent border border-white/20 text-white rounded-lg text-sm font-medium hover:bg-white/10 transition-colors">
                     View Sponsor Fit Analysis
                   </button>
                 </div>
@@ -362,8 +362,8 @@ export function SponsorCRM({ onNavigate }: SponsorCRMProps) {
             </div>
 
             {/* Activity Feed */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-              <h3 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+              <h3 className="font-serif font-bold text-[#1A1A1A] mb-4 flex items-center gap-2">
                 <Activity className="w-4 h-4 text-gray-500" />
                 Recent Activity
               </h3>
@@ -379,16 +379,16 @@ export function SponsorCRM({ onNavigate }: SponsorCRMProps) {
                         <Icon className="w-4 h-4" />
                       </div>
                       <div className="pt-1">
-                        <div className="text-sm text-gray-900 font-medium group-hover:text-indigo-600 transition-colors">
+                        <div className="text-sm text-[#1A1A1A] font-medium group-hover:text-black transition-colors">
                           {item.text}
                         </div>
-                        <div className="text-xs text-gray-400 mt-0.5">{item.time}</div>
+                        <div className="text-xs text-gray-400 mt-0.5 font-medium">{item.time}</div>
                       </div>
                     </div>
                   );
                 })}
               </div>
-              <button className="w-full mt-4 py-2 text-xs text-gray-500 hover:text-gray-700 font-medium border-t border-gray-100 pt-3">
+              <button className="w-full mt-4 py-2 text-xs text-gray-500 hover:text-black font-bold border-t border-gray-50 pt-3 uppercase tracking-wide">
                 View All Activity
               </button>
             </div>

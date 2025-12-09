@@ -19,7 +19,8 @@ import {
   BarChart3,
   MapPin,
   UserCheck,
-  Scissors
+  Scissors,
+  Monitor
 } from "lucide-react";
 import { useState } from "react";
 
@@ -35,6 +36,8 @@ export function Sidebar({ activeScreen, onNavigate, isMobileOpen, onMobileClose 
 
   const dashboardPages = [
     { id: "wizard", label: "Start New Shoot", icon: Sparkles, description: "Shoot Builder" },
+    { id: "website-wizard", label: "Website Wizard", icon: Monitor, description: "New Web Project" },
+    { id: "website-brief-dashboard", label: "Website Brief", icon: Monitor, description: "Review Website Plan" },
     { id: "overview", label: "Project Overview", icon: LayoutDashboard, description: "Bookings & Tracker" },
     { id: "shotlist", label: "Shot List Builder", icon: ListOrdered, description: "Creative Planning" },
     { id: "products", label: "Products", icon: Package, description: "Inventory Management" },

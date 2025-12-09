@@ -10,6 +10,7 @@ import VideoServices from "./Video";
 import AmazonServices from "./Amazon";
 import InstagramServices from "./Instagram";
 import WebDesignServices from "./WebDesignServices";
+import WebsiteWizard from "./WebsiteWizard";
 import Studios from "./Studios";
 import ShootWizard from "./ShootWizard";
 import Directory from "./Directory";
@@ -57,6 +58,8 @@ export default function App() {
       else if (path.includes("/video")) setActiveScreen("video");
       else if (path.includes("/amazon")) setActiveScreen("amazon");
       else if (path.includes("/instagram")) setActiveScreen("instagram");
+      else if (path.includes("/website-brief")) setActiveScreen("website-brief-dashboard");
+      else if (path.includes("/website-wizard")) setActiveScreen("website-wizard");
       else if (path.includes("/web-design")) setActiveScreen("webdesign");
       else if (path.includes("/wizard") || path.includes("/shoot")) setActiveScreen("wizard");
       else if (path.includes("/studios") || path === "/studio") setActiveScreen("studio");
@@ -108,6 +111,10 @@ export default function App() {
         return <InstagramServices />;
       case "webdesign":
         return <WebDesignServices />;
+      case "website-wizard":
+        return <WebsiteWizard />;
+      case "website-brief-dashboard":
+        return <WebsiteWizard initialStep={9} />;
       case "wizard":
         return <ShootWizard />;
       case "studio":
@@ -181,10 +188,10 @@ export default function App() {
   };
 
   // Determine if current page is a marketing page (no top nav needed)
-  const isMarketingPage = ["home", "home-v2", "photography", "clothing", "product", "video", "amazon", "instagram", "webdesign", "studio", "directory", "directorydetail", "events", "eventdetail", "wizard"].includes(activeScreen);
+  const isMarketingPage = ["home", "home-v2", "photography", "clothing", "product", "video", "amazon", "instagram", "webdesign", "website-wizard", "studio", "directory", "directorydetail", "events", "eventdetail", "wizard"].includes(activeScreen);
 
   // Determine if we should hide the sidebar (e.g. for the full-screen wizard)
-  const isFullScreen = activeScreen === "wizard";
+  const isFullScreen = activeScreen === "wizard" || activeScreen === "website-wizard";
 
   return (
     <div className="min-h-screen bg-gray-50">

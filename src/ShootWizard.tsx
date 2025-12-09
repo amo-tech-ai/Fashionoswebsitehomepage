@@ -18,7 +18,9 @@ import {
   Facebook,
   Youtube,
   Linkedin,
-  Twitter
+  Twitter,
+  Globe,
+  Sparkles
 } from "lucide-react";
 import { ImageWithFallback } from "./components/figma/ImageWithFallback";
 import { Sidebar } from "./components/shared/Sidebar";
@@ -45,7 +47,7 @@ type WizardStep =
   | "summary";
 
 interface WizardState {
-  service: "photography" | "video" | null;
+  service: "photography" | "video" | "webdesign" | "socialmedia" | null;
   category: string | null;
   subType: string | null;
   style: string | null;
@@ -63,14 +65,30 @@ const SERVICES = [
   { 
     id: "photography", 
     label: "Photography", 
-    image: "https://images.unsplash.com/photo-1700150595270-499a1ce07804?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwbW9kZWwlMjBlZGl0b3JpYWx8ZW58MXx8fHwxNzY0Nzg5MzcyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    subtitle: "",
+    image: "https://images.unsplash.com/photo-1637536701369-f815af927b59?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxibGFjayUyMHdoaXRlJTIwZWRpdG9yaWFsJTIwZmFzaGlvbiUyMHBvcnRyYWl0fGVufDF8fHx8MTc2NTI3MTE1NHww&ixlib=rb-4.1.0&q=80&w=1080",
     icon: Camera
   },
   { 
     id: "video", 
     label: "Video Production", 
-    image: "https://images.unsplash.com/photo-1639701386739-449a0e789367?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aWRlbyUyMHByb2R1Y3Rpb24lMjBjYW1lcmElMjBzZXR8ZW58MXx8fHwxNzY0ODkyMTUwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    subtitle: "",
+    image: "https://images.unsplash.com/photo-1762028892567-6ebfbb894992?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdHVkaW8lMjBsaWdodGluZyUyMGZpbG1tYWtpbmclMjBwcm9kdWN0aW9ufGVufDF8fHx8MTc2NTI3MTE1OXww&ixlib=rb-4.1.0&q=80&w=1080",
     icon: Video
+  },
+  { 
+    id: "webdesign", 
+    label: "Website Design", 
+    subtitle: "Landing pages, product portfolios, digital brand kits",
+    image: "https://images.unsplash.com/photo-1741119482290-bf0566a6d404?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXB0b3AlMjB3ZWJzaXRlJTIwZGVzaWduJTIwbW9ja3VwfGVufDF8fHx8MTc2NTI3MTE2Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+    icon: Globe
+  },
+  { 
+    id: "socialmedia", 
+    label: "Social Media Marketing", 
+    subtitle: "Instagram Reels, TikTok videos, campaign content",
+    image: "https://images.unsplash.com/photo-1694878982074-d8d4bc4581b9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb250ZW50JTIwY3JlYXRpb24lMjBwaG9uZSUyMHZlcnRpY2FsJTIwdmlkZW98ZW58MXx8fHwxNzY1MjcxMTY2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    icon: Sparkles
   }
 ];
 
@@ -223,36 +241,63 @@ export default function ShootWizard() {
   // --- Render Steps ---
 
   const renderService = () => (
-    <div className="w-full pt-6 md:pt-12">
-      <div className="max-w-3xl mx-auto text-center mb-10 md:mb-16">
-        <h1 className="text-4xl md:text-6xl font-serif text-gray-900 mb-4 tracking-tight">Choose Your Service</h1>
-        <p className="text-gray-500 text-lg md:text-xl">What would you like to create today?</p>
+    <div className="w-full pt-6 md:pt-10 pb-12">
+      <div className="max-w-3xl mx-auto text-center mb-8 md:mb-12 px-4">
+        <h1 className="text-3xl md:text-5xl font-serif text-gray-900 mb-3 tracking-tight">Choose Your Service</h1>
+        <p className="text-gray-600 text-base md:text-lg">What would you like to create today?</p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 px-4 md:px-12 max-w-5xl mx-auto">
-        {SERVICES.map((s) => (
-          <div 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 px-4 md:px-8 max-w-6xl mx-auto">
+        {SERVICES.map((s, index) => (
+          <motion.div
             key={s.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: index * 0.1 }}
             onClick={() => setState({...state, service: s.id as any})}
-            className={`relative group cursor-pointer rounded-3xl overflow-hidden aspect-[4/5] transition-all duration-700 shadow-sm hover:shadow-2xl ${
-              state.service === s.id ? 'ring-4 ring-black scale-[1.01] z-10' : 'hover:-translate-y-2 hover:z-10 z-0'
+            className={`relative group cursor-pointer rounded-3xl overflow-hidden aspect-[4/5] transition-all duration-500 ${
+              state.service === s.id 
+                ? 'ring-2 ring-black shadow-2xl scale-[1.02]' 
+                : 'shadow-md hover:shadow-2xl hover:scale-[1.02]'
             }`}
           >
-            <ImageWithFallback src={s.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt={s.label} />
-            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-700" />
-            <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 bg-gradient-to-t from-black/90 via-black/40 to-transparent">
-              <div className="flex items-center gap-6 text-white">
-                <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur flex items-center justify-center border border-white/10">
-                  <s.icon className="w-8 h-8" />
+            <ImageWithFallback 
+              src={s.image} 
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+              alt={s.label} 
+            />
+            <div className={`absolute inset-0 transition-all duration-500 ${
+              state.service === s.id 
+                ? 'bg-gradient-to-t from-black/80 via-black/30 to-black/10' 
+                : 'bg-gradient-to-t from-black/70 via-black/20 to-transparent group-hover:from-black/60 group-hover:via-black/15'
+            }`} />
+            <div className="absolute inset-0 border border-white/20 rounded-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
+              <div className="flex items-start gap-4 md:gap-5 text-white">
+                <div className={`flex-shrink-0 w-14 h-14 md:w-16 md:h-16 rounded-2xl backdrop-blur-md flex items-center justify-center border transition-all duration-300 ${
+                  state.service === s.id 
+                    ? 'bg-white/30 border-white/40' 
+                    : 'bg-white/20 border-white/20 group-hover:bg-white/30 group-hover:border-white/40'
+                }`}>
+                  <s.icon className="w-7 h-7 md:w-8 md:h-8" />
                 </div>
-                <span className="text-3xl md:text-5xl font-serif tracking-tight">{s.label}</span>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-2xl md:text-4xl font-serif tracking-tight mb-1 leading-tight">{s.label}</h3>
+                  {s.subtitle && (
+                    <p className="text-xs md:text-sm text-white/80 font-light leading-relaxed">{s.subtitle}</p>
+                  )}
+                </div>
               </div>
             </div>
             {state.service === s.id && (
-              <div className="absolute top-8 right-8 w-12 h-12 bg-black text-white rounded-full flex items-center justify-center shadow-lg animate-in fade-in zoom-in duration-300">
-                <Check className="w-6 h-6" />
-              </div>
+              <motion.div 
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="absolute top-6 right-6 w-10 h-10 md:w-12 md:h-12 bg-white text-black rounded-full flex items-center justify-center shadow-xl"
+              >
+                <Check className="w-5 h-5 md:w-6 md:h-6 stroke-[3]" />
+              </motion.div>
             )}
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>

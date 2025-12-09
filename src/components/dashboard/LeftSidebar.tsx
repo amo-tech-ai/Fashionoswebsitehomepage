@@ -8,7 +8,8 @@ import {
   Users, 
   Briefcase, 
   Settings, 
-  LogOut 
+  LogOut,
+  Monitor
 } from "lucide-react";
 
 interface NavItem {
@@ -23,6 +24,7 @@ export function LeftSidebar() {
     { icon: Command, label: "Command Center", active: true },
     { icon: Calendar, label: "Event Dashboard" },
     { icon: PlusSquare, label: "Create Event Wizard" },
+    { icon: Monitor, label: "Website Design Wizard" },
     { icon: Layers, label: "Runway & Layout" },
     { icon: Users, label: "Casting & Models" },
     { icon: Briefcase, label: "Designer & Sponsors" },

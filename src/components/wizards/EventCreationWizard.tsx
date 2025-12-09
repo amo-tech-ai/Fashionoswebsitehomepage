@@ -31,20 +31,19 @@ function GeminiButton({ onClick, label, icon: Icon = Sparkles, className = "" }:
   return (
     <button 
       onClick={onClick}
-      className={`group relative inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 transition-all shadow-sm hover:shadow-md ${className}`}
+      className={`group relative inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-[#6B21A8] bg-[#F3E8FF] hover:bg-purple-100 transition-all shadow-sm ${className}`}
     >
-      <Icon className="w-4 h-4 animate-pulse" />
+      <Icon className="w-4 h-4 text-[#A855F7]" />
       <span>{label}</span>
-      <div className="absolute inset-0 rounded-lg ring-2 ring-white/20 group-hover:ring-white/40 transition-all" />
     </button>
   );
 }
 
 function InsightBanner({ children, type = "info" }: { children: React.ReactNode, type?: "info" | "warning" | "success" }) {
   const styles = {
-    info: "bg-indigo-50 border-indigo-100 text-indigo-900",
-    warning: "bg-amber-50 border-amber-100 text-amber-900",
-    success: "bg-emerald-50 border-emerald-100 text-emerald-900"
+    info: "bg-blue-50 border-blue-100 text-blue-900",
+    warning: "bg-[#FEF3C7] border-amber-100 text-[#92400E]",
+    success: "bg-[#DCFCE7] border-green-100 text-[#166534]"
   };
 
   const icons = {
@@ -57,17 +56,17 @@ function InsightBanner({ children, type = "info" }: { children: React.ReactNode,
 
   return (
     <div className={`p-4 rounded-xl border flex items-start gap-3 ${styles[type]}`}>
-      <Icon className="w-5 h-5 mt-0.5 flex-shrink-0" />
-      <div className="text-sm leading-relaxed">{children}</div>
+      <Icon className="w-5 h-5 mt-0.5 flex-shrink-0 opacity-80" />
+      <div className="text-sm leading-relaxed font-medium">{children}</div>
     </div>
   );
 }
 
 function SectionTitle({ title, subtitle }: { title: string, subtitle?: string }) {
   return (
-    <div className="mb-6">
-      <h2 className="text-xl font-serif font-bold text-gray-900">{title}</h2>
-      {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
+    <div className="mb-8">
+      <h2 className="text-3xl font-serif font-medium text-[#1A1A1A] mb-2">{title}</h2>
+      {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
     </div>
   );
 }
@@ -143,23 +142,23 @@ export function EventCreationWizard({ onComplete }: { onComplete?: () => void })
         {/* Left Column: Core Forms */}
         <div className="lg:col-span-2 space-y-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Event Name</label>
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Event Name</label>
             <input 
               type="text" 
               value={formData.name}
               onChange={(e) => handleInputChange("name", e.target.value)}
-              className="w-full px-4 py-3.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-900 transition-shadow bg-white text-lg font-medium placeholder:font-normal"
+              className="w-full px-4 py-3.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#1A1A1A] transition-shadow bg-white text-lg font-medium placeholder:font-normal text-[#1A1A1A]"
               placeholder="e.g. NYFW SS25 Showcase"
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Event Type</label>
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Event Type</label>
               <select 
                 value={formData.type}
                 onChange={(e) => handleInputChange("type", e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-900 transition-shadow bg-white"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#1A1A1A] transition-shadow bg-white text-[#1A1A1A] font-medium"
               >
                 <option>Runway Show</option>
                 <option>Showcase</option>
@@ -168,11 +167,11 @@ export function EventCreationWizard({ onComplete }: { onComplete?: () => void })
               </select>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Date & Time</label>
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Date & Time</label>
               <div className="relative">
                 <input 
                   type="datetime-local" 
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-900 transition-shadow bg-white pl-11"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#1A1A1A] transition-shadow bg-white pl-11 text-[#1A1A1A] font-medium"
                 />
                 <Calendar className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
               </div>
@@ -181,14 +180,14 @@ export function EventCreationWizard({ onComplete }: { onComplete?: () => void })
 
           <div className="space-y-3">
              <div className="flex justify-between items-center">
-                <label className="text-sm font-medium text-gray-700">Theme & Vision</label>
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Theme & Vision</label>
                 <GeminiButton label="Enhance Theme" onClick={() => handleInputChange("theme", "Ethereal future-tech fusion with bioluminescent accents and brutalist architecture.")} />
              </div>
              <textarea 
               rows={4}
               value={formData.theme}
               onChange={(e) => handleInputChange("theme", e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-900 transition-shadow bg-white resize-none text-gray-600 leading-relaxed"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#1A1A1A] transition-shadow bg-white resize-none text-[#1A1A1A] leading-relaxed"
             />
             <div className="flex flex-wrap gap-2">
               <span className="text-xs font-medium text-gray-400 py-1.5">Starters:</span>
@@ -196,7 +195,7 @@ export function EventCreationWizard({ onComplete }: { onComplete?: () => void })
                 <button 
                   key={prompt}
                   onClick={() => handleInputChange("theme", prompt)}
-                  className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full text-xs text-gray-600 hover:bg-gray-100 transition-colors"
+                  className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full text-xs text-gray-600 hover:bg-gray-100 hover:text-black transition-colors"
                 >
                   {prompt}
                 </button>
@@ -209,22 +208,23 @@ export function EventCreationWizard({ onComplete }: { onComplete?: () => void })
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
              <div className="flex items-center gap-2 mb-4">
-                <Globe className="w-4 h-4 text-indigo-600" />
-                <h3 className="text-sm font-bold text-gray-900">Brand Analysis</h3>
+                <Globe className="w-4 h-4 text-gray-900" />
+                <h3 className="text-sm font-bold text-[#1A1A1A]">Brand Analysis</h3>
              </div>
-             <p className="text-xs text-gray-500 mb-3">Paste a URL to have Gemini analyze the brand aesthetic automatically.</p>
+             <p className="text-xs text-gray-500 mb-4 leading-relaxed">Paste a URL to have Gemini analyze the brand aesthetic automatically.</p>
              <div className="flex gap-2 mb-4">
                <input 
                   type="text" 
                   placeholder="instagram.com/brand"
-                  className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-gray-900"
+                  className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-gray-900 bg-[#F7F7F5]"
                />
-               <button className="px-3 py-2 bg-gray-100 rounded-lg text-gray-600 hover:bg-gray-200 transition-colors">
+               <button className="px-3 py-2 bg-[#1A1A1A] rounded-lg text-white hover:bg-gray-800 transition-colors">
                  <Wand2 className="w-4 h-4" />
                </button>
              </div>
-             <div className="bg-indigo-50 rounded-lg p-3">
-               <p className="text-xs text-indigo-800 italic">
+             <div className="bg-[#F3E8FF] rounded-lg p-3 border border-purple-100">
+               <p className="text-xs text-[#6B21A8] font-medium flex gap-2">
+                 <Sparkles className="w-3 h-3 shrink-0 mt-0.5" />
                  "Tip: AI can suggest themes based on your last 3 Instagram posts."
                </p>
              </div>
@@ -246,17 +246,17 @@ export function EventCreationWizard({ onComplete }: { onComplete?: () => void })
                 <div 
                   key={venue.id}
                   onClick={() => handleInputChange("venueId", venue.id)}
-                  className={`cursor-pointer group rounded-xl border-2 overflow-hidden transition-all relative ${
-                    formData.venueId === venue.id ? "border-gray-900 shadow-lg ring-1 ring-gray-900" : "border-transparent hover:border-gray-200 shadow-sm"
+                  className={`cursor-pointer group rounded-xl border overflow-hidden transition-all relative ${
+                    formData.venueId === venue.id ? "border-[#1A1A1A] shadow-md ring-1 ring-[#1A1A1A]" : "border-gray-200 hover:border-gray-400 shadow-sm"
                   }`}
                 >
                   <div className="h-40 w-full" style={{ background: venue.image }} />
                   <div className="p-5 bg-white">
                     <div className="flex justify-between items-start mb-2">
-                       <h4 className="font-bold text-gray-900 text-lg">{venue.name}</h4>
-                       {formData.venueId === venue.id && <div className="bg-gray-900 text-white p-1 rounded-full"><Check className="w-3 h-3"/></div>}
+                       <h4 className="font-bold text-[#1A1A1A] text-lg font-serif">{venue.name}</h4>
+                       {formData.venueId === venue.id && <div className="bg-[#1A1A1A] text-white p-1 rounded-full"><Check className="w-3 h-3"/></div>}
                     </div>
-                    <p className="text-sm text-gray-500 mb-4">{venue.location}</p>
+                    <p className="text-sm text-gray-500 mb-4 font-medium">{venue.location}</p>
                     <div className="flex items-center gap-4 text-xs font-medium text-gray-600 border-t border-gray-100 pt-4">
                       <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" /> {venue.capacity}</span>
                       <span className="flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5" /> {venue.price}</span>
@@ -273,30 +273,30 @@ export function EventCreationWizard({ onComplete }: { onComplete?: () => void })
 
         {/* Right Column: Layouts */}
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm h-fit">
-          <h3 className="text-sm font-bold text-gray-900 mb-4">Runway Configuration</h3>
+          <h3 className="text-sm font-bold text-[#1A1A1A] mb-4">Runway Configuration</h3>
           <div className="space-y-3">
             {layouts.map(layout => (
               <div 
                 key={layout.id}
                 onClick={() => handleInputChange("layoutId", layout.id)}
                 className={`cursor-pointer p-3 rounded-lg border transition-all flex items-center gap-3 ${
-                  formData.layoutId === layout.id ? "border-gray-900 bg-gray-50" : "border-gray-100 hover:border-gray-200"
+                  formData.layoutId === layout.id ? "border-[#1A1A1A] bg-gray-50" : "border-gray-100 hover:border-gray-300"
                 }`}
               >
-                <div className={`w-10 h-10 rounded-md flex items-center justify-center font-mono font-bold text-sm ${
-                   formData.layoutId === layout.id ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-400"
+                <div className={`w-10 h-10 rounded-md flex items-center justify-center font-serif font-bold text-sm ${
+                   formData.layoutId === layout.id ? "bg-[#1A1A1A] text-white" : "bg-gray-100 text-gray-400"
                 }`}>
                   {layout.icon}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-900">{layout.name}</p>
+                  <p className="text-sm font-medium text-[#1A1A1A]">{layout.name}</p>
                   <p className="text-xs text-gray-500">{layout.desc}</p>
                 </div>
               </div>
             ))}
           </div>
           <div className="mt-6 pt-6 border-t border-gray-100">
-            <button className="w-full py-2 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:text-gray-900 hover:border-gray-300 transition-colors">
+            <button className="w-full py-2 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:text-white hover:bg-[#1A1A1A] hover:border-[#1A1A1A] transition-colors">
               Compare Layouts
             </button>
           </div>
@@ -317,34 +317,34 @@ export function EventCreationWizard({ onComplete }: { onComplete?: () => void })
           <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center hover:shadow-md transition-shadow">
              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Models</span>
              <div className="flex items-center gap-2">
-                <UserCheck className="w-5 h-5 text-gray-900" />
-                <span className="text-3xl font-serif font-bold text-gray-900">{formData.models}</span>
+                <UserCheck className="w-5 h-5 text-[#1A1A1A]" />
+                <span className="text-3xl font-serif font-medium text-[#1A1A1A]">{formData.models}</span>
              </div>
           </div>
           <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center hover:shadow-md transition-shadow">
              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Looks</span>
              <div className="flex items-center gap-2">
-                <Shirt className="w-5 h-5 text-gray-900" />
-                <span className="text-3xl font-serif font-bold text-gray-900">{formData.looks}</span>
+                <Shirt className="w-5 h-5 text-[#1A1A1A]" />
+                <span className="text-3xl font-serif font-medium text-[#1A1A1A]">{formData.looks}</span>
              </div>
           </div>
           <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center hover:shadow-md transition-shadow">
              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Runtime</span>
              <div className="flex items-center gap-2">
-                <Clock className="w-5 h-5 text-gray-900" />
-                <span className="text-3xl font-serif font-bold text-gray-900">18m</span>
+                <Clock className="w-5 h-5 text-[#1A1A1A]" />
+                <span className="text-3xl font-serif font-medium text-[#1A1A1A]">18m</span>
              </div>
           </div>
        </div>
 
        {/* Timeline Visualization */}
-       <div className="bg-white border border-gray-200 rounded-xl p-8 overflow-hidden relative group">
+       <div className="bg-white border border-gray-200 rounded-xl p-8 overflow-hidden relative group shadow-sm">
           <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-             <button className="text-xs bg-gray-900 text-white px-3 py-1.5 rounded-full">Edit Flow</button>
+             <button className="text-xs bg-[#1A1A1A] text-white px-3 py-1.5 rounded-lg hover:bg-gray-800 transition-colors font-medium">Edit Flow</button>
           </div>
           
           <div className="flex items-center justify-between relative">
-             <div className="absolute left-0 top-1/2 w-full h-0.5 bg-gray-100 -z-10" />
+             <div className="absolute left-0 top-1/2 w-full h-px bg-gray-200 -z-10" />
              
              {[
                { time: "0:00", label: "Intro", type: "Lighting" },
@@ -353,12 +353,12 @@ export function EventCreationWizard({ onComplete }: { onComplete?: () => void })
                { time: "12:15", label: "Finale Start", type: "Group" },
                { time: "15:00", label: "Designer Bow", type: "Talent" }
              ].map((point, i) => (
-               <div key={i} className="flex flex-col items-center gap-3 bg-white px-2 z-10 cursor-pointer hover:scale-110 transition-transform">
+               <div key={i} className="flex flex-col items-center gap-3 bg-white px-2 z-10 cursor-pointer hover:scale-105 transition-transform">
                   <span className="text-xs font-mono font-medium text-gray-400">{point.time}</span>
-                  <div className={`w-4 h-4 rounded-full ring-4 ring-white ${i === 0 || i === 4 ? "bg-gray-900" : "bg-indigo-500"}`} />
+                  <div className={`w-3 h-3 rounded-full ring-4 ring-white ${i === 0 || i === 4 ? "bg-[#1A1A1A]" : "bg-purple-500"}`} />
                   <div className="text-center">
-                     <p className="text-sm font-bold text-gray-900">{point.label}</p>
-                     <p className="text-[10px] text-gray-500 uppercase tracking-wide">{point.type}</p>
+                     <p className="text-sm font-bold text-[#1A1A1A]">{point.label}</p>
+                     <p className="text-[10px] text-gray-500 uppercase tracking-wide font-medium">{point.type}</p>
                   </div>
                </div>
              ))}
@@ -382,7 +382,7 @@ export function EventCreationWizard({ onComplete }: { onComplete?: () => void })
                {["All", "Fashion", "Beauty", "Media", "Hospitality"].map(cat => (
                  <button 
                    key={cat}
-                   className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 whitespace-nowrap"
+                   className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-[#1A1A1A] whitespace-nowrap"
                  >
                    {cat}
                  </button>
@@ -402,17 +402,17 @@ export function EventCreationWizard({ onComplete }: { onComplete?: () => void })
                          : [...formData.selectedSponsors, sponsor.id];
                        handleInputChange("selectedSponsors", newSelected);
                      }}
-                     className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${
-                       isSelected ? "bg-gray-50 border-gray-900" : "bg-white border-gray-100 hover:border-gray-200"
+                     className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all shadow-sm ${
+                       isSelected ? "bg-gray-50 border-[#1A1A1A]" : "bg-white border-gray-100 hover:border-gray-300"
                      }`}
                    >
                       <div className="flex items-center gap-4">
-                         <div className="w-10 h-10 bg-gray-900 text-white rounded-full flex items-center justify-center font-serif font-bold">
+                         <div className="w-10 h-10 bg-[#1A1A1A] text-white rounded-full flex items-center justify-center font-serif font-bold">
                             {sponsor.logo}
                          </div>
                          <div>
-                            <h4 className="font-bold text-gray-900">{sponsor.name}</h4>
-                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                            <h4 className="font-bold text-[#1A1A1A]">{sponsor.name}</h4>
+                            <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
                                <span>{sponsor.category}</span>
                                <span className="w-1 h-1 rounded-full bg-gray-300" />
                                <span>{sponsor.tier}</span>
@@ -420,7 +420,7 @@ export function EventCreationWizard({ onComplete }: { onComplete?: () => void })
                          </div>
                       </div>
                       <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-colors ${
-                         isSelected ? "bg-gray-900 border-gray-900 text-white" : "border-gray-300 text-transparent"
+                         isSelected ? "bg-[#1A1A1A] border-[#1A1A1A] text-white" : "border-gray-300 text-transparent"
                       }`}>
                          <Check className="w-3.5 h-3.5" />
                       </div>
@@ -431,19 +431,19 @@ export function EventCreationWizard({ onComplete }: { onComplete?: () => void })
          </div>
 
          <div className="space-y-6">
-            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-xl border border-indigo-100">
-               <h3 className="font-bold text-indigo-900 mb-2 flex items-center gap-2">
+            <div className="bg-[#F3E8FF] p-6 rounded-xl border border-purple-100 shadow-sm">
+               <h3 className="font-bold text-[#6B21A8] mb-2 flex items-center gap-2">
                   <Sparkles className="w-4 h-4" /> Suggested Activations
                </h3>
-               <p className="text-sm text-indigo-800 mb-4">Based on <strong>Dior</strong> participation:</p>
+               <p className="text-sm text-purple-900 mb-4 font-medium">Based on <strong>Dior</strong> participation:</p>
                <div className="space-y-2">
                   {["VIP Lounge Customization", "Backstage Beauty Bar", "Arrival Photo Moment"].map(idea => (
-                     <div key={idea} className="flex items-center gap-2 bg-white/60 p-2 rounded-lg text-sm text-indigo-900">
-                        <CheckCircle2 className="w-4 h-4 text-indigo-600" /> {idea}
+                     <div key={idea} className="flex items-center gap-2 bg-white/60 p-2 rounded-lg text-sm text-purple-900 font-medium">
+                        <CheckCircle2 className="w-4 h-4 text-purple-600" /> {idea}
                      </div>
                   ))}
                </div>
-               <button className="w-full mt-4 py-2 bg-white text-indigo-600 font-medium text-sm rounded-lg shadow-sm hover:bg-indigo-50 transition-colors">
+               <button className="w-full mt-4 py-2 bg-white text-purple-700 font-medium text-sm rounded-lg shadow-sm hover:bg-purple-50 transition-colors">
                   Generate Sponsor Deck
                </button>
             </div>
@@ -451,8 +451,8 @@ export function EventCreationWizard({ onComplete }: { onComplete?: () => void })
             <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 block">Analyze New Partner</label>
                <div className="flex gap-2">
-                 <input type="text" placeholder="Brand URL" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
-                 <button className="p-2 bg-gray-100 rounded-lg text-gray-600"><Wand2 className="w-4 h-4"/></button>
+                 <input type="text" placeholder="Brand URL" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#1A1A1A] bg-[#F7F7F5]" />
+                 <button className="p-2 bg-[#1A1A1A] rounded-lg text-white hover:bg-gray-800 transition-colors"><Wand2 className="w-4 h-4"/></button>
                </div>
             </div>
          </div>
@@ -471,10 +471,10 @@ export function EventCreationWizard({ onComplete }: { onComplete?: () => void })
          <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 border-b border-gray-100">
                <tr>
-                  <th className="px-6 py-4 font-bold text-gray-900">Item</th>
-                  <th className="px-6 py-4 font-bold text-gray-900">Team / Owner</th>
-                  <th className="px-6 py-4 font-bold text-gray-900">Deadline</th>
-                  <th className="px-6 py-4 font-bold text-gray-900">Status</th>
+                  <th className="px-6 py-4 font-bold text-[#1A1A1A]">Item</th>
+                  <th className="px-6 py-4 font-bold text-[#1A1A1A]">Team / Owner</th>
+                  <th className="px-6 py-4 font-bold text-[#1A1A1A]">Deadline</th>
+                  <th className="px-6 py-4 font-bold text-[#1A1A1A]">Status</th>
                </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -485,8 +485,8 @@ export function EventCreationWizard({ onComplete }: { onComplete?: () => void })
                  { task: "Sponsor Logos Vector", team: "Design", date: "Sep 15", status: "Pending" },
                ].map((row, i) => (
                  <tr key={i} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900">{row.task}</td>
-                    <td className="px-6 py-4 text-gray-600 flex items-center gap-2">
+                    <td className="px-6 py-4 font-medium text-[#1A1A1A]">{row.task}</td>
+                    <td className="px-6 py-4 text-gray-600 flex items-center gap-2 font-medium">
                        <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500">
                           {row.team.charAt(0)}
                        </div>
@@ -494,9 +494,9 @@ export function EventCreationWizard({ onComplete }: { onComplete?: () => void })
                     </td>
                     <td className="px-6 py-4 text-gray-500 font-mono text-xs">{row.date}</td>
                     <td className="px-6 py-4">
-                       {row.status === 'Done' && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">Complete</span>}
-                       {row.status === 'Pending' && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">On Track</span>}
-                       {row.status === 'Risk' && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-100">At Risk</span>}
+                       {row.status === 'Done' && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#DCFCE7] text-[#166534]">Complete</span>}
+                       {row.status === 'Pending' && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#FEF3C7] text-[#92400E]">Pending</span>}
+                       {row.status === 'Risk' && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#FEE2E2] text-[#991B1B]">At Risk</span>}
                     </td>
                  </tr>
                ))}
@@ -513,7 +513,7 @@ export function EventCreationWizard({ onComplete }: { onComplete?: () => void })
   const renderStep6 = () => (
     <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
        <div className="text-center space-y-2 mb-8">
-          <h2 className="text-3xl font-serif font-bold text-gray-900">Review Event Plan</h2>
+          <h2 className="text-3xl font-serif font-medium text-[#1A1A1A]">Review Event Plan</h2>
           <p className="text-gray-500">Verify all details before creating the event workspace.</p>
        </div>
 
@@ -521,207 +521,135 @@ export function EventCreationWizard({ onComplete }: { onComplete?: () => void })
           {/* Card 1 */}
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:border-gray-300 transition-all">
              <div className="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100">
-                <div className="p-2 bg-gray-100 rounded-lg text-gray-900"><Calendar className="w-5 h-5" /></div>
+                <div className="p-2 bg-gray-50 rounded-lg text-[#1A1A1A]"><Calendar className="w-5 h-5" /></div>
                 <div>
-                   <h3 className="font-bold text-gray-900">Event Basics</h3>
+                   <h3 className="font-bold text-[#1A1A1A]">Event Basics</h3>
                    <p className="text-xs text-gray-500">Overview</p>
                 </div>
-                <button onClick={() => setStep(1)} className="ml-auto text-xs text-indigo-600 font-medium">Edit</button>
+                <button onClick={() => setStep(1)} className="ml-auto text-xs text-[#1A1A1A] font-semibold underline">Edit</button>
              </div>
-             <div className="space-y-2 text-sm text-gray-600">
-                <div className="flex justify-between"><span>Name:</span> <span className="font-medium text-gray-900">{formData.name}</span></div>
-                <div className="flex justify-between"><span>Type:</span> <span className="font-medium text-gray-900">{formData.type}</span></div>
-                <div className="flex justify-between"><span>Theme:</span> <span className="font-medium text-gray-900 truncate w-40">{formData.theme}</span></div>
+             <div className="space-y-2 text-sm text-gray-600 font-medium">
+                <div className="flex justify-between"><span>Name:</span> <span className="font-medium text-[#1A1A1A]">{formData.name}</span></div>
+                <div className="flex justify-between"><span>Type:</span> <span className="font-medium text-[#1A1A1A]">{formData.type}</span></div>
+                <div className="flex justify-between"><span>Theme:</span> <span className="font-medium text-[#1A1A1A] truncate w-40">{formData.theme}</span></div>
              </div>
           </div>
 
           {/* Card 2 */}
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:border-gray-300 transition-all">
              <div className="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100">
-                <div className="p-2 bg-gray-100 rounded-lg text-gray-900"><MapPin className="w-5 h-5" /></div>
+                <div className="p-2 bg-gray-50 rounded-lg text-[#1A1A1A]"><MapPin className="w-5 h-5" /></div>
                 <div>
-                   <h3 className="font-bold text-gray-900">Venue & Layout</h3>
+                   <h3 className="font-bold text-[#1A1A1A]">Venue & Layout</h3>
                    <p className="text-xs text-gray-500">Location</p>
                 </div>
-                <button onClick={() => setStep(2)} className="ml-auto text-xs text-indigo-600 font-medium">Edit</button>
+                <button onClick={() => setStep(2)} className="ml-auto text-xs text-[#1A1A1A] font-semibold underline">Edit</button>
              </div>
-             <div className="space-y-2 text-sm text-gray-600">
-                <div className="flex justify-between"><span>Venue:</span> <span className="font-medium text-gray-900">Skylight Clarkson</span></div>
-                <div className="flex justify-between"><span>Layout:</span> <span className="font-medium text-gray-900">Straight Runway</span></div>
-                <div className="flex justify-between"><span>Capacity:</span> <span className="font-medium text-gray-900">3,200</span></div>
-             </div>
-          </div>
-
-           {/* Card 3 */}
-           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:border-gray-300 transition-all">
-             <div className="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100">
-                <div className="p-2 bg-gray-100 rounded-lg text-gray-900"><UserCheck className="w-5 h-5" /></div>
-                <div>
-                   <h3 className="font-bold text-gray-900">Production</h3>
-                   <p className="text-xs text-gray-500">Casting & Tech</p>
-                </div>
-                <button onClick={() => setStep(3)} className="ml-auto text-xs text-indigo-600 font-medium">Edit</button>
-             </div>
-             <div className="space-y-2 text-sm text-gray-600">
-                <div className="flex justify-between"><span>Models:</span> <span className="font-medium text-gray-900">{formData.models}</span></div>
-                <div className="flex justify-between"><span>Looks:</span> <span className="font-medium text-gray-900">{formData.looks}</span></div>
-                <div className="flex justify-between"><span>Runtime:</span> <span className="font-medium text-gray-900">18 mins</span></div>
-             </div>
-          </div>
-
-           {/* Card 4 */}
-           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:border-gray-300 transition-all">
-             <div className="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100">
-                <div className="p-2 bg-gray-100 rounded-lg text-gray-900"><Handshake className="w-5 h-5" /></div>
-                <div>
-                   <h3 className="font-bold text-gray-900">Sponsors</h3>
-                   <p className="text-xs text-gray-500">Partnerships</p>
-                </div>
-                <button onClick={() => setStep(4)} className="ml-auto text-xs text-indigo-600 font-medium">Edit</button>
-             </div>
-             <div className="space-y-2 text-sm text-gray-600">
-                <div className="flex justify-between"><span>Partners:</span> <span className="font-medium text-gray-900">Dior, Chanel</span></div>
-                <div className="flex justify-between"><span>Activations:</span> <span className="font-medium text-gray-900">VIP Lounge</span></div>
-             </div>
-          </div>
-       </div>
-
-       <div className="flex flex-col md:flex-row gap-4 items-stretch">
-         <div className="flex-1 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-xl p-6 flex items-center justify-between shadow-lg">
-            <div>
-               <h4 className="font-bold text-lg mb-1">Generate Event Brief</h4>
-               <p className="text-sm text-gray-300">Create a PDF summary for stakeholders.</p>
-            </div>
-            <button className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm backdrop-blur-sm transition-colors border border-white/20">
-               Generate PDF
-            </button>
-         </div>
-         <div className="flex-1 border border-gray-200 rounded-xl p-6 bg-white">
-            <div className="flex items-start gap-3">
-               <Info className="w-5 h-5 text-indigo-600 mt-0.5" />
-               <div>
-                  <h4 className="font-bold text-gray-900 text-sm">Final Suggestion</h4>
-                  <p className="text-sm text-gray-600 mt-1">Your production timeline is aggressive. Consider moving <em>Lighting Plot</em> up by 2 days.</p>
-               </div>
-            </div>
-         </div>
-       </div>
-    </div>
-  );
-
-  return (
-    <div className="min-h-screen bg-[#FAFAFA] flex flex-col font-sans text-gray-900">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-30">
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between mb-6">
-             <div className="flex items-center gap-3">
-                <button onClick={() => onComplete?.()} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                   <ChevronLeft className="w-5 h-5 text-gray-500" />
-                </button>
-                <div>
-                   <h1 className="text-xl font-bold text-gray-900">Create New Event</h1>
-                   <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <span>FashionOS Wizard</span>
-                      <span className="w-1 h-1 rounded-full bg-gray-300" />
-                      <span>AI-Assisted</span>
-                   </div>
-                </div>
-             </div>
-             <div className="hidden md:block text-right">
-                <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Step {step} of {steps.length}</span>
-                <p className="text-sm font-bold text-indigo-600">{steps[step-1]}</p>
+             <div className="space-y-2 text-sm text-gray-600 font-medium">
+                <div className="flex justify-between"><span>Venue:</span> <span className="font-medium text-[#1A1A1A]">Skylight Clarkson</span></div>
+                <div className="flex justify-between"><span>Layout:</span> <span className="font-medium text-[#1A1A1A]">Straight Runway</span></div>
+                <div className="flex justify-between"><span>Capacity:</span> <span className="font-medium text-[#1A1A1A]">3,200 Guests</span></div>
              </div>
           </div>
           
-          {/* Progress Bar */}
-          <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
-             <motion.div 
-                className="h-full bg-gray-900"
-                initial={{ width: 0 }}
-                animate={{ width: `${(step / steps.length) * 100}%` }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}
-             />
+          {/* Card 3 */}
+          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:border-gray-300 transition-all">
+             <div className="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100">
+                <div className="p-2 bg-gray-50 rounded-lg text-[#1A1A1A]"><Users className="w-5 h-5" /></div>
+                <div>
+                   <h3 className="font-bold text-[#1A1A1A]">Casting</h3>
+                   <p className="text-xs text-gray-500">Models & Looks</p>
+                </div>
+                <button onClick={() => setStep(3)} className="ml-auto text-xs text-[#1A1A1A] font-semibold underline">Edit</button>
+             </div>
+             <div className="space-y-2 text-sm text-gray-600 font-medium">
+                <div className="flex justify-between"><span>Models:</span> <span className="font-medium text-[#1A1A1A]">{formData.models} confirmed</span></div>
+                <div className="flex justify-between"><span>Looks:</span> <span className="font-medium text-[#1A1A1A]">{formData.looks} styles</span></div>
+             </div>
+          </div>
+
+          {/* Card 4 */}
+          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:border-gray-300 transition-all">
+             <div className="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100">
+                <div className="p-2 bg-gray-50 rounded-lg text-[#1A1A1A]"><Zap className="w-5 h-5" /></div>
+                <div>
+                   <h3 className="font-bold text-[#1A1A1A]">Partners</h3>
+                   <p className="text-xs text-gray-500">Sponsors</p>
+                </div>
+                <button onClick={() => setStep(4)} className="ml-auto text-xs text-[#1A1A1A] font-semibold underline">Edit</button>
+             </div>
+             <div className="space-y-2 text-sm text-gray-600 font-medium">
+                <div className="flex justify-between"><span>Sponsors:</span> <span className="font-medium text-[#1A1A1A]">{formData.selectedSponsors.length} selected</span></div>
+                <div className="flex justify-between"><span>Activations:</span> <span className="font-medium text-[#1A1A1A]">VIP Lounge +2</span></div>
+             </div>
+          </div>
+       </div>
+    </div>
+  );
+
+  return (
+    <div className="fixed inset-0 bg-[#F7F7F5] z-50 overflow-y-auto">
+      <div className="min-h-screen flex flex-col max-w-5xl mx-auto px-4 py-8">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between mb-12">
+          <div className="flex items-center gap-4">
+             <div className="w-10 h-10 bg-[#1A1A1A] rounded-full flex items-center justify-center text-white">
+                <Sparkles className="w-5 h-5" />
+             </div>
+             <div>
+                <h1 className="text-2xl font-serif font-medium text-[#1A1A1A]">New Event</h1>
+                <p className="text-sm text-gray-500">AI-Powered Wizard</p>
+             </div>
+          </div>
+          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-gray-200 shadow-sm">
+             <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">Step {step} of 6</span>
+             <div className="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-full bg-[#1A1A1A] transition-all duration-300" style={{ width: `${(step / 6) * 100}%` }} />
+             </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="flex-1 max-w-6xl mx-auto px-6 py-8 w-full">
-        <AnimatePresence mode="wait">
-           <motion.div
-             key={step}
-             initial={{ opacity: 0, x: 10 }}
-             animate={{ opacity: 1, x: 0 }}
-             exit={{ opacity: 0, x: -10 }}
-             transition={{ duration: 0.3 }}
-           >
-             {step === 1 && renderStep1()}
-             {step === 2 && renderStep2()}
-             {step === 3 && renderStep3()}
-             {step === 4 && renderStep4()}
-             {step === 5 && renderStep5()}
-             {step === 6 && renderStep6()}
-           </motion.div>
-        </AnimatePresence>
-      </div>
+        {/* Content Area */}
+        <div className="flex-1 mb-24">
+           {step === 1 && renderStep1()}
+           {step === 2 && renderStep2()}
+           {step === 3 && renderStep3()}
+           {step === 4 && renderStep4()}
+           {step === 5 && renderStep5()}
+           {step === 6 && renderStep6()}
+        </div>
 
-      {/* Footer Actions */}
-      <div className="bg-white border-t border-gray-200 sticky bottom-0 z-30 py-5 shadow-[0_-5px_20px_rgba(0,0,0,0.03)]">
-        <div className="max-w-6xl mx-auto px-6 flex justify-between items-center">
-          <button 
-            onClick={prevStep}
-            disabled={step === 1}
-            className={`px-6 py-3 rounded-xl text-sm font-medium flex items-center gap-2 transition-colors ${
-              step === 1 
-                ? "text-gray-300 cursor-not-allowed" 
-                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-            }`}
-          >
-            <ChevronLeft className="w-4 h-4" /> Back
-          </button>
-
-          <div className="flex items-center gap-3">
-             <span className="text-xs text-gray-400 hidden sm:inline-block mr-4">
-                {step === 6 ? "Ready to finalize?" : "Changes saved automatically"}
-             </span>
-            {step === 6 && (
-              <button className="px-6 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 border border-gray-200 transition-colors">
-                Save Draft
+        {/* Footer Navigation */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+           <div className="max-w-5xl mx-auto flex items-center justify-between">
+              <button 
+                onClick={prevStep}
+                disabled={step === 1}
+                className="px-6 py-3 rounded-xl font-medium text-gray-600 hover:text-black disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+              >
+                 <ChevronLeft className="w-5 h-5" /> Back
               </button>
-            )}
-            <button 
-              onClick={() => step === 6 ? onComplete?.() : nextStep()}
-              className="px-8 py-3 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800 shadow-lg shadow-gray-900/20 transition-all flex items-center gap-2 group"
-            >
-              {step === 6 ? "Create Event" : "Next Step"} 
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
+              
+              {step < 6 ? (
+                <button 
+                  onClick={nextStep}
+                  className="px-8 py-3 bg-[#1A1A1A] text-white rounded-xl font-medium hover:bg-gray-800 transition-colors shadow-lg shadow-gray-200 flex items-center gap-2"
+                >
+                   Next Step <ChevronRight className="w-5 h-5" />
+                </button>
+              ) : (
+                <button 
+                  onClick={onComplete}
+                  className="px-8 py-3 bg-[#1A1A1A] text-white rounded-xl font-medium hover:bg-gray-800 transition-colors shadow-lg shadow-gray-200 flex items-center gap-2"
+                >
+                   <Check className="w-5 h-5" /> Create Event Workspace
+                </button>
+              )}
+           </div>
         </div>
+
       </div>
     </div>
   );
-}
-
-function Handshake(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m11 17 2 2a2 2 0 0 0 2.83 0l3.58-3.59a2 2 0 0 0 0-2.83l-4-4a2 2 0 0 0-2.83 0L6 15" />
-      <path d="m22 18-2 2-4-4" />
-      <path d="m2 21 2-2 4 4" />
-      <path d="M13 6l-4 4L2 3v11" />
-    </svg>
-  )
 }

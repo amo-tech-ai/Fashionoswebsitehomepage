@@ -31,6 +31,8 @@ export function NavigationBar({ activeScreen, onMobileMenuToggle }: NavigationBa
         return "Designer & Collection";
       case "venue":
         return "Venue & Production";
+      case "website-brief-dashboard":
+        return "Website Brief Dashboard";
       default:
         return "Dashboard";
     }
