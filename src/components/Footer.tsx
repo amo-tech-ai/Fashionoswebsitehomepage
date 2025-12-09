@@ -2,10 +2,24 @@ import { motion } from "motion/react";
 import { Instagram, Twitter, Linkedin } from "lucide-react";
 
 export function Footer() {
+  const handleNavigation = (href: string) => {
+    if (href === "#") return;
+    
+    // Update URL and trigger routing
+    window.history.pushState({}, "", href);
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  };
+
   const footerSections = [
     {
       title: "About",
-      links: ["Our Story", "Team", "Careers", "Press"]
+      links: [
+        "Our Story", 
+        "Team", 
+        "Careers", 
+        "Press",
+        { text: "Home V2 (New)", href: "/home-v2" }
+      ]
     },
     {
       title: "Services",
@@ -63,6 +77,10 @@ export function Footer() {
                     <a
                       href={typeof link === 'string' ? "#" : link.href}
                       className="text-gray-600 hover:text-gray-900 transition-colors duration-200 text-sm"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleNavigation(typeof link === 'string' ? "#" : link.href);
+                      }}
                     >
                       {typeof link === 'string' ? link : link.text}
                     </a>
