@@ -9,7 +9,7 @@ import { CreativeServices } from "./components/CreativeServices";
 import { FashionDirectory } from "./components/FashionDirectory";
 import { FashionMarketplace } from "./components/FashionMarketplace";
 import { BehindTheScenes } from "./components/BehindTheScenes";
-import { ContactSection } from "./components/ContactSection";
+import { CreateProfileCTA } from "./components/shared/CreateProfileCTA";
 import { Footer } from "./components/Footer";
 
 export default function AppHome() {
@@ -151,7 +151,7 @@ export default function AppHome() {
         <BehindTheScenes videoThumbnail={videoThumbnail} />
 
         {/* 11. Contact/CTA Section */}
-        <ContactSection />
+        <CreateProfileCTA />
 
         {/* 12. Footer */}
         <Footer />

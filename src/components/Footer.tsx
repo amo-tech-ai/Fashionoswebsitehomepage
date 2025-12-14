@@ -32,6 +32,7 @@ export function Footer() {
         { text: "E-Commerce Web Design", href: "/web-design" },
         { text: "Instagram Services", href: "/Instagram" },
         { text: "Start New Shoot", href: "/wizard" },
+        { text: "Designer Onboarding", href: "/designer-wizard" },
         { text: "Studio Hire", href: "/Studios" },
         { text: "Campaigns", href: "#" },
         { text: "Runway", href: "#" },

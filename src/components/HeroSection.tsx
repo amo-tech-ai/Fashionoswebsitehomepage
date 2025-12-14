@@ -17,6 +17,12 @@ export function HeroSection({ images }: HeroSectionProps) {
     transition: { duration: 0.8, ease: "easeOut" }
   };
 
+  const handleNavigation = (href: string) => {
+    // Update URL and trigger routing event for App.tsx
+    window.history.pushState({}, "", href);
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  };
+
   return (
     <section className="min-h-screen bg-white">
       <div className="container mx-auto px-6 lg:px-12 py-16 lg:py-24">
@@ -35,13 +41,24 @@ export function HeroSection({ images }: HeroSectionProps) {
               </p>
             </div>
 
-            <motion.button
-              className="bg-black text-white px-10 py-4 rounded-full hover:bg-gray-800 transition-all duration-300"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              Book a Campaign
-            </motion.button>
+            <div className="flex flex-wrap gap-4">
+              <motion.button
+                className="bg-black text-white px-10 py-4 rounded-full hover:bg-gray-800 transition-all duration-300 font-medium"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Book a Campaign
+              </motion.button>
+              
+              <motion.button
+                onClick={() => handleNavigation("/designer-wizard")}
+                className="bg-white border border-gray-200 text-gray-900 px-10 py-4 rounded-full hover:bg-gray-50 transition-all duration-300 font-medium flex items-center justify-center"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Create Your Profile
+              </motion.button>
+            </div>
 
             <div className="space-y-3 pt-6">
               <div className="flex items-center gap-3">

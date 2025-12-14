@@ -2,6 +2,12 @@ import { motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
 
 export function ContactSection() {
+  const handleNavigation = (href: string) => {
+    // Update URL and trigger routing event for App.tsx
+    window.history.pushState({}, "", href);
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  };
+
   return (
     <section className="py-24 lg:py-32 bg-[rgb(var(--color-soft-gray))]">
       <div className="container mx-auto px-6 lg:px-12">
@@ -21,14 +27,25 @@ export function ContactSection() {
             </p>
           </div>
 
-          <motion.button
-            className="bg-black text-white px-12 py-5 rounded-full hover:bg-gray-800 transition-all duration-300 inline-flex items-center gap-3 group"
-            whileHover={{ scale: 1.02, gap: "1rem" }}
-            whileTap={{ scale: 0.98 }}
-          >
-            Start a Custom Brief
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
-          </motion.button>
+          <div className="flex flex-col md:flex-row gap-4 justify-center items-center">
+            <motion.button
+              className="bg-black text-white px-12 py-5 rounded-full hover:bg-gray-800 transition-all duration-300 inline-flex items-center gap-3 group"
+              whileHover={{ scale: 1.02, gap: "1rem" }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Start a Custom Brief
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+            </motion.button>
+            
+            <motion.button
+              onClick={() => handleNavigation("/designer-wizard")}
+              className="px-12 py-5 rounded-full border border-gray-200 text-gray-900 hover:bg-gray-50 transition-all duration-300 inline-flex items-center justify-center font-medium"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Create Your Brand Profile
+            </motion.button>
+          </div>
 
           <div className="pt-6 flex flex-wrap justify-center gap-8 text-sm text-gray-500">
             <div className="flex items-center gap-2">

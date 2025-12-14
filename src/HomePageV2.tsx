@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { CreateProfileCTA } from "./components/shared/CreateProfileCTA";
 import { Camera, Palette, Video, Sparkles, TrendingUp, Award, Play, ArrowRight, ChevronRight } from "lucide-react";
 
 export default function HomePageV2() {
@@ -506,30 +507,7 @@ export default function HomePageV2() {
       </section>
 
       {/* SECTION 10 - CALL TO ACTION */}
-      <section className="container mx-auto px-6 lg:px-12 py-16 lg:py-24">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="max-w-4xl mx-auto bg-white rounded-3xl border border-gray-200 p-12 lg:p-16 text-center space-y-8 shadow-sm"
-        >
-          <h2 className="text-3xl lg:text-4xl leading-tight">
-            Need something a little more creative?
-          </h2>
-          <p className="text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">
-            Explore custom projects, advanced production setups, and tailored creative solutions designed around your brand.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <button className="px-8 py-4 bg-black text-white rounded-xl hover:bg-gray-900 transition-all duration-300">
-              Start a Custom Project
-            </button>
-            <button className="px-8 py-4 border border-gray-300 rounded-xl hover:border-gray-900 transition-all duration-300">
-              Book a Consultation
-            </button>
-          </div>
-        </motion.div>
-      </section>
+      <CreateProfileCTA />
 
       {/* SECTION 11 - FOOTER */}
       <footer className="bg-[#FAFAF9] border-t border-gray-200">
