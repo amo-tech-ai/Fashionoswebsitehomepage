@@ -241,62 +241,54 @@ export default function ShootWizard() {
   // --- Render Steps ---
 
   const renderService = () => (
-    <div className="w-full pt-6 md:pt-10 pb-12">
-      <div className="max-w-3xl mx-auto text-center mb-8 md:mb-12 px-4">
-        <h1 className="text-3xl md:text-5xl font-serif text-gray-900 mb-3 tracking-tight">Choose Your Service</h1>
-        <p className="text-gray-600 text-base md:text-lg">What would you like to create today?</p>
+    <div className="w-full pt-6 md:pt-12">
+      <div className="max-w-3xl mx-auto text-center mb-10 md:mb-16">
+        <h1 className="text-4xl md:text-5xl font-serif text-gray-900 mb-4 tracking-tight">Choose your shoot type</h1>
+        <p className="text-gray-500 text-lg">Select the core service to begin your creative brief.</p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 px-4 md:px-8 max-w-6xl mx-auto">
+      <div className="max-w-4xl mx-auto px-4 md:px-8 space-y-4">
         {SERVICES.map((s, index) => (
           <motion.div
             key={s.id}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: index * 0.1 }}
+            transition={{ duration: 0.3, delay: index * 0.05 }}
             onClick={() => setState({...state, service: s.id as any})}
-            className={`relative group cursor-pointer rounded-3xl overflow-hidden aspect-[4/5] transition-all duration-500 ${
+            className={`flex items-center gap-6 p-4 rounded-2xl border transition-all cursor-pointer group bg-white ${
               state.service === s.id 
-                ? 'ring-2 ring-black shadow-2xl scale-[1.02]' 
-                : 'shadow-md hover:shadow-2xl hover:scale-[1.02]'
+                ? 'border-black shadow-lg ring-1 ring-black' 
+                : 'border-gray-100 hover:border-gray-200 hover:shadow-md'
             }`}
           >
-            <ImageWithFallback 
-              src={s.image} 
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-              alt={s.label} 
-            />
-            <div className={`absolute inset-0 transition-all duration-500 ${
-              state.service === s.id 
-                ? 'bg-gradient-to-t from-black/80 via-black/30 to-black/10' 
-                : 'bg-gradient-to-t from-black/70 via-black/20 to-transparent group-hover:from-black/60 group-hover:via-black/15'
-            }`} />
-            <div className="absolute inset-0 border border-white/20 rounded-3xl pointer-events-none" />
-            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
-              <div className="flex items-start gap-4 md:gap-5 text-white">
-                <div className={`flex-shrink-0 w-14 h-14 md:w-16 md:h-16 rounded-2xl backdrop-blur-md flex items-center justify-center border transition-all duration-300 ${
-                  state.service === s.id 
-                    ? 'bg-white/30 border-white/40' 
-                    : 'bg-white/20 border-white/20 group-hover:bg-white/30 group-hover:border-white/40'
-                }`}>
-                  <s.icon className="w-7 h-7 md:w-8 md:h-8" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-2xl md:text-4xl font-serif tracking-tight mb-1 leading-tight">{s.label}</h3>
-                  {s.subtitle && (
-                    <p className="text-xs md:text-sm text-white/80 font-light leading-relaxed">{s.subtitle}</p>
-                  )}
-                </div>
-              </div>
+            {/* Small Square Image */}
+            <div className="w-24 h-24 md:w-28 md:h-28 shrink-0 rounded-xl overflow-hidden bg-gray-50 relative">
+               <ImageWithFallback 
+                 src={s.image} 
+                 className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                 alt={s.label}
+               />
+               {/* Icon Overlay */}
+               <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-transparent transition-colors">
+                  <div className="w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-sm">
+                    <s.icon className="w-4 h-4 text-black" />
+                  </div>
+               </div>
             </div>
-            {state.service === s.id && (
-              <motion.div 
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="absolute top-6 right-6 w-10 h-10 md:w-12 md:h-12 bg-white text-black rounded-full flex items-center justify-center shadow-xl"
-              >
-                <Check className="w-5 h-5 md:w-6 md:h-6 stroke-[3]" />
-              </motion.div>
-            )}
+
+            {/* Content Text-First */}
+            <div className="flex-1 min-w-0 py-2">
+               <div className="flex items-center justify-between mb-1">
+                 <h3 className="text-xl md:text-2xl font-serif text-gray-900">{s.label}</h3>
+                 {state.service === s.id && (
+                    <div className="w-6 h-6 bg-black text-white rounded-full flex items-center justify-center animate-in fade-in zoom-in">
+                      <Check className="w-3 h-3" />
+                    </div>
+                 )}
+               </div>
+               <p className="text-sm md:text-base text-gray-500 leading-relaxed max-w-lg">
+                 {s.subtitle || "Professional production tailored to your brand needs."}
+               </p>
+            </div>
           </motion.div>
         ))}
       </div>
@@ -470,37 +462,103 @@ export default function ShootWizard() {
     </div>
   );
 
-  const renderTalent = () => (
-    <div className="w-full pt-6 md:pt-12">
-      <div className="max-w-3xl mx-auto text-center mb-10 md:mb-16">
-        <h1 className="text-4xl md:text-6xl font-serif text-gray-900 mb-4 tracking-tight">Talent Selection</h1>
-        <p className="text-gray-500 text-lg md:text-xl">Who will be featured in your content?</p>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 px-4 md:px-8 max-w-7xl mx-auto">
-        {TALENT.map((t) => (
-          <div 
-            key={t.id}
-            onClick={() => setState({...state, talent: t.id})}
-            className={`relative group cursor-pointer rounded-3xl overflow-hidden aspect-[4/3] transition-all duration-500 shadow-sm hover:shadow-2xl ${
-              state.talent === t.id ? 'ring-2 ring-black' : 'hover:-translate-y-2'
-            }`}
-          >
-            {t.image && <ImageWithFallback src={t.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt={t.label} />}
-            <div className={`absolute inset-0 transition-all duration-500 ${state.talent === t.id ? 'bg-black/40' : 'bg-black/20 group-hover:bg-black/10'}`} />
-            
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-6">
-              <span className="text-4xl md:text-5xl font-serif font-medium text-center mb-6 drop-shadow-lg tracking-tight">{t.label}</span>
-              {state.talent === t.id && (
-                <div className="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center shadow-lg animate-in fade-in zoom-in duration-300">
-                   <Check className="w-6 h-6" />
-                </div>
-              )}
+  const renderTalent = () => {
+    const isModelRequired = state.talent && state.talent !== 'none';
+    
+    return (
+        <div className="w-full pt-6 md:pt-12">
+            <div className="max-w-3xl mx-auto text-center mb-10 md:mb-16">
+                <h1 className="text-4xl md:text-5xl font-serif text-gray-900 mb-4 tracking-tight">Talent Selection</h1>
+                <p className="text-gray-500 text-lg">Do you require models for this shoot?</p>
             </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+            
+            <div className="max-w-3xl mx-auto px-4 md:px-8 space-y-8">
+                {/* Binary Choice */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button
+                        onClick={() => setState({...state, talent: 'none'})}
+                        className={`p-6 rounded-2xl border text-left transition-all ${
+                            state.talent === 'none'
+                                ? 'border-black bg-gray-900 text-white ring-1 ring-black shadow-lg'
+                                : 'border-gray-200 bg-white hover:border-gray-300 text-gray-900 hover:bg-gray-50'
+                        }`}
+                    >
+                        <div className="flex justify-between items-start mb-4">
+                             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${state.talent === 'none' ? 'bg-white/20' : 'bg-gray-100'}`}>
+                                <X className={`w-5 h-5 ${state.talent === 'none' ? 'text-white' : 'text-gray-600'}`} />
+                             </div>
+                             {state.talent === 'none' && <Check className="w-5 h-5" />}
+                        </div>
+                        <h3 className="text-xl font-serif mb-1">Product Only</h3>
+                        <p className={`text-sm ${state.talent === 'none' ? 'text-gray-300' : 'text-gray-500'}`}>
+                           Focus purely on the merchandise. No models needed.
+                        </p>
+                    </button>
+                    
+                    <button
+                        onClick={() => {
+                             if (!isModelRequired) setState({...state, talent: 'fullbody'});
+                        }}
+                        className={`p-6 rounded-2xl border text-left transition-all ${
+                            isModelRequired
+                                ? 'border-black bg-gray-900 text-white ring-1 ring-black shadow-lg'
+                                : 'border-gray-200 bg-white hover:border-gray-300 text-gray-900 hover:bg-gray-50'
+                        }`}
+                    >
+                        <div className="flex justify-between items-start mb-4">
+                             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isModelRequired ? 'bg-white/20' : 'bg-gray-100'}`}>
+                                <User className={`w-5 h-5 ${isModelRequired ? 'text-white' : 'text-gray-600'}`} />
+                             </div>
+                             {isModelRequired && <Check className="w-5 h-5" />}
+                        </div>
+                        <h3 className="text-xl font-serif mb-1">Models Required</h3>
+                        <p className={`text-sm ${isModelRequired ? 'text-gray-300' : 'text-gray-500'}`}>
+                           Select specific model types for your campaign.
+                        </p>
+                    </button>
+                </div>
+                
+                {/* Expanded Selection */}
+                <AnimatePresence>
+                    {isModelRequired && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="overflow-hidden"
+                        >
+                            <div className="pt-4 pb-2">
+                                <h4 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-6 text-center">Select Model Type</h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    {TALENT.filter(t => t.id !== 'none').map(t => (
+                                        <div 
+                                            key={t.id}
+                                            onClick={() => setState({...state, talent: t.id})}
+                                            className={`relative cursor-pointer rounded-xl overflow-hidden aspect-[3/4] group ${
+                                                state.talent === t.id ? 'ring-2 ring-black' : ''
+                                            }`}
+                                        >
+                                            <ImageWithFallback src={t.image || ''} className="w-full h-full object-cover" alt={t.label} />
+                                            <div className={`absolute inset-0 transition-colors ${state.talent === t.id ? 'bg-black/40' : 'bg-black/20 group-hover:bg-black/10'}`} />
+                                            <div className="absolute bottom-0 inset-x-0 p-4">
+                                                <p className="text-white font-medium text-center">{t.label}</p>
+                                            </div>
+                                            {state.talent === t.id && (
+                                                <div className="absolute top-3 right-3 w-6 h-6 bg-white text-black rounded-full flex items-center justify-center shadow-sm">
+                                                    <Check className="w-3 h-3" />
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+        </div>
+    );
+  };
 
   const renderAddOns = () => (
     <div className="w-full pt-6 md:pt-12">

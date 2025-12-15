@@ -43,14 +43,22 @@ export function Header() {
             ))}
           </nav>
 
-          {/* CTA Button */}
-          <motion.button
-            className="hidden lg:block bg-black text-white px-8 py-3 rounded-full hover:bg-gray-800 transition-all duration-300 text-sm"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            Book Now
-          </motion.button>
+          {/* CTA Buttons */}
+          <div className="hidden lg:flex items-center gap-4">
+            <motion.button
+              className="text-sm font-medium text-gray-900 hover:text-gray-600 transition-colors"
+              whileHover={{ y: -1 }}
+            >
+              Log In
+            </motion.button>
+            <motion.button
+              className="bg-black text-white px-6 py-3 rounded-full hover:bg-gray-800 transition-all duration-300 text-sm"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Sign Up
+            </motion.button>
+          </div>
 
           {/* Mobile Menu Button */}
           <button
@@ -88,9 +96,14 @@ export function Header() {
                   {link.name}
                 </a>
               ))}
-              <button className="w-full bg-black text-white py-3 rounded-full hover:bg-gray-800 transition-all duration-300 mt-4">
-                Book Now
-              </button>
+              <div className="pt-4 flex flex-col gap-3">
+                <button className="w-full bg-white border border-gray-200 text-gray-900 py-3 rounded-full hover:bg-gray-50 transition-all duration-300">
+                  Log In
+                </button>
+                <button className="w-full bg-black text-white py-3 rounded-full hover:bg-gray-800 transition-all duration-300">
+                  Sign Up
+                </button>
+              </div>
             </nav>
           </motion.div>
         )}
