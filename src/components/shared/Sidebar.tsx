@@ -35,6 +35,9 @@ export function Sidebar({ activeScreen, onNavigate, isMobileOpen, onMobileClose 
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const dashboardPages = [
+    { id: "home", label: "Home V1", icon: Monitor, description: "Original" },
+    { id: "home-v2", label: "Home V2", icon: Monitor, description: "Previous" },
+    { id: "home-v3", label: "Home V3", icon: Sparkles, description: "Latest Concept" },
     { id: "wizard", label: "Start New Shoot", icon: Sparkles, description: "Shoot Builder" },
     { id: "website-wizard", label: "Website Wizard", icon: Monitor, description: "New Web Project" },
     { id: "website-brief-dashboard", label: "Website Brief", icon: Monitor, description: "Review Website Plan" },

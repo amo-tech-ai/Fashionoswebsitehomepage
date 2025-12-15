@@ -17,8 +17,15 @@ export function Footer() {
         "Our Story", 
         "Team", 
         "Careers", 
-        "Press",
-        { text: "Home V2 (New)", href: "/home-v2" }
+        "Press"
+      ]
+    },
+    {
+      title: "Review Versions",
+      links: [
+        { text: "Home V1 (Original)", href: "/" },
+        { text: "Home V2 (Previous)", href: "/home-v2" },
+        { text: "Home V3 (Latest)", href: "/home-v3" }
       ]
     },
     {
@@ -59,7 +66,7 @@ export function Footer() {
     <footer className="bg-[rgb(var(--color-soft-gray))] border-t border-gray-200">
       <div className="container mx-auto px-6 lg:px-12 py-16 lg:py-20">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-12 lg:gap-16 mb-16">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 lg:gap-12 mb-16">
           {footerSections.map((section, index) => (
             <motion.div
               key={section.title}

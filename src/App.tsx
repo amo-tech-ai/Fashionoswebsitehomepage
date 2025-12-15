@@ -3,6 +3,7 @@ import { Sidebar } from "./components/shared/Sidebar";
 import { NavigationBar } from "./components/shared/NavigationBar";
 import AppHome from "./AppHome";
 import HomePageV2 from "./HomePageV2";
+import HomePageV3 from "./HomePageV3";
 import Services from "./Services";
 import Clothing from "./Clothing";
 import Product from "./Product";
@@ -54,6 +55,7 @@ export default function App() {
       // Simple routing logic based on path
       if (path === "/" || path === "/home") setActiveScreen("home");
       else if (path === "/home-v2" || path === "/v2") setActiveScreen("home-v2");
+      else if (path === "/home-v3" || path === "/v3") setActiveScreen("home-v3");
       else if (path.includes("/services") || path === "/photography") setActiveScreen("photography");
       else if (path.includes("/clothing")) setActiveScreen("clothing");
       else if (path.includes("/product")) setActiveScreen("product");
@@ -100,6 +102,8 @@ export default function App() {
         return <AppHome />;
       case "home-v2":
         return <HomePageV2 />;
+      case "home-v3":
+        return <HomePageV3 />;
       case "photography":
         return <Services />;
       case "clothing":
@@ -195,7 +199,7 @@ export default function App() {
   };
 
   // Determine if current page is a marketing page (no top nav needed)
-  const isMarketingPage = ["home", "home-v2", "photography", "clothing", "product", "video", "amazon", "instagram", "webdesign", "website-wizard", "designer-wizard", "studio", "directory", "directorydetail", "events", "eventdetail", "wizard"].includes(activeScreen);
+  const isMarketingPage = ["home", "home-v2", "home-v3", "photography", "clothing", "product", "video", "amazon", "instagram", "webdesign", "website-wizard", "designer-wizard", "studio", "directory", "directorydetail", "events", "eventdetail", "wizard"].includes(activeScreen);
 
   // Determine if we should hide the sidebar (e.g. for the full-screen wizard)
   const isFullScreen = activeScreen === "wizard" || activeScreen === "website-wizard" || activeScreen === "designer-wizard";
