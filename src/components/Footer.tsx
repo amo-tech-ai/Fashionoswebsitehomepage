@@ -31,19 +31,16 @@ export function Footer() {
     {
       title: "Services",
       links: [
-        { text: "Photography Services", href: "/Services" },
-        { text: "Clothing Photography", href: "/Clothing" },
-        { text: "Product Photography", href: "/Product" },
-        { text: "Video Services", href: "/Video" },
-        { text: "Amazon Services", href: "/Amazon" },
-        { text: "E-Commerce Web Design", href: "/web-design" },
-        { text: "Instagram Services", href: "/Instagram" },
+        { text: "All Services", href: "/services" },
+        { text: "Social Media Services", href: "/instagram" },
+        { text: "Website Design", href: "/web-design" },
+        { text: "Photography Services", href: "/photography" },
+        { text: "Clothing Photography", href: "/clothing" },
+        { text: "Product Photography", href: "/product" },
+        { text: "Video Production", href: "/video" },
+        { text: "Amazon Content", href: "/amazon" },
         { text: "Start New Shoot", href: "/wizard" },
-        { text: "Designer Onboarding", href: "/designer-wizard" },
-        { text: "Studio Hire", href: "/Studios" },
-        { text: "Campaigns", href: "#" },
-        { text: "Runway", href: "#" },
-        { text: "Video & Social", href: "#" }
+        { text: "Studio Hire", href: "/studios" }
       ]
     },
     {

@@ -185,6 +185,7 @@
     --color-gray-700: oklch(.373 .034 259.733);
     --color-gray-800: oklch(.278 .033 256.848);
     --color-gray-900: oklch(.21 .034 264.665);
+    --color-gray-950: oklch(.13 .028 261.692);
     --color-zinc-800: oklch(.274 .006 286.033);
     --color-zinc-900: oklch(.21 .006 285.885);
     --color-stone-50: oklch(.985 .001 106.423);
@@ -1400,6 +1401,10 @@
 
   .h-\[calc\(100vh-200px\)\] {
     height: calc(100vh - 200px);
+  }
+
+  .h-auto {
+    height: auto;
   }
 
   .h-fit {
@@ -2952,6 +2957,10 @@
 
   .bg-gray-900 {
     background-color: var(--color-gray-900);
+  }
+
+  .bg-gray-950 {
+    background-color: var(--color-gray-950);
   }
 
   .bg-green-50 {

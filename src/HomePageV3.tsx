@@ -3,6 +3,7 @@ import { useRef } from "react";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { ImageWithFallback } from "./components/figma/ImageWithFallback";
+import exampleImage from 'figma:asset/20ab9239a892e6131e16968f3533c44504578092.png';
 import { 
   ArrowRight, 
   Camera, 
@@ -436,28 +437,69 @@ export default function HomePageV3() {
       </section>
 
       {/* 11. FINAL CTA */}
-      <section className="py-32 bg-white">
-         <div className="container mx-auto px-6 lg:px-12 text-center">
-            <h2 className="text-5xl lg:text-6xl font-serif mb-12 text-gray-900">Ready to Run Fashion <br/> Like a System?</h2>
-            
-            <div className="flex flex-col items-center gap-6">
-               <button 
-                  onClick={() => handleNavigation("/designer-wizard")}
-                  className="bg-black text-white px-12 py-5 text-sm uppercase tracking-widest hover:bg-gray-800 transition-all transform hover:scale-105"
-               >
-                  Create Your Brand Profile
-               </button>
-               
-               <div className="flex gap-8 mt-4">
-                  <button onClick={() => handleNavigation("/wizard")} className="text-gray-500 hover:text-black border-b border-transparent hover:border-black pb-1 transition-all text-sm">
-                    Book a Shoot
-                  </button>
-                  <button onClick={() => handleNavigation("/events")} className="text-gray-500 hover:text-black border-b border-transparent hover:border-black pb-1 transition-all text-sm">
-                    Plan an Event
-                  </button>
-               </div>
+      <section className="py-24 bg-gray-50">
+        <div className="container mx-auto px-6 lg:px-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            {/* Left Content */}
+            <div className="space-y-8">
+              <h2 className="text-5xl lg:text-6xl font-serif text-gray-900 leading-tight">
+                Create Your <br/> FashionOS Profile
+              </h2>
+              
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-white border border-gray-200 rounded-full shadow-sm">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-xs font-medium tracking-wide text-gray-600 uppercase">Free to Join</span>
+              </div>
+
+              <div className="space-y-4">
+                 <h3 className="text-xl font-bold text-gray-900">Get Started in Minutes</h3>
+                 <p className="text-gray-600 leading-relaxed max-w-md">
+                   Create a professional fashion profile in under 5 minutes. <br/>
+                   A modern platform where fashion meets AI.
+                 </p>
+              </div>
+
+              <ul className="space-y-4 pt-2">
+                 {[
+                   "Get discovered through events, sponsors, and collaborations",
+                   "Understand your brand with AI-powered audits",
+                   "Manage everything from one professional dashboard"
+                 ].map((item, i) => (
+                   <li key={i} className="flex items-start gap-3 text-gray-600">
+                     <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2 flex-shrink-0" />
+                     <span className="text-sm">{item}</span>
+                   </li>
+                 ))}
+              </ul>
             </div>
-         </div>
+
+            {/* Right Content */}
+            <div className="space-y-6">
+              {/* Top Image Card */}
+              <div className="rounded-2xl overflow-hidden shadow-xl">
+                 <img src={exampleImage} alt="Fashion Profile" className="w-full h-auto object-cover" />
+              </div>
+
+              {/* Bottom Action Card */}
+              <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 text-center space-y-6">
+                 <button 
+                   onClick={() => handleNavigation("/designer-wizard")}
+                   className="w-full bg-gray-950 text-white py-4 rounded-full text-sm font-medium hover:bg-black transition-transform transform hover:scale-[1.02] flex items-center justify-center gap-2"
+                 >
+                   Create Profile <ArrowRight size={16} />
+                 </button>
+                 
+                 <button className="text-gray-500 text-sm hover:text-gray-900 transition-colors">
+                   View Example Profile
+                 </button>
+
+                 <div className="pt-4 border-t border-gray-100">
+                   <p className="text-xs text-gray-400">Trusted by fashion designers, brands & organizers</p>
+                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <Footer />
