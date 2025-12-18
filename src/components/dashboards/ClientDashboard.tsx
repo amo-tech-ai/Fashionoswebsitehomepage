@@ -10,8 +10,11 @@ import {
   ArrowUpRight,
   Layout
 } from 'lucide-react';
+import { useBrandShoot } from '../../context/BrandShootContext';
 
 export function ClientDashboard() {
+  const { activeProjects } = useBrandShoot();
+
   const client = {
     name: "Acme Fashion",
     logo: "https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?auto=format&fit=crop&q=80&w=200&h=200",
@@ -28,11 +31,13 @@ export function ClientDashboard() {
     styles: ["Editorial", "Street Style", "High Contrast"]
   };
 
-  const history = [
-    { id: 1, name: "SS25 Campaign", date: "Oct 2025", items: 18, image: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&q=80&w=300&h=200" },
-    { id: 2, name: "Winter Lookbook", date: "Jan 2025", items: 42, image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=300&h=200" },
-    { id: 3, name: "Social Refresh", date: "Nov 2024", items: 12, image: "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=300&h=200" },
-  ];
+  const history = activeProjects.map(project => ({
+    id: project.id,
+    name: project.name,
+    date: project.date,
+    items: Math.floor(Math.random() * 20) + 10, // Mock item count if not available
+    image: project.image
+  }));
 
   return (
     <div className="min-h-screen bg-[#F8F5F1] p-6 lg:p-12 font-sans text-gray-900">

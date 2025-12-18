@@ -8,12 +8,30 @@ import {
   Sparkles, 
   ChevronRight, 
   Trash2,
-  Camera
+  Camera,
+  ArrowLeft
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
-export function ShotListBuilder() {
+import { useBrandShoot, ShotItem } from '../../context/BrandShootContext';
+
+export function ShotListBuilder({ onBack }: { onBack?: () => void }) {
+  const { shotList, setShotList, updateChecklist, sampleList } = useBrandShoot();
   const [activeProduct, setActiveProduct] = useState<number | null>(null);
+
+  // Sync checklist when shots exist
+  React.useEffect(() => {
+    if (shotList.length > 0) {
+      updateChecklist('shotListLocked', true);
+    } else {
+      updateChecklist('shotListLocked', false);
+    }
+  }, [shotList.length]);
+
+  // Cura Intelligence: Find samples not yet in shot list
+  const unplannedSamples = sampleList.filter(sample => 
+    !shotList.some(shot => shot.name.includes(sample.name) || shot.notes.includes(sample.name))
+  );
 
   const products = [
     { id: 1, name: "Glow Serum", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=100&h=100" },
@@ -21,43 +39,23 @@ export function ShotListBuilder() {
     { id: 3, name: "Leather Tote", image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&q=80&w=100&h=100" },
   ];
 
-  const shots = [
-    {
-      id: 1,
-      name: "Hero Shot - Front",
-      type: "Photo",
-      notes: "Clean white background, soft shadows to highlight texture.",
-      scene: "White Seamless",
-      talent: "None",
-      status: "Completed",
-      price: 250,
-      image: "https://images.unsplash.com/photo-1629198688000-71f23e745b6e?auto=format&fit=crop&q=80&w=300&h=200"
-    },
-    {
-      id: 2,
-      name: "Lifestyle - Application",
-      type: "Video",
-      notes: "Model applying serum to cheek, slow motion.",
-      scene: "Bathroom Set",
-      talent: "Sarah K.",
-      status: "Planned",
-      price: 450,
-      image: null
-    },
-    {
-      id: 3,
-      name: "Texture Macro",
-      type: "Photo",
-      notes: "Extreme close-up of the serum drop.",
-      scene: "Macro Table",
-      talent: "None",
-      status: "Shooting",
-      price: 250,
-      image: null
-    }
-  ];
+  // Helper to add new shot
+  const addNewShot = () => {
+    const newShot: ShotItem = {
+        id: Date.now(),
+        name: "New Planned Shot",
+        type: "Photo",
+        notes: "Add notes here...",
+        scene: "Studio",
+        talent: "TBD",
+        status: "Planned",
+        price: 200,
+        image: null
+    };
+    setShotList([...shotList, newShot]);
+  };
 
-  const totalPrice = shots.reduce((sum, shot) => sum + shot.price, 0);
+  const totalPrice = shotList.reduce((sum, shot) => sum + shot.price, 0);
 
   return (
     <div className="min-h-screen bg-[#F8F5F1] flex font-sans">
@@ -105,6 +103,15 @@ export function ShotListBuilder() {
           {/* Header */}
           <div className="flex justify-between items-end mb-10">
             <div>
+              {onBack && (
+                <button 
+                  onClick={onBack}
+                  className="flex items-center gap-2 text-gray-500 hover:text-gray-900 mb-4 transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span className="text-sm font-medium">Back to Timeline</span>
+                </button>
+              )}
               <h1 className="text-4xl font-serif text-gray-900 mb-2">Shot List Builder</h1>
               <p className="text-gray-500">Plan your creative direction and deliverables.</p>
             </div>
@@ -115,21 +122,60 @@ export function ShotListBuilder() {
           </div>
 
           {/* AI Suggestion Bar */}
-          <div className="bg-gradient-to-r from-gray-900 to-gray-800 text-white p-4 rounded-xl shadow-lg mb-8 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                <Sparkles className="w-4 h-4 text-white" />
+          {unplannedSamples.length > 0 && (
+            <motion.div 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-gradient-to-r from-gray-900 to-gray-800 text-white p-4 rounded-xl shadow-lg mb-8 flex items-center justify-between"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                  <Sparkles className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                   <p className="text-sm font-medium">Cura Suggestion: You have {unplannedSamples.length} samples without planned shots.</p>
+                   <p className="text-xs text-gray-300">Try adding a shot for "{unplannedSamples[0].name}"</p>
+                </div>
               </div>
-              <p className="text-sm font-medium">Recommendation: Add +1 Macro Shot and +1 Lifestyle Shot for Instagram Reels.</p>
-            </div>
-            <button className="px-4 py-1.5 bg-white text-gray-900 text-xs font-bold rounded-lg hover:bg-gray-100 transition-colors">
-              Apply All
-            </button>
-          </div>
+              <button 
+                onClick={() => {
+                   const newShot: ShotItem = {
+                      id: Date.now(),
+                      name: `Hero Shot: ${unplannedSamples[0].name}`,
+                      type: "Photo",
+                      notes: `Focus on texture of ${unplannedSamples[0].name}.`,
+                      scene: "Studio",
+                      talent: "None",
+                      status: "Planned",
+                      price: 250,
+                      image: unplannedSamples[0].image
+                   };
+                   setShotList([...shotList, newShot]);
+                }}
+                className="px-4 py-1.5 bg-white text-gray-900 text-xs font-bold rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                Add {unplannedSamples[0].name} Shot
+              </button>
+            </motion.div>
+          )}
+
+          {unplannedSamples.length === 0 && (
+             <div className="bg-gradient-to-r from-gray-900 to-gray-800 text-white p-4 rounded-xl shadow-lg mb-8 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                    <Sparkles className="w-4 h-4 text-white" />
+                  </div>
+                  <p className="text-sm font-medium">All samples are covered! Recommendation: Add +1 Lifestyle Shot for Reels.</p>
+                </div>
+                <button className="px-4 py-1.5 bg-white text-gray-900 text-xs font-bold rounded-lg hover:bg-gray-100 transition-colors">
+                  Apply Suggestion
+                </button>
+              </div>
+          )}
 
           {/* Shot List */}
           <div className="space-y-6">
-            {shots.map((shot) => (
+            {shotList.map((shot) => (
               <motion.div 
                 key={shot.id}
                 initial={{ opacity: 0, y: 10 }}
@@ -163,8 +209,15 @@ export function ShotListBuilder() {
                         }`}>
                           {shot.status}
                         </span>
-                        <button className="p-1 text-gray-400 hover:text-gray-900 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <MoreHorizontal className="w-5 h-5" />
+                        <button 
+                            onClick={() => {
+                                const newShots = shotList.filter(s => s.id !== shot.id);
+                                setShotList(newShots);
+                                if(newShots.length === 0) updateChecklist('shotListLocked', false);
+                            }}
+                            className="p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 className="w-5 h-5" />
                         </button>
                       </div>
                     </div>
@@ -187,7 +240,10 @@ export function ShotListBuilder() {
               </motion.div>
             ))}
 
-            <button className="w-full py-6 border-2 border-dashed border-gray-300 rounded-2xl text-gray-400 hover:border-gray-900 hover:text-gray-900 transition-all flex flex-col items-center justify-center gap-2 group">
+            <button 
+                onClick={addNewShot}
+                className="w-full py-6 border-2 border-dashed border-gray-300 rounded-2xl text-gray-400 hover:border-gray-900 hover:text-gray-900 transition-all flex flex-col items-center justify-center gap-2 group"
+            >
               <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center group-hover:bg-gray-900 group-hover:text-white transition-colors">
                 <Plus className="w-5 h-5" />
               </div>

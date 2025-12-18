@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   FileText, 
   PenTool, 
@@ -19,6 +19,7 @@ import {
   Calendar
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { useBrandShoot } from '../../context/BrandShootContext';
 
 // --- Types ---
 
@@ -314,7 +315,39 @@ function AISuggestionsBar() {
 // --- Main Component ---
 
 export function ContractsManager() {
+  const { proposal, activeProjects } = useBrandShoot();
   const [activeTab, setActiveTab] = useState<'overview' | 'contracts' | 'deliverables' | 'ai'>('overview');
+
+  // Merge Context Proposal into Contracts Data
+  const dynamicContracts: Contract[] = [...contractsData];
+  
+  if (proposal) {
+    dynamicContracts.unshift({
+      id: "proposal-new",
+      sponsorName: "Current Client", // Could derive from signals
+      sponsorLogo: "★",
+      eventName: proposal.category,
+      value: `$${proposal.totalCost.toLocaleString()}`,
+      status: "Draft",
+      date: new Date().toLocaleDateString()
+    });
+  }
+
+  // Also map active projects as Signed contracts
+  activeProjects.forEach(project => {
+      // Avoid dupes if possible, but for now just push
+      if (project.id !== 'proposal-new') {
+        dynamicContracts.push({
+            id: `contract-${project.id}`,
+            sponsorName: project.client,
+            sponsorLogo: project.client.charAt(0),
+            eventName: project.name,
+            value: "Confidential",
+            status: "Signed",
+            date: project.date
+        });
+      }
+  });
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] pb-20 animate-in fade-in duration-500">
@@ -369,10 +402,10 @@ export function ContractsManager() {
         
         {/* KPI Bar */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          <KPICard title="Active Contracts" value="8" icon={FileText} trend="+2 this month" />
-          <KPICard title="Pending Signature" value="3" icon={PenTool} />
+          <KPICard title="Active Contracts" value={String(activeProjects.length + 5)} icon={FileText} trend="+2 this month" />
+          <KPICard title="Pending Signature" value={proposal ? "1" : "0"} icon={PenTool} />
           <KPICard title="Payments Received" value="$420k" icon={DollarSign} trend="85% of total" />
-          <KPICard title="Drafts" value="5" icon={File} />
+          <KPICard title="Drafts" value={proposal ? "1" : "0"} icon={File} />
         </div>
 
         {/* AI Suggestion Bar */}
@@ -397,7 +430,7 @@ export function ContractsManager() {
                  )}
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {contractsData.slice(0, activeTab === 'overview' ? 3 : undefined).map(contract => (
+                {dynamicContracts.slice(0, activeTab === 'overview' ? 6 : undefined).map(contract => (
                   <ContractCard key={contract.id} contract={contract} />
                 ))}
               </div>

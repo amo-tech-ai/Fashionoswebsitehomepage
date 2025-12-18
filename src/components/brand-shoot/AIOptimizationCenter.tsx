@@ -15,6 +15,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui
 import { Badge } from '../ui/badge';
 import { Progress } from '../ui/progress';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
+import { toast } from "sonner@2.0.3";
+
+import { useBrandShoot } from '../../context/BrandShootContext';
 
 // Mock Data for Optimization
 const OPTIMIZATIONS = [
@@ -25,8 +28,9 @@ const OPTIMIZATIONS = [
     title: 'Low Contrast Detected',
     description: 'Product visibility is low on mobile screens. Increase contrast by 15%.',
     impact: 'High Impact',
-    assetId: 'img_3',
-    assetUrl: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=800&h=1000'
+    assetId: 0, // Maps to assets[0]
+    originalUrl: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&q=80',
+    fixedUrl: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&q=80&contrast=30&vib=20' // Simulated param change
   },
   {
     id: 2,
@@ -35,8 +39,32 @@ const OPTIMIZATIONS = [
     title: 'Drop-off Risk',
     description: 'Video length (15s) is causing 40% drop-off. Trim to 8s loop.',
     impact: 'Medium Impact',
-    assetId: 'vid_1',
-    assetUrl: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=800&h=1000'
+    assetId: 'ad_optimization',
+    targetAdId: 'ad1',
+    originalUrl: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&q=80',
+    fixedUrl: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&q=80&sat=-100' // B&W as visual proxy for change
+  },
+  {
+    id: 3,
+    type: 'risk',
+    severity: 'high',
+    title: 'Weather Alert: Rain Forecast',
+    description: 'Rain predicted for shoot day (Nov 02). Recommendation: Shift to indoor studio backup or reschedule.',
+    impact: 'Critical Risk',
+    assetId: 'weather_risk',
+    originalUrl: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&q=80&w=400&h=500', // Rain image
+    fixedUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=400&h=500' // Studio image
+  },
+  {
+    id: 4,
+    type: 'budget',
+    severity: 'medium',
+    title: 'Budget Watchdog: Overtime Risk',
+    description: 'Current shot list estimate exceeds 8h day by 2 hours. Estimated OT cost: $600.',
+    impact: 'Cost Risk',
+    assetId: 'budget_risk',
+    originalUrl: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=400&h=500', // Money/Business image
+    fixedUrl: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=400&h=500' // Planning/Schedule image
   }
 ];
 
@@ -45,17 +73,73 @@ interface AIOptimizationCenterProps {
 }
 
 export function AIOptimizationCenter({ onNavigate }: AIOptimizationCenterProps) {
+  const { campaignPlan, setCampaignPlan } = useBrandShoot();
   const [activeOpt, setActiveOpt] = useState(OPTIMIZATIONS[0]);
   const [optimizationScore, setOptimizationScore] = useState(72);
   const [isOptimizing, setIsOptimizing] = useState(false);
+  const [fixedIds, setFixedIds] = useState<number[]>([]);
+
+  if (!campaignPlan) {
+    return (
+        <div className="min-h-screen bg-[#FDFBF9] flex items-center justify-center font-sans">
+            <div className="text-center space-y-4 max-w-md px-6">
+                <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto">
+                    <Sparkles className="w-8 h-8 text-gray-400" />
+                </div>
+                <h2 className="text-xl font-serif font-medium text-gray-900">No Active Campaign</h2>
+                <p className="text-gray-500 text-sm">
+                    Launch a campaign from the wizard to unlock AI optimization insights.
+                </p>
+                <Button onClick={() => onNavigate('brand-shoot-start')}>
+                    Start New Campaign
+                </Button>
+            </div>
+        </div>
+    );
+  }
 
   const handleApplyFix = () => {
     setIsOptimizing(true);
+    
     setTimeout(() => {
-      setOptimizationScore(88);
+      // 1. Update Local UI State
+      setOptimizationScore(prev => Math.min(prev + 15, 100));
+      setFixedIds(prev => [...prev, activeOpt.id]);
+      
+      // 2. Update Global Context (Real Data Mutation)
+      if (campaignPlan) {
+        const newPlan = { ...campaignPlan };
+        
+        if (activeOpt.type === 'visual') {
+           // Fix the asset image
+           if (newPlan.assets[activeOpt.assetId as number]) {
+             newPlan.assets[activeOpt.assetId as number].url = activeOpt.fixedUrl!;
+             // Add a tag to indicate it was fixed
+             newPlan.assets[activeOpt.assetId as number].usage += " (Optimized)";
+           }
+        } else if (activeOpt.type === 'performance') {
+           // Fix the ad format
+           const adIndex = newPlan.ads.findIndex(a => a.id === activeOpt.targetAdId);
+           if (adIndex !== -1) {
+             newPlan.ads[adIndex].format = "Reels 9:16 (Optimized 8s Loop)";
+             newPlan.roi.conversion = 'high'; // Boost ROI prediction
+           }
+        } else if (activeOpt.type === 'risk') {
+           // Fix the location/date risk
+           // This is a mock update, but in a real app would update the schedule or location
+           toast.success("Schedule updated to Indoor Backup Plan");
+        } else if (activeOpt.type === 'budget') {
+            toast.success("Shot list optimized to fit standard day (removed 2 low-priority shots).");
+        }
+        
+        setCampaignPlan(newPlan);
+      }
+
       setIsOptimizing(false);
-    }, 2000);
+    }, 1500);
   };
+
+  const isFixed = fixedIds.includes(activeOpt.id);
 
   return (
     <div className="min-h-screen bg-[#FDFBF9] pb-24 font-sans">
@@ -72,7 +156,7 @@ export function AIOptimizationCenter({ onNavigate }: AIOptimizationCenterProps) 
           </div>
         </div>
         <div className="flex gap-3">
-           <Button variant="outline" onClick={() => onNavigate('overview')}>Exit</Button>
+           <Button variant="outline" onClick={() => onNavigate('campaign-summary')}>Exit</Button>
            <Button className="bg-gray-900 text-white hover:bg-black">
              <RefreshCw className="w-4 h-4 mr-2" />
              Re-Analyze
@@ -165,13 +249,13 @@ export function AIOptimizationCenter({ onNavigate }: AIOptimizationCenterProps) 
                {/* Before/After Visualization */}
                <div className="relative w-full max-w-md aspect-[4/5] rounded-lg overflow-hidden shadow-2xl">
                  <img 
-                   src={activeOpt.assetUrl} 
+                   src={isFixed ? activeOpt.fixedUrl : activeOpt.originalUrl} 
                    alt="Asset" 
                    className={`w-full h-full object-cover transition-all duration-700 ${isOptimizing ? 'filter brightness-110 contrast-125' : ''}`}
                  />
                  
                  {/* Scanning Overlay Effect */}
-                 {!isOptimizing && optimizationScore < 80 && (
+                 {!isOptimizing && !isFixed && (
                    <div className="absolute inset-0 bg-indigo-900/10 pointer-events-none">
                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 border-2 border-white/50 rounded-full animate-ping" />
                      <div className="absolute top-8 right-8 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-sm animate-bounce">
@@ -200,10 +284,10 @@ export function AIOptimizationCenter({ onNavigate }: AIOptimizationCenterProps) 
                  </div>
                  <Button 
                    onClick={handleApplyFix}
-                   disabled={isOptimizing || optimizationScore > 80}
-                   className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20"
+                   disabled={isOptimizing || isFixed}
+                   className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 disabled:bg-green-600 disabled:opacity-100"
                  >
-                   {optimizationScore > 80 ? (
+                   {isFixed ? (
                      <>
                        <CheckCircle2 className="w-4 h-4 mr-2" />
                        Optimized

@@ -19,6 +19,7 @@ import { Sidebar } from "./components/shared/Sidebar";
 import { WizardModeSelection } from "./components/wizard/WizardModeSelection";
 import { WizardAIIntake } from "./components/wizard/WizardAIIntake";
 import { WizardAISidebar } from "./components/wizard/WizardAISidebar";
+import { useBrandShoot, WizardState } from "./context/BrandShootContext";
 
 import amazonImg from "figma:asset/41ffa841e5b6ae969b626aecc0e3cd3404a96df5.png";
 import instagramImg from "figma:asset/a7f7eb0fdd0513adec473287236c1cf6c46c0ee0.png";
@@ -39,19 +40,6 @@ type WizardStep =
   | "channels" 
   | "dateTime" 
   | "summary";
-
-export interface WizardState {
-  service: "photography" | "video" | "webdesign" | "socialmedia" | null;
-  category: string | null;
-  subType: string | null;
-  style: string | null;
-  scenes: string[];
-  talent: string | null;
-  addOns: string[];
-  channels: string[];
-  date: Date | null;
-  timeSlot: string | null;
-}
 
 // --- Data ---
 
@@ -220,6 +208,7 @@ const getGeminiRecommendation = (step: WizardStep, context: any) => {
 // --- Main Component ---
 
 export default function ShootWizard({ onComplete }: { onComplete?: (data: WizardState) => void }) {
+  const { wizardData, setWizardData } = useBrandShoot();
   const [workflowStage, setWorkflowStage] = useState<'mode' | 'intake' | 'wizard'>('mode');
   const [isAIEnabled, setIsAIEnabled] = useState(false);
   const [aiContext, setAiContext] = useState<any>(null);
@@ -230,7 +219,8 @@ export default function ShootWizard({ onComplete }: { onComplete?: (data: Wizard
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Mobile sidebar toggle
   const [currentMonth, setCurrentMonth] = useState(new Date());
   
-  const [state, setState] = useState<WizardState>({
+  // Use context state or fallback to default
+  const state: WizardState = wizardData || {
     service: null,
     category: null,
     subType: null,
@@ -241,7 +231,17 @@ export default function ShootWizard({ onComplete }: { onComplete?: (data: Wizard
     channels: [],
     date: null,
     timeSlot: null
-  });
+  };
+
+  // Helper to update state in context
+  const setState = (newState: WizardState | ((prev: WizardState) => WizardState)) => {
+    if (typeof newState === 'function') {
+      const updated = newState(state);
+      setWizardData(updated);
+    } else {
+      setWizardData(newState);
+    }
+  };
 
   const stepOrder: WizardStep[] = [
     "service", 

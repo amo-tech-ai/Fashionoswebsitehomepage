@@ -31,19 +31,78 @@ export function BrandSignalCapture({ onNavigate }: BrandSignalCaptureProps) {
     onNavigate('ai-thinking');
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Helper: Resize and convert to Base64
+  const processFile = (file: File): Promise<{ name: string; type: string; url: string }> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          // Max dimension 800px to save localStorage space
+          const MAX_SIZE = 800;
+          if (width > height) {
+            if (width > MAX_SIZE) {
+              height *= MAX_SIZE / width;
+              width = MAX_SIZE;
+            }
+          } else {
+            if (height > MAX_SIZE) {
+              width *= MAX_SIZE / height;
+              height = MAX_SIZE;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          // Compress to JPEG 0.7
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          resolve({
+            name: file.name,
+            type: 'image/jpeg',
+            url: dataUrl
+          });
+        };
+        img.src = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-       const newFiles = Array.from(e.target.files).map(file => ({
-         name: file.name,
-         type: file.type,
-         url: URL.createObjectURL(file)
-       }));
-       setFiles(prev => [...prev, ...newFiles]);
+       const processedFiles = await Promise.all(
+         Array.from(e.target.files).map(processFile)
+       );
+       setFiles(prev => [...prev, ...processedFiles]);
     }
   };
 
   const removeFile = (index: number) => {
       setFiles(files.filter((_, i) => i !== index));
+  };
+
+  const handlePaste = async (e: React.ClipboardEvent) => {
+    const items = e.clipboardData.items;
+    const imageFiles: File[] = [];
+    
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        if (file) imageFiles.push(file);
+      }
+    }
+
+    if (imageFiles.length > 0) {
+      const processedFiles = await Promise.all(imageFiles.map(processFile));
+      setFiles(prev => [...prev, ...processedFiles]);
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -55,24 +114,22 @@ export function BrandSignalCapture({ onNavigate }: BrandSignalCaptureProps) {
     setIsDragging(false);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const newFiles = Array.from(e.dataTransfer.files)
-        .filter(file => file.type.startsWith('image/'))
-        .map(file => ({
-          name: file.name,
-          type: file.type,
-          url: URL.createObjectURL(file)
-        }));
-      setFiles(prev => [...prev, ...newFiles]);
+      const imageFiles = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+      const processedFiles = await Promise.all(imageFiles.map(processFile));
+      setFiles(prev => [...prev, ...processedFiles]);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFBF9] flex flex-col items-center justify-center p-4">
+    <div 
+      className="min-h-screen bg-[#FDFBF9] flex flex-col items-center justify-center p-4"
+      onPaste={handlePaste}
+    >
       <div className="max-w-2xl w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 my-10">
         
         {/* Header */}

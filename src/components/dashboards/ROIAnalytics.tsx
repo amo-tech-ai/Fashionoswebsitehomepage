@@ -8,7 +8,7 @@ import {
   Zap
 } from "lucide-react";
 import { motion } from "motion/react";
-import { Badge } from "../ui/badge";
+import { useBrandShoot } from '../../context/BrandShootContext';
 
 // --- Components ---
 
@@ -58,7 +58,12 @@ function InsightCard({ title, type }: { title: string, type: 'positive' | 'neutr
 // --- Main Component ---
 
 export function ROIAnalytics({ onNavigate }: { onNavigate: (page: string) => void }) {
+  const { campaignPlan } = useBrandShoot();
   const [activeTab, setActiveTab] = useState('overview');
+
+  // Derive insights from campaign plan if available
+  const conversionImpact = campaignPlan?.roi?.conversion === 'high' ? 'High' : campaignPlan?.roi?.conversion === 'medium' ? 'Medium' : 'Low';
+  const awarenessImpact = campaignPlan?.roi?.awareness === 'high' ? 'High' : campaignPlan?.roi?.awareness === 'medium' ? 'Medium' : 'Low';
 
   return (
     <div className="min-h-screen bg-[#FDFBF9] pb-20 font-sans">
@@ -91,12 +96,12 @@ export function ROIAnalytics({ onNavigate }: { onNavigate: (page: string) => voi
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <ImpactGauge 
               label="Brand Awareness" 
-              impact="High" 
-              description="Significant uplift in mentions across key markets." 
+              impact={awarenessImpact} 
+              description={campaignPlan ? `Projected impact for ${campaignPlan.strategy.title}` : "Significant uplift in mentions across key markets."} 
             />
             <ImpactGauge 
               label="Conversion Efficiency" 
-              impact="Medium" 
+              impact={conversionImpact} 
               description="Steady performance, optimizing for lower CAC." 
             />
             <ImpactGauge 

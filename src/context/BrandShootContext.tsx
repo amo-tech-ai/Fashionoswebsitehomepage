@@ -49,6 +49,14 @@ export interface Shot {
   rationale: string;
 }
 
+export interface CustomizationOption {
+  id: string;
+  label: string;
+  price: number;
+  selected: boolean;
+  description: string;
+}
+
 export interface CampaignPlan {
   strategy: {
     title: string;
@@ -68,6 +76,9 @@ export interface CampaignPlan {
   channelPacks: ChannelPack[];
   recipes: AssetRecipe[];
   ads: AdCreative[];
+  
+  // Customizations
+  customizations: CustomizationOption[];
 
   roi: {
     conversion: 'high' | 'medium' | 'low';
@@ -77,6 +88,42 @@ export interface CampaignPlan {
     total: number;
     deposit: number;
   };
+}
+
+export interface WizardState {
+  service: "photography" | "video" | "webdesign" | "socialmedia" | null;
+  category: string | null;
+  subType: string | null;
+  style: string | null;
+  scenes: string[];
+  talent: string | null;
+  addOns: string[];
+  channels: string[];
+  date: Date | null;
+  timeSlot: string | null;
+}
+
+export interface ProposalState {
+  service: string;
+  category: string;
+  date?: string;
+  timeSlot?: string;
+  scenes: string[];
+  activeAddOns: string[];
+  totalCost: number;
+}
+
+export interface WizardState {
+  service: "photography" | "video" | "webdesign" | "socialmedia" | null;
+  category: string | null;
+  subType: string | null;
+  style: string | null;
+  scenes: string[];
+  talent: string | null;
+  addOns: string[];
+  channels: string[];
+  date: Date | null;
+  timeSlot: string | null;
 }
 
 export interface Project {
@@ -98,9 +145,93 @@ interface BrandShootContextType {
   isAdjustMode: boolean;
   setAdjustMode: (isAdjust: boolean) => void;
   updatePackCount: (channelIndex: number, increment: boolean) => void;
+  updateAsset: (index: number, newUrl: string) => void;
+  toggleCustomization: (id: string) => void;
   generateMockPlan: () => void;
   launchCampaign: () => void;
   activeProjects: Project[];
+  setActiveProjects: React.Dispatch<React.SetStateAction<Project[]>>; // Expose setter
+  bookedTalent: (number | string)[]; // Allow both for compatibility
+  setBookedTalent: (ids: (number | string)[]) => void;
+  shortlistedLocations: string[];
+  setShortlistedLocations: (ids: string[]) => void;
+  confirmedLocation: string | null;
+  setConfirmedLocation: (id: string | null) => void;
+  proposal: ProposalState | null;
+  setProposal: (proposal: ProposalState | null) => void;
+  
+  // New Global Wizard State
+  wizardData: WizardState | null;
+  setWizardData: (data: WizardState | null) => void;
+
+  // --- New Operational State ---
+  shotList: ShotItem[];
+  setShotList: (shots: ShotItem[]) => void;
+  
+  sampleList: SampleItem[];
+  setSampleList: (samples: SampleItem[]) => void;
+  
+  callSheetSchedule: ScheduleBlock[];
+  setCallSheetSchedule: (schedule: ScheduleBlock[]) => void;
+
+  galleryAssets: GalleryAsset[];
+  setGalleryAssets: (assets: GalleryAsset[]) => void;
+
+  productionChecklist: {
+    shotListLocked: boolean;
+    talentConfirmed: boolean;
+    stylingBreakdown: boolean;
+    callSheetIssued: boolean;
+  };
+  updateChecklist: (key: keyof BrandShootContextType['productionChecklist'], value: boolean) => void;
+}
+
+// --- New Operational Interfaces ---
+
+export interface GalleryAsset {
+  id: number | string;
+  name: string;
+  type: 'image' | 'video';
+  status: 'Pending' | 'Approved' | 'Rejected';
+  aiScore: number;
+  aiReason: string;
+  url: string;
+  date: string;
+  linkedShotId?: number | string; // Link to Shot List
+}
+
+export interface ShotItem {
+  id: number | string;
+  name: string;
+  type: 'Photo' | 'Video';
+  notes: string;
+  scene: string;
+  talent: string;
+  status: 'Planned' | 'Shooting' | 'Completed';
+  price: number;
+  image: string | null;
+}
+
+export interface SampleItem {
+  id: string;
+  name: string;
+  sku: string;
+  variant: string;
+  image: string;
+  status: 'awaiting' | 'on_set' | 'shot' | 'returned';
+  isHero: boolean;
+  priority: number;
+}
+
+export interface ScheduleBlock {
+  id: string;
+  time: string;
+  endTime: string;
+  title: string;
+  location: string;
+  talent: string;
+  type: 'indoor' | 'outdoor' | 'break' | 'admin';
+  description?: string;
 }
 
 // --- Default State ---
@@ -113,9 +244,40 @@ const defaultContext: BrandShootContextType = {
   isAdjustMode: false,
   setAdjustMode: () => {},
   updatePackCount: () => {},
+  updateAsset: () => {},
+  toggleCustomization: () => {},
   generateMockPlan: () => {},
   launchCampaign: () => {},
   activeProjects: [],
+  setActiveProjects: () => {},
+  bookedTalent: [],
+  setBookedTalent: () => {},
+  shortlistedLocations: [],
+  setShortlistedLocations: () => {},
+  confirmedLocation: null,
+  setConfirmedLocation: () => {},
+  proposal: null,
+  setProposal: () => {},
+  
+  wizardData: null,
+  setWizardData: () => {},
+  
+  // New Defaults
+  shotList: [],
+  setShotList: () => {},
+  sampleList: [],
+  setSampleList: () => {},
+  callSheetSchedule: [],
+  setCallSheetSchedule: () => {},
+  galleryAssets: [],
+  setGalleryAssets: () => {},
+  productionChecklist: {
+    shotListLocked: true,
+    talentConfirmed: true,
+    stylingBreakdown: false,
+    callSheetIssued: false
+  },
+  updateChecklist: () => {}
 };
 
 // --- Context & Provider ---
@@ -204,6 +366,210 @@ export const BrandShootProvider = ({ children }: { children: ReactNode }) => {
     }
   ]);
 
+  const [bookedTalent, setBookedTalent] = useState<(number | string)[]>([]);
+  const [shortlistedLocations, setShortlistedLocations] = useState<string[]>([]);
+  const [confirmedLocation, setConfirmedLocation] = useState<string | null>(null);
+
+  const [wizardData, setWizardData] = useState<WizardState | null>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('brandShoot_wizardData');
+        return saved ? JSON.parse(saved) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (wizardData) {
+      localStorage.setItem('brandShoot_wizardData', JSON.stringify(wizardData));
+    }
+  }, [wizardData]);
+
+  // Proposal State for Persistence
+  const [proposal, setProposal] = useState<ProposalState | null>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('brandShoot_proposal');
+        return saved ? JSON.parse(saved) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  });
+
+  // --- Operational State Implementation ---
+  
+  const [shotList, setShotList] = useState<ShotItem[]>([
+    {
+      id: 1,
+      name: "Hero Shot - Front",
+      type: "Photo",
+      notes: "Clean white background, soft shadows to highlight texture.",
+      scene: "White Seamless",
+      talent: "None",
+      status: "Completed",
+      price: 250,
+      image: "https://images.unsplash.com/photo-1629198688000-71f23e745b6e?auto=format&fit=crop&q=80&w=300&h=200"
+    },
+    {
+      id: 2,
+      name: "Lifestyle - Application",
+      type: "Video",
+      notes: "Model applying serum to cheek, slow motion.",
+      scene: "Bathroom Set",
+      talent: "Sarah K.",
+      status: "Planned",
+      price: 450,
+      image: null
+    },
+    {
+      id: 3,
+      name: "Texture Macro",
+      type: "Photo",
+      notes: "Extreme close-up of the serum drop.",
+      scene: "Macro Table",
+      talent: "None",
+      status: "Shooting",
+      price: 250,
+      image: null
+    }
+  ]);
+
+  const [sampleList, setSampleList] = useState<SampleItem[]>([
+    {
+      id: '1',
+      name: 'Cashmere Oversized Coat',
+      sku: 'CO-24-BK',
+      variant: 'Midnight Black / M',
+      image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400&q=80',
+      status: 'shot',
+      isHero: true,
+      priority: 1
+    },
+    {
+      id: '2',
+      name: 'Silk Pleated Trousers',
+      sku: 'TR-24-CR',
+      variant: 'Cream / 38',
+      image: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=400&q=80',
+      status: 'on_set',
+      isHero: true,
+      priority: 2
+    },
+    {
+      id: '3',
+      name: 'Structured Wool Blazer',
+      sku: 'BL-24-GR',
+      variant: 'Charcoal / 40',
+      image: 'https://images.unsplash.com/photo-1591369822096-35c938988a29?w=400&q=80',
+      status: 'awaiting',
+      isHero: false,
+      priority: 3
+    },
+    {
+      id: '4',
+      name: 'Leather Ankle Boots',
+      sku: 'BT-24-BK',
+      variant: 'Black / 39',
+      image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400&q=80',
+      status: 'awaiting',
+      isHero: false,
+      priority: 4
+    },
+    {
+      id: '5',
+      name: 'Signature Silk Scarf',
+      sku: 'SC-24-PR',
+      variant: 'Print / One Size',
+      image: 'https://images.unsplash.com/photo-1584030373081-f37b7bb4fa8e?w=400&q=80',
+      status: 'returned',
+      isHero: false,
+      priority: 5
+    }
+  ]);
+
+  const [callSheetSchedule, setCallSheetSchedule] = useState<ScheduleBlock[]>([
+    {
+      id: '1',
+      time: '08:00 AM',
+      endTime: '09:00 AM',
+      title: 'Crew Call & Breakfast',
+      location: 'Base Camp',
+      talent: 'All Crew',
+      type: 'admin',
+      description: 'Coffee, gear check, safety briefing'
+    },
+    {
+      id: '2',
+      time: '09:00 AM',
+      endTime: '12:00 PM',
+      title: 'Scene 1: Studio Portraits',
+      location: 'Studio A (Indoor)',
+      talent: 'Sarah, David',
+      type: 'indoor',
+      description: 'White cyc wall, high contrast lighting'
+    },
+    {
+      id: '3',
+      time: '12:00 PM',
+      endTime: '01:00 PM',
+      title: 'Lunch Break',
+      location: 'Catering Tent',
+      talent: 'All',
+      type: 'break'
+    },
+    {
+      id: '4',
+      time: '01:00 PM',
+      endTime: '04:00 PM',
+      title: 'Scene 2: Urban Street Style',
+      location: 'Rooftop Garden (Outdoor)',
+      talent: 'Sarah, David',
+      type: 'outdoor',
+      description: 'Natural light, city backdrop'
+    },
+    {
+      id: '5',
+      time: '04:00 PM',
+      endTime: '05:00 PM',
+      title: 'Wrap & Breakdown',
+      location: 'Base Camp',
+      talent: 'All Crew',
+      type: 'admin'
+    }
+  ]);
+
+  const [galleryAssets, setGalleryAssets] = useState<GalleryAsset[]>([]);
+
+  const [productionChecklist, setProductionChecklist] = useState({
+    shotListLocked: true,
+    talentConfirmed: true,
+    stylingBreakdown: false,
+    callSheetIssued: false
+  });
+
+  const updateChecklist = (key: keyof typeof productionChecklist, value: boolean) => {
+    setProductionChecklist(prev => ({ ...prev, [key]: value }));
+  };
+
+  useEffect(() => {
+    if (proposal) {
+      localStorage.setItem('brandShoot_proposal', JSON.stringify(proposal));
+    }
+  }, [proposal]);
+
+  // Helper to calculate total price
+  const calculateTotal = (plan: CampaignPlan) => {
+    const totalAssets = plan.channelPacks.reduce((acc, pack) => acc + pack.outputCount, 0);
+    const assetCost = totalAssets * PRICE_PER_ASSET;
+    const customizationCost = plan.customizations?.reduce((acc, item) => item.selected ? acc + item.price : acc, 0) || 0;
+    return BASE_PRICE + assetCost + customizationCost;
+  };
+
   // Update pack quantity and recalculate price
   const updatePackCount = (channelIndex: number, increment: boolean) => {
     if (!campaignPlan) return;
@@ -218,9 +584,7 @@ export const BrandShootProvider = ({ children }: { children: ReactNode }) => {
     newPlan.channelPacks[channelIndex].outputCount = increment ? currentCount + 1 : currentCount - 1;
     
     // Recalculate Total Price
-    // Logic: Base Fee + (Total Assets * Price Per Asset)
-    const totalAssets = newPlan.channelPacks.reduce((acc, pack) => acc + pack.outputCount, 0);
-    const newTotal = BASE_PRICE + (totalAssets * PRICE_PER_ASSET);
+    const newTotal = calculateTotal(newPlan);
     
     newPlan.pricing.total = newTotal;
     newPlan.pricing.deposit = Math.round(newTotal / 2);
@@ -228,10 +592,51 @@ export const BrandShootProvider = ({ children }: { children: ReactNode }) => {
     setCampaignPlan(newPlan);
   };
 
+  const updateAsset = (index: number, newUrl: string) => {
+    if (!campaignPlan) return;
+    const newPlan = { ...campaignPlan };
+    if (newPlan.assets[index]) {
+        newPlan.assets[index].url = newUrl;
+        setCampaignPlan(newPlan);
+    }
+  };
+
+  const toggleCustomization = (id: string) => {
+    if (!campaignPlan) return;
+    const newPlan = { ...campaignPlan };
+    const item = newPlan.customizations?.find(c => c.id === id);
+    if (item) {
+        item.selected = !item.selected;
+        
+        // Recalculate price
+        const newTotal = calculateTotal(newPlan);
+        newPlan.pricing.total = newTotal;
+        newPlan.pricing.deposit = Math.round(newTotal / 2);
+        
+        setCampaignPlan(newPlan);
+    }
+  };
+
   // Mock AI Generation Logic
   const generateMockPlan = () => {
-    // In a real app, this would call an API with the 'signals'
-    
+    // Determine Brand Name
+    let brandName = "Brand";
+    if (signals.website) {
+      try {
+        const hostname = new URL(signals.website.startsWith('http') ? signals.website : `https://${signals.website}`).hostname;
+        brandName = hostname.replace('www.', '').split('.')[0];
+        brandName = brandName.charAt(0).toUpperCase() + brandName.slice(1);
+      } catch (e) {
+        brandName = "Brand";
+      }
+    } else if (signals.instagram) {
+      brandName = signals.instagram.replace('@', '');
+    }
+
+    // Determine Base Assets (Use uploaded if available, else Unsplash)
+    const userImages = signals.files?.map(f => f.url) || [];
+    const getAsset = (idx: number, fallback: string) => userImages[idx] || fallback;
+
     // Initial Counts
     const initialPacks: ChannelPack[] = [
       {
@@ -262,16 +667,16 @@ export const BrandShootProvider = ({ children }: { children: ReactNode }) => {
 
     const newPlan: CampaignPlan = {
       strategy: {
-        title: "Summer '25 Editorial",
-        goal: "Product Sales Campaign", // Updated for Step 1
-        tone: "Effortless, Warm, High Contrast", // Updated for Step 1
+        title: `${brandName} Summer '25`,
+        goal: "Product Sales Campaign",
+        tone: "Effortless, Warm, High Contrast",
         channels: ["Instagram", "Shopify", "Amazon"],
       },
       assets: [
-        { source: "Instagram", url: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=300&auto=format&fit=crop", usage: "Reel Cover" },
-        { source: "Website", url: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=300&auto=format&fit=crop", usage: "Hero Banner" },
-        { source: "Product", url: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=300&auto=format&fit=crop", usage: "PDP Detail" },
-        { source: "Ad", url: "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=300&auto=format&fit=crop", usage: "Ad Creative" },
+        { source: "Instagram", url: getAsset(0, "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=300&auto=format&fit=crop"), usage: "Reel Cover" },
+        { source: "Website", url: getAsset(1, "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=300&auto=format&fit=crop"), usage: "Hero Banner" },
+        { source: "Product", url: getAsset(2, "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=300&auto=format&fit=crop"), usage: "PDP Detail" },
+        { source: "Ad", url: getAsset(3, "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=300&auto=format&fit=crop"), usage: "Ad Creative" },
       ],
       // Legacy shots
       shots: [], 
@@ -318,14 +723,23 @@ export const BrandShootProvider = ({ children }: { children: ReactNode }) => {
           funnelStage: 'Retargeting'
         }
       ],
+      
+      // Default Customizations
+      customizations: [
+        { id: 'c1', label: 'Senior Art Director', price: 1200, selected: true, description: 'On-set creative direction and oversight' },
+        { id: 'c2', label: 'Hair & Makeup Artist', price: 850, selected: true, description: 'Full day beauty services' },
+        { id: 'c3', label: 'Wardrobe Stylist', price: 950, selected: true, description: 'Sourcing and on-set styling' },
+        { id: 'c4', label: 'Social Cuts (3x)', price: 600, selected: false, description: 'Extra short-form edits for TikTok/Reels' },
+        { id: 'c5', label: 'Rush Delivery (48h)', price: 500, selected: false, description: 'Expedited post-production' }
+      ],
 
       roi: {
         conversion: 'high',
         awareness: 'medium'
       },
       pricing: {
-        total: totalPrice,
-        deposit: Math.round(totalPrice / 2)
+        total: totalPrice + 1200 + 850 + 950, // Base + Assets + Default Selected Customizations
+        deposit: Math.round((totalPrice + 1200 + 850 + 950) / 2)
       }
     };
     setCampaignPlan(newPlan);
@@ -341,7 +755,7 @@ export const BrandShootProvider = ({ children }: { children: ReactNode }) => {
       id: Date.now(),
       name: campaignPlan.strategy.title,
       client: "New Client", 
-      status: "AI Generated",
+      status: "Pre-Production",
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       deliverables: `${totalAssets} Assets`,
       progress: 0,
@@ -361,9 +775,32 @@ export const BrandShootProvider = ({ children }: { children: ReactNode }) => {
         isAdjustMode, 
         setAdjustMode,
         updatePackCount,
+        updateAsset,
+        toggleCustomization,
         generateMockPlan,
         launchCampaign,
-        activeProjects
+        activeProjects,
+        setActiveProjects,
+        bookedTalent,
+        setBookedTalent,
+        shortlistedLocations,
+        setShortlistedLocations,
+        confirmedLocation,
+        setConfirmedLocation,
+        proposal,
+        setProposal,
+        wizardData,
+        setWizardData,
+        shotList,
+        setShotList,
+        sampleList,
+        setSampleList,
+        callSheetSchedule,
+        setCallSheetSchedule,
+        galleryAssets,
+        setGalleryAssets,
+        productionChecklist,
+        updateChecklist
       }}
     >
       {children}

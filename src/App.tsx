@@ -28,6 +28,7 @@ import { BillingDashboard } from "./components/dashboards/BillingDashboard";
 import { CommandCenter } from "./components/dashboards/CommandCenter";
 import { RunwayStage } from "./components/dashboards/RunwayStage";
 import { CastingModels } from "./components/dashboards/CastingModels";
+import { CuraCasting } from "./components/dashboards/CuraCasting";
 import { DesignerCollection } from "./components/dashboards/DesignerCollection";
 import { VenueManagement } from "./components/dashboards/VenueManagement";
 import { ROIAnalytics } from "./components/dashboards/ROIAnalytics";
@@ -59,14 +60,23 @@ import { AIThinking } from "./components/brand-shoot/AIThinking";
 import { CampaignSummary } from "./components/brand-shoot/CampaignSummary";
 import { ProposalConfirmation } from "./components/brand-shoot/ProposalConfirmation";
 import { AIOptimizationCenter } from "./components/brand-shoot/AIOptimizationCenter";
+import { SmartSampleTracker } from "./components/production/SmartSampleTracker";
+import { DynamicCallSheet } from "./components/production/DynamicCallSheet";
+import { CuraCasting } from "./components/casting/CuraCasting";
+import { CastingAvailability } from "./components/casting/CastingAvailability";
+import { CastingMatchmaker } from "./components/casting/CastingMatchmaker";
+import { ScoutSetup } from "./components/scout/ScoutSetup";
+import { ScoutFinder } from "./components/scout/ScoutFinder";
+import { ScoutShortlist } from "./components/scout/ScoutShortlist";
+import { ProposalReady } from "./components/workflow/ProposalReady";
+import { ProductionTimeline } from "./components/workflow/ProductionTimeline";
 
-import { BrandShootProvider } from "./context/BrandShootContext";
+import { BrandShootProvider, useBrandShoot } from "./context/BrandShootContext";
 
-export default function App() {
+function AppContent() {
+  const { setWizardData, wizardData } = useBrandShoot();
   const [activeScreen, setActiveScreen] = useState("home-v3");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  // Add State for Wizard
-  const [wizardState, setWizardState] = useState<WizardState | null>(null);
 
   // Handle initial URL load and browser back/forward
   useEffect(() => {
@@ -122,6 +132,12 @@ export default function App() {
       else if (path.includes("/campaign-summary")) setActiveScreen("campaign-summary");
       else if (path.includes("/proposal-confirmation")) setActiveScreen("proposal-confirmation");
       else if (path.includes("/ai-optimization")) setActiveScreen("ai-optimization");
+      else if (path.includes("/sample-tracker")) setActiveScreen("sample-tracker");
+      else if (path.includes("/call-sheet")) setActiveScreen("call-sheet");
+      else if (path.includes("/cura-casting")) setActiveScreen("cura-casting");
+      else if (path.includes("/casting-availability")) setActiveScreen("casting-availability");
+      else if (path.includes("/casting-matchmaker")) setActiveScreen("casting-matchmaker");
+      else if (path.includes("/scout/setup")) setActiveScreen("scout-setup");
     };
 
     handlePathChange();
@@ -165,7 +181,7 @@ export default function App() {
       case "style-guide":
         return <StyleGuide />;
       case "wizard":
-        return <ShootWizard onComplete={(data) => { setWizardState(data); setActiveScreen("proposal"); }} />;
+        return <ShootWizard onComplete={(data) => { setWizardData(data); setActiveScreen("proposal"); }} />;
       case "studio":
         return <Studios />;
       case "directory":
@@ -185,7 +201,7 @@ export default function App() {
       case "overview":
         return <ProjectOverview onNavigate={setActiveScreen} />;
       case "shotlist":
-        return <ShotListBuilder />;
+        return <ShotListBuilder onBack={() => setActiveScreen('production-timeline')} />;
       case "products":
         return <ProductsDashboard />;
       case "gallery":
@@ -199,7 +215,7 @@ export default function App() {
       case "runway":
         return <RunwayStage />;
       case "casting":
-        return <CastingModels />;
+        return <CuraCasting onNavigate={setActiveScreen} />;
       case "designer":
         return <DesignerCollection />;
       case "venues":
@@ -213,7 +229,7 @@ export default function App() {
       case "tasks-operations":
       case "tasks-media":
         const taskTab = activeScreen.startsWith('tasks-') ? activeScreen.replace('tasks-', '') : 'event-planning';
-        return <TasksAndDeliverables initialTab={taskTab} />;
+        return <TasksAndDeliverables initialTab={taskTab} onNavigate={setActiveScreen} />;
       case "sponsor-detail":
         return <SponsorDetail onNavigate={setActiveScreen} />;
       case "contracts":
@@ -233,7 +249,7 @@ export default function App() {
       case "architecture":
         return <SiteArchitecture />;
       case "proposal":
-        return <ProposalPreview onNavigate={setActiveScreen} proposalData={wizardState} />;
+        return <ProposalPreview onNavigate={setActiveScreen} proposalData={wizardData} />;
       case "booking":
         return <BookingFlow onNavigate={setActiveScreen} />;
 
@@ -250,6 +266,26 @@ export default function App() {
         return <ProposalConfirmation onNavigate={setActiveScreen} />;
       case "ai-optimization":
         return <AIOptimizationCenter onNavigate={setActiveScreen} />;
+      case "sample-tracker":
+        return <SmartSampleTracker onBack={() => setActiveScreen('production-timeline')} />;
+      case "call-sheet":
+        return <DynamicCallSheet onBack={() => setActiveScreen('production-timeline')} />;
+      case "cura-casting":
+        return <CuraCasting onNavigate={setActiveScreen} />;
+      case "casting-availability":
+        return <CastingAvailability onNavigate={setActiveScreen} />;
+      case "casting-matchmaker":
+        return <CastingMatchmaker onNavigate={setActiveScreen} />;
+      case "scout-setup":
+        return <ScoutSetup onNavigate={setActiveScreen} />;
+      case "scout-finder":
+        return <ScoutFinder onNavigate={setActiveScreen} />;
+      case "scout-shortlist":
+        return <ScoutShortlist onNavigate={setActiveScreen} />;
+      case "proposal-ready":
+        return <ProposalReady onNavigate={setActiveScreen} />;
+      case "production-timeline":
+        return <ProductionTimeline onNavigate={setActiveScreen} />;
       
       default:
         return <HomePageV3 />;
@@ -261,12 +297,11 @@ export default function App() {
 
   // Determine if we should hide the sidebar (e.g. for the full-screen wizard)
   const isFullScreen = activeScreen === "wizard" || activeScreen === "website-wizard" || activeScreen === "designer-wizard" || activeScreen === "event-wizard" || activeScreen === "directory-wizard" || activeScreen === "proposal" || activeScreen === "booking" || 
-    activeScreen === "brand-shoot-start" || activeScreen === "brand-signal-capture" || activeScreen === "ai-thinking" || activeScreen === "campaign-summary" || activeScreen === "proposal-confirmation" || activeScreen === "ai-optimization";
+    activeScreen === "brand-shoot-start" || activeScreen === "brand-signal-capture" || activeScreen === "ai-thinking" || activeScreen === "campaign-summary" || activeScreen === "proposal-confirmation" || activeScreen === "ai-optimization" || activeScreen === "sample-tracker" || activeScreen === "casting-matchmaker" || activeScreen === "scout-setup" || activeScreen === "scout-finder" || activeScreen === "scout-shortlist" || activeScreen === "proposal-ready" || activeScreen === "production-timeline";
 
   return (
-    <BrandShootProvider>
-      <div className="min-h-screen bg-gray-50">
-        {/* Sidebar Navigation */}
+    <div className="min-h-screen bg-gray-50">
+      {/* Sidebar Navigation */}
       {!isFullScreen && !isMarketingPage && (
         <Sidebar 
           activeScreen={activeScreen} 
@@ -312,7 +347,14 @@ export default function App() {
           </div>
         )}
       </div>
-      </div>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <BrandShootProvider>
+      <AppContent />
     </BrandShootProvider>
   );
 }

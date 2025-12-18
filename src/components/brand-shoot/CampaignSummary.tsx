@@ -2,14 +2,17 @@ import React, { useState } from 'react';
 import { 
   ArrowRight, Check, Sparkles, TrendingUp, Layers, 
   Instagram, ShoppingBag, Globe, Video, Camera, 
-  Facebook, Youtube, Plus, Minus, Monitor, Share2
+  Facebook, Youtube, Plus, Minus, Monitor, Share2,
+  RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '../ui/sheet';
 import { useBrandShoot } from '../../context/BrandShootContext';
+import { DigitalContractModal } from './DigitalContractModal';
 
 // --- Icons Map ---
 const ChannelIcons: Record<string, React.ElementType> = {
@@ -32,14 +35,37 @@ export function CampaignSummary({ onNavigate }: CampaignSummaryProps) {
     campaignPlan, 
     isAdjustMode, 
     setAdjustMode,
-    updatePackCount
+    updatePackCount,
+    updateAsset
   } = useBrandShoot();
+  
+  const [isContractOpen, setIsContractOpen] = useState(false);
+  const [swappingAssetIndex, setSwappingAssetIndex] = useState<number | null>(null);
 
   if (!campaignPlan) {
     return <div className="min-h-screen flex items-center justify-center">Loading plan...</div>;
   }
 
   const { strategy, recipes, ads, roi, pricing, channelPacks, assets } = campaignPlan;
+
+  const handleAssetSwap = (newUrl: string) => {
+    if (swappingAssetIndex !== null) {
+      updateAsset(swappingAssetIndex, newUrl);
+      setSwappingAssetIndex(null);
+    }
+  };
+
+  const renderSwapOverlay = (index: number, children: React.ReactNode, className?: string) => (
+    <div className={`relative group cursor-pointer ${className}`} onClick={() => setSwappingAssetIndex(index)}>
+      {children}
+      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg z-10 pointer-events-none">
+         <div className="bg-white/20 backdrop-blur-md border border-white/30 text-white px-3 py-1.5 rounded-full flex items-center gap-2 text-xs font-medium transform translate-y-2 group-hover:translate-y-0 transition-transform">
+           <RefreshCw className="w-3 h-3" />
+           Swap Visual
+         </div>
+      </div>
+    </div>
+  );
 
   // --- Animation Variants ---
   const containerVariants = {
@@ -239,9 +265,13 @@ export function CampaignSummary({ onNavigate }: CampaignSummaryProps) {
                  {/* Visual Preview Side */}
                  <div className="bg-gray-50 p-6 flex items-center justify-center relative overflow-hidden group">
                     <div className="grid grid-cols-2 gap-4 w-full max-w-xs rotate-3 transition-transform duration-700 group-hover:rotate-0">
-                      <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400" className="rounded-lg shadow-lg w-full aspect-[3/4] object-cover bg-white" />
+                      {renderSwapOverlay(0, 
+                        <img src={assets[0]?.url || "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400"} className="rounded-lg shadow-lg w-full aspect-[3/4] object-cover bg-white" />
+                      )}
                       <div className="space-y-4 pt-8">
-                        <img src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=400" className="rounded-lg shadow-lg w-full aspect-square object-cover bg-white" />
+                        {renderSwapOverlay(2,
+                          <img src={assets[2]?.url || "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=400"} className="rounded-lg shadow-lg w-full aspect-square object-cover bg-white" />
+                        )}
                       </div>
                     </div>
                  </div>
@@ -299,8 +329,11 @@ export function CampaignSummary({ onNavigate }: CampaignSummaryProps) {
                whileTap={{ scale: 0.98 }}
                className="group relative aspect-[4/5] sm:aspect-video overflow-hidden rounded-2xl bg-gray-900"
              >
-                <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent p-6 flex flex-col justify-end">
+                {renderSwapOverlay(1,
+                  <img src={assets[1]?.url || "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800"} className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" />,
+                  "absolute inset-0 w-full h-full"
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent p-6 flex flex-col justify-end pointer-events-none">
                    <div className="bg-white/20 backdrop-blur-md self-start text-white text-[10px] uppercase tracking-wider px-2 py-1 rounded mb-2">
                      Inspiration
                    </div>
@@ -314,8 +347,11 @@ export function CampaignSummary({ onNavigate }: CampaignSummaryProps) {
                whileTap={{ scale: 0.98 }}
                className="group relative aspect-[4/5] sm:aspect-video overflow-hidden rounded-2xl bg-gray-900"
              >
-                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent p-6 flex flex-col justify-end">
+                {renderSwapOverlay(3,
+                  <img src={assets[3]?.url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800"} className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" />,
+                  "absolute inset-0 w-full h-full"
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent p-6 flex flex-col justify-end pointer-events-none">
                    <div className="bg-white/20 backdrop-blur-md self-start text-white text-[10px] uppercase tracking-wider px-2 py-1 rounded mb-2">
                      Culture
                    </div>
@@ -413,7 +449,7 @@ export function CampaignSummary({ onNavigate }: CampaignSummaryProps) {
                <div className="text-xs text-gray-400">Includes {channelPacks.reduce((acc, p) => acc + p.outputCount, 0)} Assets</div>
             </div>
             <Button 
-              onClick={() => onNavigate('proposal-confirmation')}
+              onClick={() => onNavigate('proposal-ready')}
               className="bg-gray-900 text-white hover:bg-black rounded-xl px-8 py-6 h-auto text-sm font-medium shadow-xl shadow-gray-900/20 transition-transform active:scale-95"
             >
               Approve Proposal
@@ -427,13 +463,58 @@ export function CampaignSummary({ onNavigate }: CampaignSummaryProps) {
               <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
               Download PDF
             </button>
-            <button className="text-xs text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1">
+            <button 
+              onClick={() => onNavigate('ai-optimization')}
+              className="text-xs text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1"
+            >
               <Sparkles className="w-3 h-3" />
               Ask AI to Adjust
             </button>
           </div>
         </div>
       </div>
+
+      {/* --- SWAP ASSET SHEET --- */}
+      <Sheet open={swappingAssetIndex !== null} onOpenChange={(open) => !open && setSwappingAssetIndex(null)}>
+         <SheetContent side="bottom" className="h-[80vh] sm:h-auto rounded-t-[2rem]">
+           <SheetHeader className="mb-4">
+             <SheetTitle className="font-serif text-2xl">Select Visual Direction</SheetTitle>
+             <SheetDescription>
+               Choose an alternative visual style. The AI will adapt the rest of the campaign to match.
+             </SheetDescription>
+           </SheetHeader>
+           
+           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 overflow-y-auto pb-8">
+              {[1,2,3,4,5,6].map(i => {
+                 // Use consistent random seed based on index + asset index
+                 const seed = (swappingAssetIndex || 0) * 10 + i;
+                 const keyword = swappingAssetIndex === 0 ? "product,minimal" : 
+                                 swappingAssetIndex === 1 ? "lifestyle,fashion" : 
+                                 swappingAssetIndex === 2 ? "texture,fabric" : "social,style";
+                 const url = `https://source.unsplash.com/random/400x500?${keyword}&sig=${seed}`;
+                 
+                 return (
+                   <div 
+                     key={i}
+                     className="relative aspect-[3/4] rounded-xl overflow-hidden cursor-pointer group"
+                     onClick={() => handleAssetSwap(url)}
+                   >
+                     <img 
+                       src={url}
+                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                       alt="Alternative option"
+                     />
+                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                        <div className="bg-white text-gray-900 rounded-full p-2 opacity-0 group-hover:opacity-100 transform scale-90 group-hover:scale-100 transition-all">
+                          <Check className="w-4 h-4" />
+                        </div>
+                     </div>
+                   </div>
+                 );
+              })}
+           </div>
+         </SheetContent>
+      </Sheet>
 
     </div>
   );

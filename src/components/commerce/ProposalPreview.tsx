@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { motion } from "motion/react";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { 
   CheckCircle2, 
   Download, 
@@ -7,16 +7,65 @@ import {
   Calendar, 
   FileText, 
   ShieldCheck,
-  Sparkles
+  Sparkles,
+  RefreshCw,
+  PlusCircle,
+  XCircle
 } from "lucide-react";
+import { Button } from "../ui/button";
+
+import { BudgetWatchdog } from "./BudgetWatchdog";
+import { useBrandShoot } from "../../context/BrandShootContext";
 
 export function ProposalPreview({ onNavigate, proposalData }: { onNavigate: (screen: string) => void, proposalData?: any }) {
+  const { setProposal } = useBrandShoot();
   const [isGenerating, setIsGenerating] = useState(true);
+  
+  // Local state to manage active add-ons, defaulting to what's passed in proposalData
+  const [activeAddOns, setActiveAddOns] = useState<string[]>([]);
+  
+  useEffect(() => {
+    if (proposalData?.addOns) {
+      setActiveAddOns(proposalData.addOns);
+    }
+  }, [proposalData]);
 
-  // Derive dynamic content from proposalData
+  // Derive dynamic content
   const serviceTitle = proposalData?.service ? `${proposalData.service.charAt(0).toUpperCase() + proposalData.service.slice(1)} Production` : "Production Campaign";
   const category = proposalData?.category ? proposalData.category.charAt(0).toUpperCase() + proposalData.category.slice(1) : "Fashion";
-  const totalCost = 1500 + (proposalData?.addOns?.length || 0) * 300; // Simplified calculation
+  
+  // Simplified calculation based on local state
+  const basePrice = 1500;
+  const addOnPrice = 300;
+  const totalCost = basePrice + (activeAddOns.length * addOnPrice);
+
+  // Sync with global context whenever important data changes
+  useEffect(() => {
+    if (!isGenerating && proposalData) {
+      setProposal({
+        service: proposalData.service || "Production",
+        category: proposalData.category || "Fashion",
+        date: proposalData.date,
+        timeSlot: proposalData.timeSlot,
+        scenes: proposalData.scenes || [],
+        activeAddOns: activeAddOns,
+        totalCost: totalCost
+      });
+    }
+  }, [activeAddOns, totalCost, isGenerating, proposalData, setProposal]);
+  
+  const handleRemoveAddOn = (addOn: string) => {
+    setActiveAddOns(prev => prev.filter(a => a !== addOn));
+  };
+
+  const handleApplySavings = () => {
+    if (activeAddOns.length > 0) {
+      // Remove the last add-on as a simulation of "smart optimization"
+      const newAddOns = [...activeAddOns];
+      newAddOns.pop();
+      setActiveAddOns(newAddOns);
+    }
+  };
   
   useEffect(() => {
     // Simulate AI Generation delay
@@ -96,34 +145,56 @@ export function ProposalPreview({ onNavigate, proposalData }: { onNavigate: (scr
 
             {/* Scope of Work */}
             <section className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
-              <div className="px-8 py-6 border-b border-gray-100 bg-gray-50/50">
+              <div className="px-8 py-6 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
                 <h2 className="text-sm font-bold uppercase tracking-widest text-gray-900">Scope of Work</h2>
+                <div className="text-xs font-medium text-gray-400">Customizable</div>
               </div>
               <div className="divide-y divide-gray-100">
                 <ScopeItem 
                   title={`${serviceTitle}`} 
                   desc="Full Day Studio Access • Professional Equipment • Creative Direction" 
+                  locked
                 />
                 {proposalData?.scenes?.length > 0 && (
                    <ScopeItem 
                      title="Scene Setup" 
                      desc={`Custom set design for: ${proposalData.scenes.map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join(", ")}`} 
+                     locked
                    />
                 )}
-                {proposalData?.addOns?.length > 0 ? (
-                  <ScopeItem 
-                    title="Additional Services" 
-                    desc={`Includes: ${proposalData.addOns.join(", ")}`} 
-                  />
-                ) : (
-                  <ScopeItem 
-                    title="Standard Team" 
-                    desc="1 Photographer • 1 Assistant" 
-                  />
+                
+                {/* Dynamic Add-Ons List */}
+                <AnimatePresence>
+                  {activeAddOns.map((addon) => (
+                    <motion.div
+                      key={addon}
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                    >
+                      <ScopeItem 
+                        title={addon} 
+                        desc="Optional add-on service included in proposal." 
+                        onRemove={() => handleRemoveAddOn(addon)}
+                        price={addOnPrice}
+                      />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+                
+                {/* Fallback if no add-ons but default package */}
+                {activeAddOns.length === 0 && (
+                   <ScopeItem 
+                     title="Standard Team" 
+                     desc="1 Photographer • 1 Assistant" 
+                     locked
+                   />
                 )}
+                
                 <ScopeItem 
                   title="Post-Production" 
                   desc="Color Correction • Retouching • 48hr Turnaround" 
+                  locked
                 />
               </div>
             </section>
@@ -162,10 +233,32 @@ export function ProposalPreview({ onNavigate, proposalData }: { onNavigate: (scr
 
           {/* Sidebar - Cost & Terms */}
           <div className="space-y-6">
-            <div className="bg-gray-900 text-white rounded-2xl p-8 shadow-xl">
+            
+            {/* Budget Watchdog */}
+            <BudgetWatchdog 
+              currentTotal={totalCost} 
+              budgetTarget={2000} 
+              onAdjustScope={handleApplySavings} 
+            />
+
+            <div className="bg-gray-900 text-white rounded-2xl p-8 shadow-xl relative overflow-hidden">
+               {/* Background Texture */}
+               <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-16 -mt-16 blur-2xl pointer-events-none" />
+
               <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-6">Total Estimate</h3>
+              
               <div className="flex items-baseline gap-1 mb-2">
-                <span className="text-4xl font-serif font-medium">${totalCost.toLocaleString()}</span>
+                <AnimatePresence mode="wait">
+                  <motion.span 
+                    key={totalCost}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="text-4xl font-serif font-medium"
+                  >
+                    ${totalCost.toLocaleString()}
+                  </motion.span>
+                </AnimatePresence>
                 <span className="text-gray-400">.00</span>
               </div>
               <p className="text-sm text-gray-400 mb-8">Includes all taxes and fees</p>
@@ -173,14 +266,12 @@ export function ProposalPreview({ onNavigate, proposalData }: { onNavigate: (scr
               <div className="space-y-4 pt-6 border-t border-gray-800 mb-8">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">Base Package</span>
-                  <span>$1,500</span>
+                  <span>${basePrice.toLocaleString()}</span>
                 </div>
-                {proposalData?.addOns?.length > 0 && (
-                   <div className="flex justify-between text-sm">
-                     <span className="text-gray-400">Add-Ons</span>
-                     <span>+${(proposalData.addOns.length * 300).toLocaleString()}</span>
-                   </div>
-                )}
+                <div className="flex justify-between text-sm">
+                   <span className="text-gray-400">Add-Ons ({activeAddOns.length})</span>
+                   <span>+${(activeAddOns.length * addOnPrice).toLocaleString()}</span>
+                </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">Platform Fee</span>
                   <span>Included</span>
@@ -222,16 +313,31 @@ export function ProposalPreview({ onNavigate, proposalData }: { onNavigate: (scr
   );
 }
 
-function ScopeItem({ title, desc }: { title: string, desc: string }) {
+function ScopeItem({ title, desc, locked = false, onRemove, price }: { title: string, desc: string, locked?: boolean, onRemove?: () => void, price?: number }) {
   return (
     <div className="px-8 py-6 flex flex-col md:flex-row md:items-center justify-between gap-4 group hover:bg-gray-50 transition-colors">
-      <div>
-        <h3 className="font-serif font-medium text-gray-900">{title}</h3>
+      <div className="flex-1">
+        <h3 className="font-serif font-medium text-gray-900 flex items-center gap-2">
+          {title}
+          {price && <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-sans">+${price}</span>}
+        </h3>
         <p className="text-sm text-gray-500 mt-1">{desc}</p>
       </div>
-      <div className="w-6 h-6 rounded-full border border-gray-200 flex items-center justify-center group-hover:border-gray-900 group-hover:bg-gray-900 transition-all">
-        <CheckCircle2 className="w-4 h-4 text-white opacity-0 group-hover:opacity-100" />
-      </div>
+      
+      {locked ? (
+         <div className="w-8 h-8 flex items-center justify-center text-gray-300">
+           <CheckCircle2 className="w-5 h-5 text-gray-300" />
+         </div>
+      ) : (
+         <Button 
+           variant="ghost" 
+           size="icon" 
+           onClick={onRemove}
+           className="w-8 h-8 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50"
+         >
+            <XCircle className="w-5 h-5" />
+         </Button>
+      )}
     </div>
   );
 }
