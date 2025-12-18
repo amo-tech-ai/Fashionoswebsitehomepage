@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 // --- Types ---
 
@@ -6,6 +6,7 @@ export interface BrandSignals {
   website: string;
   instagram: string;
   commerce: string;
+  files?: Array<{ name: string; type: string; url: string }>;
 }
 
 export type Channel = 'Instagram' | 'TikTok' | 'YouTube' | 'Facebook' | 'Pinterest' | 'Shopify' | 'Amazon' | 'Website';
@@ -105,7 +106,7 @@ interface BrandShootContextType {
 // --- Default State ---
 
 const defaultContext: BrandShootContextType = {
-  signals: { website: '', instagram: '', commerce: '' },
+  signals: { website: '', instagram: '', commerce: '', files: [] },
   setSignals: () => {},
   campaignPlan: null,
   setCampaignPlan: () => {},
@@ -128,15 +129,47 @@ const BASE_PRICE = 1500; // Base campaign fee
 const PRICE_PER_ASSET = 120; // Cost per asset in a pack
 
 export const BrandShootProvider = ({ children }: { children: ReactNode }) => {
-  const [signals, setSignals] = useState<BrandSignals>({
-    website: '',
-    instagram: '',
-    commerce: '',
+  // Load initial state from localStorage
+  const [signals, setSignals] = useState<BrandSignals>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('brandShoot_signals');
+        return saved ? JSON.parse(saved) : { website: '', instagram: '', commerce: '', files: [] };
+      } catch (e) {
+        console.error("Failed to load signals from localStorage", e);
+        return { website: '', instagram: '', commerce: '', files: [] };
+      }
+    }
+    return { website: '', instagram: '', commerce: '', files: [] };
   });
 
-  const [campaignPlan, setCampaignPlan] = useState<CampaignPlan | null>(null);
+  const [campaignPlan, setCampaignPlan] = useState<CampaignPlan | null>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('brandShoot_campaignPlan');
+        return saved ? JSON.parse(saved) : null;
+      } catch (e) {
+        console.error("Failed to load campaign plan from localStorage", e);
+        return null;
+      }
+    }
+    return null;
+  });
+
   const [isAdjustMode, setAdjustMode] = useState(false);
   
+  // Persist signals to localStorage
+  useEffect(() => {
+    localStorage.setItem('brandShoot_signals', JSON.stringify(signals));
+  }, [signals]);
+
+  // Persist campaign plan to localStorage
+  useEffect(() => {
+    if (campaignPlan) {
+      localStorage.setItem('brandShoot_campaignPlan', JSON.stringify(campaignPlan));
+    }
+  }, [campaignPlan]);
+
   // Hardcoded initial projects
   const [activeProjects, setActiveProjects] = useState<Project[]>([
     {
@@ -204,23 +237,23 @@ export const BrandShootProvider = ({ children }: { children: ReactNode }) => {
       {
         channel: 'Instagram',
         outputCount: 12,
-        formats: ['Feed 4:5', 'Stories 9:16', 'Reels 9:16'],
+        formats: ['Feed', 'Stories', 'Reels'],
         usage: ['Organic', 'Paid'],
-        rationale: 'High engagement potential on visual-first platform.'
+        rationale: 'Short-form and feed content designed to drive discovery and engagement.'
       },
       {
         channel: 'Shopify',
         outputCount: 8,
-        formats: ['Hero Banner', 'PDP 1:1', 'Collection 16:9'],
+        formats: ['Hero Banner', 'Product Cards'],
         usage: ['PDP'],
-        rationale: 'Optimized for mobile conversion and zoom capability.'
+        rationale: 'High-fidelity product imagery to boost conversion.'
       },
       {
         channel: 'Amazon',
         outputCount: 6,
-        formats: ['White Background', 'Infographic', 'Video Loop'],
+        formats: ['White Background', 'Infographic'],
         usage: ['PDP'],
-        rationale: 'Compliance with marketplace standards plus brand storytelling.'
+        rationale: 'Clean, compliant visuals that build trust.'
       }
     ];
 
@@ -230,8 +263,8 @@ export const BrandShootProvider = ({ children }: { children: ReactNode }) => {
     const newPlan: CampaignPlan = {
       strategy: {
         title: "Summer '25 Editorial",
-        goal: "Direct Conversion (PDP)",
-        tone: "Effortless, Warm, High-Contrast",
+        goal: "Product Sales Campaign", // Updated for Step 1
+        tone: "Effortless, Warm, High Contrast", // Updated for Step 1
         channels: ["Instagram", "Shopify", "Amazon"],
       },
       assets: [

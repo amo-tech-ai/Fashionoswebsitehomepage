@@ -102,202 +102,276 @@ export function CampaignSummary({ onNavigate }: CampaignSummaryProps) {
 
         {/* --- SECTION 1: STRATEGY HERO --- */}
         <motion.div variants={itemVariants}>
-          <Card className="border-0 shadow-lg shadow-black/5 overflow-hidden">
-            <div className="bg-gray-900 p-6 text-white relative overflow-hidden">
-               <div className="relative z-10">
-                  <Badge className="bg-white/20 hover:bg-white/30 text-white border-0 mb-3 backdrop-blur-sm">
+          <Card className="border-0 shadow-xl shadow-indigo-900/5 overflow-hidden">
+            <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-indigo-950 p-8 text-white relative overflow-hidden">
+               <div className="relative z-10 flex flex-col items-start text-left">
+                  <Badge className="bg-white/10 text-white border-0 mb-6 backdrop-blur-md px-3 py-1 font-normal tracking-wide">
                     {strategy.title}
                   </Badge>
-                  <h2 className="font-serif text-3xl mb-2">{strategy.goal}</h2>
-                  <div className="flex flex-wrap gap-2 text-sm text-gray-300">
-                    <span className="bg-white/10 px-2 py-1 rounded">{strategy.tone}</span>
+                  
+                  <h2 className="font-serif text-4xl mb-4 leading-tight tracking-tight">
+                    {strategy.goal}
+                  </h2>
+                  
+                  <p className="text-gray-300 font-sans text-lg leading-relaxed max-w-md mb-8">
+                    High-impact visuals designed to increase product confidence and sales.
+                  </p>
+
+                  <div className="flex flex-wrap gap-3">
+                    {strategy.tone.split(',').map((tone) => (
+                      <span 
+                        key={tone} 
+                        className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-gray-200 backdrop-blur-sm"
+                      >
+                        {tone.trim()}
+                      </span>
+                    ))}
                   </div>
                </div>
-               {/* Abstract BG */}
-               <div className="absolute -right-10 -bottom-20 w-64 h-64 bg-indigo-500/30 rounded-full blur-3xl" />
-            </div>
-            
-            <div className="p-4 flex flex-wrap gap-2 bg-white">
-              {strategy.channels.map(channel => (
-                <Badge key={channel} variant="secondary" className="bg-gray-100 text-gray-600 font-normal">
-                  {channel}
-                </Badge>
-              ))}
+               
+               {/* Soft Abstract Gradients */}
+               <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
+               <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-[80px] translate-y-1/3 -translate-x-1/4" />
             </div>
           </Card>
         </motion.div>
 
-        {/* --- SECTION 2: CHANNEL OUTPUT PACKS --- */}
-        <motion.div variants={itemVariants} className="space-y-4">
-          <h3 className="font-serif text-lg text-gray-900 px-1">Channel Output Packs</h3>
+        {/* --- SECTION 2: WHAT CONTENT WILL BE CREATED --- */}
+        <motion.div variants={itemVariants} className="space-y-6">
+          <h3 className="font-serif text-2xl text-gray-900 px-1">What Content Will Be Created</h3>
           
           {/* Horizontal Scroll Container */}
-          <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 snap-x hide-scrollbar">
+          <div className="flex gap-4 overflow-x-auto pb-6 -mx-4 px-4 snap-x hide-scrollbar">
             {channelPacks.map((pack, i) => {
               const Icon = ChannelIcons[pack.channel] || Monitor;
               return (
-                <div key={i} className="min-w-[280px] bg-white rounded-xl p-5 shadow-sm border border-gray-100 snap-center flex flex-col justify-between">
-                  <div>
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex items-center gap-2">
-                        <div className="p-2 bg-gray-50 rounded-lg">
-                          <Icon className="w-5 h-5 text-gray-900" />
-                        </div>
-                        <span className="font-medium text-gray-900">{pack.channel}</span>
+                <motion.div 
+                  whileTap={{ scale: 0.98 }}
+                  key={i} 
+                  className="min-w-[300px] bg-white rounded-2xl p-4 shadow-sm border border-gray-100 snap-center flex flex-col group hover:shadow-md transition-all duration-300"
+                >
+                  
+                  {/* Header */}
+                  <div className="flex justify-between items-center mb-4 px-1">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-gray-900">
+                        <Icon className="w-4 h-4" />
                       </div>
-                      <Badge variant="outline" className="text-gray-500 text-xs">
-                        {pack.outputCount} Assets
-                      </Badge>
+                      <span className="font-serif text-lg text-gray-900">{pack.channel}</span>
                     </div>
+                    <Badge variant="secondary" className="bg-gray-100 text-gray-600 font-normal">
+                      {pack.outputCount} Assets
+                    </Badge>
+                  </div>
+
+                  {/* Visual Thumbnails */}
+                  <div className="grid grid-cols-2 gap-2 mb-4 h-32">
+                    <div className="rounded-lg bg-gray-100 overflow-hidden relative">
+                      <img 
+                        src={`https://source.unsplash.com/random/400x500?fashion,${pack.channel.toLowerCase()}&sig=${i}a`} 
+                        alt="Preview" 
+                        className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-700"
+                      />
+                    </div>
+                    <div className="rounded-lg bg-gray-100 overflow-hidden relative">
+                       <img 
+                        src={`https://source.unsplash.com/random/400x500?lifestyle,${pack.channel.toLowerCase()}&sig=${i}b`} 
+                        alt="Preview" 
+                        className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-700 delay-75"
+                      />
+                    </div>
+                  </div>
                     
-                    <div className="space-y-3 mb-4">
-                      <div className="flex flex-wrap gap-1">
-                        {pack.formats.map(fmt => (
-                          <span key={fmt} className="text-[10px] uppercase tracking-wider bg-gray-50 px-2 py-1 rounded text-gray-500">
-                            {fmt}
-                          </span>
-                        ))}
-                      </div>
-                      <p className="text-xs text-gray-500 leading-relaxed italic border-l-2 border-gray-200 pl-3">
-                        "{pack.rationale}"
-                      </p>
-                    </div>
-                  </div>
+                  {/* Description */}
+                  <p className="text-sm text-gray-500 leading-relaxed mb-4 px-1 min-h-[3rem]">
+                    {pack.rationale}
+                  </p>
 
-                  <div className="flex gap-2 mt-2">
-                     {pack.usage.map(u => (
-                       <Badge key={u} className={`text-[10px] ${
-                         u === 'Paid' ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100' :
-                         u === 'PDP' ? 'bg-amber-50 text-amber-700 hover:bg-amber-100' :
-                         'bg-green-50 text-green-700 hover:bg-green-100'
-                       } border-0`}>
-                         {u}
-                       </Badge>
-                     ))}
-                  </div>
-
-                  {isAdjustMode && (
-                     <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between animate-in fade-in">
-                       <span className="text-xs font-medium text-gray-500">Adjust Qty</span>
-                       <div className="flex items-center gap-3">
+                  {/* Footer / Usage */}
+                  <div className="mt-auto px-1 flex items-center justify-between">
+                     <div className="flex gap-2">
+                       {pack.usage.map(u => (
+                         <span key={u} className="text-[10px] uppercase tracking-wider font-medium text-gray-400 border border-gray-100 px-2 py-1 rounded-md">
+                           {u}
+                         </span>
+                       ))}
+                     </div>
+                     
+                     {/* Adjust Mode Controls */}
+                     {isAdjustMode && (
+                       <div className="flex items-center gap-3 bg-gray-50 rounded-full px-2 py-1">
                          <button 
                            onClick={() => updatePackCount(i, false)}
-                           className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200"
+                           className="w-6 h-6 rounded-full bg-white shadow-sm flex items-center justify-center hover:bg-gray-100 text-gray-600"
                          >
                            <Minus className="w-3 h-3" />
                          </button>
-                         <span className="text-sm font-medium w-4 text-center">{pack.outputCount}</span>
+                         <span className="text-xs font-bold w-4 text-center">{pack.outputCount}</span>
                          <button 
                            onClick={() => updatePackCount(i, true)}
-                           className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200"
+                           className="w-6 h-6 rounded-full bg-white shadow-sm flex items-center justify-center hover:bg-gray-100 text-gray-600"
                          >
                            <Plus className="w-3 h-3" />
                          </button>
                        </div>
-                     </div>
-                  )}
-                </div>
+                     )}
+                  </div>
+                </motion.div>
               );
             })}
           </div>
         </motion.div>
 
-        {/* --- SECTION 3: EXTRACTED BRAND ASSETS --- */}
+        {/* --- SECTION 3: PRODUCT DETAIL ESSENTIALS --- */}
         <motion.div variants={itemVariants} className="space-y-4">
-           <h3 className="font-serif text-lg text-gray-900 px-1">Extracted Brand DNA</h3>
-           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-             {assets.map((asset, i) => (
-               <div key={i} className="aspect-[4/5] rounded-xl relative overflow-hidden group bg-gray-100">
-                 <img src={asset.url} alt="Brand Asset" className="w-full h-full object-cover" />
-                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2">
-                   <span className="text-[10px] text-white/80 uppercase tracking-wider">{asset.source}</span>
-                   <span className="text-xs text-white font-medium">{asset.usage}</span>
+          <div className="px-1">
+             <h3 className="font-serif text-2xl text-gray-900 mb-1">Product Detail Essentials</h3>
+             <p className="text-sm text-gray-500 max-w-lg">
+               Visuals that help customers understand the product, trust its quality, and buy with confidence.
+             </p>
+          </div>
+
+          <motion.div whileTap={{ scale: 0.99 }}>
+          <Card className="border-0 bg-white shadow-sm overflow-hidden">
+             <CardContent className="p-0">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+                 
+                 {/* Visual Preview Side */}
+                 <div className="bg-gray-50 p-6 flex items-center justify-center relative overflow-hidden group">
+                    <div className="grid grid-cols-2 gap-4 w-full max-w-xs rotate-3 transition-transform duration-700 group-hover:rotate-0">
+                      <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400" className="rounded-lg shadow-lg w-full aspect-[3/4] object-cover bg-white" />
+                      <div className="space-y-4 pt-8">
+                        <img src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=400" className="rounded-lg shadow-lg w-full aspect-square object-cover bg-white" />
+                      </div>
+                    </div>
                  </div>
-                 {/* Confidence Chip */}
-                 <div className="absolute top-2 right-2 bg-white/90 backdrop-blur text-[10px] px-1.5 py-0.5 rounded text-green-700 font-medium">
-                   98% Match
+
+                 {/* Content Side */}
+                 <div className="p-8 flex flex-col justify-center">
+                    <div className="flex items-center gap-2 mb-4">
+                       <Badge className="bg-green-50 text-green-700 border-0 px-2 py-0.5 text-[10px] uppercase tracking-wider">High Confidence</Badge>
+                       <span className="text-xs text-gray-400">AI Reasoning: Reduces hesitation.</span>
+                    </div>
+
+                    <h4 className="font-medium text-gray-900 mb-6">Included Assets</h4>
+                    
+                    <ul className="space-y-4 mb-8">
+                      <li className="flex items-center gap-3 text-sm text-gray-600">
+                         <div className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                         White background product images
+                      </li>
+                      <li className="flex items-center gap-3 text-sm text-gray-600">
+                         <div className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                         Close-up texture details
+                      </li>
+                      <li className="flex items-center gap-3 text-sm text-gray-600">
+                         <div className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                         On-model context shots
+                      </li>
+                    </ul>
+
+                    <div className="flex flex-wrap gap-2">
+                      {['Website', 'Shopify', 'Amazon'].map(platform => (
+                        <Badge key={platform} variant="outline" className="text-gray-400 font-normal border-gray-200">
+                          {platform}
+                        </Badge>
+                      ))}
+                    </div>
                  </div>
                </div>
-             ))}
-           </div>
+             </CardContent>
+          </Card>
+          </motion.div>
         </motion.div>
 
-        {/* --- SECTION 4: AI ASSET RECIPES --- */}
+        {/* --- SECTION 4: BRAND STORY & SOCIAL CONTENT --- */}
         <motion.div variants={itemVariants} className="space-y-4">
-          <h3 className="font-serif text-lg text-gray-900 px-1">Asset Recipes</h3>
-          <div className="space-y-3">
-            {recipes.map((recipe) => (
-              <Card key={recipe.id} className="border border-gray-100 shadow-sm">
-                <CardContent className="p-5">
-                   <div className="flex justify-between items-start mb-3">
-                     <h4 className="font-medium text-gray-900">{recipe.title}</h4>
-                     <Badge variant="outline" className="text-indigo-600 bg-indigo-50 border-indigo-100">
-                       {recipe.confidence}% Confidence
+           <div className="px-1">
+             <h3 className="font-serif text-2xl text-gray-900 mb-1">Brand Story & Social Content</h3>
+             <p className="text-sm text-gray-500 max-w-lg">
+               Lifestyle visuals that build desire, context, and emotional connection.
+             </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+             {/* Card 1: Lifestyle */}
+             <motion.div 
+               whileTap={{ scale: 0.98 }}
+               className="group relative aspect-[4/5] sm:aspect-video overflow-hidden rounded-2xl bg-gray-900"
+             >
+                <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent p-6 flex flex-col justify-end">
+                   <div className="bg-white/20 backdrop-blur-md self-start text-white text-[10px] uppercase tracking-wider px-2 py-1 rounded mb-2">
+                     Inspiration
+                   </div>
+                   <h4 className="text-white font-serif text-xl">Lifestyle Photography</h4>
+                   <p className="text-white/70 text-sm mt-1">Real-world context that sells the dream.</p>
+                </div>
+             </motion.div>
+
+             {/* Card 2: Social */}
+             <motion.div 
+               whileTap={{ scale: 0.98 }}
+               className="group relative aspect-[4/5] sm:aspect-video overflow-hidden rounded-2xl bg-gray-900"
+             >
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent p-6 flex flex-col justify-end">
+                   <div className="bg-white/20 backdrop-blur-md self-start text-white text-[10px] uppercase tracking-wider px-2 py-1 rounded mb-2">
+                     Culture
+                   </div>
+                   <h4 className="text-white font-serif text-xl">Social Storytelling</h4>
+                   <p className="text-white/70 text-sm mt-1">Short-form video & BTS moments.</p>
+                </div>
+             </motion.div>
+          </div>
+        </motion.div>
+
+        {/* --- SECTION 5: CAMPAIGN MESSAGING CONCEPTS --- */}
+        <motion.div variants={itemVariants} className="space-y-4">
+          <div className="flex items-center gap-2 px-1">
+             <h3 className="font-serif text-2xl text-gray-900">Campaign Messaging Concepts</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             {ads.map((ad) => (
+               <motion.div 
+                 whileTap={{ scale: 0.98 }}
+                 key={ad.id} 
+                 className="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group"
+               >
+                 {/* Decorative background element */}
+                 <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-indigo-50 to-transparent rounded-bl-full -mr-4 -mt-4" />
+                 
+                 <div className="relative z-10">
+                   <div className="flex justify-between items-start mb-4">
+                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+                       {ad.platform === 'Instagram' && <Instagram className="w-3 h-3" />}
+                       {ad.platform === 'Facebook' && <Facebook className="w-3 h-3" />}
+                       {ad.platform}
+                     </span>
+                     <Badge variant="outline" className={`text-[10px] border-0 px-2 py-1 ${
+                       ad.funnelStage === 'Awareness' ? 'bg-blue-50 text-blue-700' : 
+                       ad.funnelStage === 'Conversion' ? 'bg-green-50 text-green-700' : 'bg-purple-50 text-purple-700'
+                     }`}>
+                       {ad.funnelStage === 'Awareness' ? 'Awareness' : ad.funnelStage === 'Conversion' ? 'Sales' : 'Retargeting'}
                      </Badge>
                    </div>
                    
-                   <p className="text-sm text-gray-500 mb-4">{recipe.rationale}</p>
+                   <h4 className="font-serif text-xl text-gray-900 mb-2 leading-tight">"{ad.hook}"</h4>
                    
-                   <div className="flex flex-wrap gap-2 mb-4">
-                     {recipe.requirements.map(req => (
-                       <span key={req} className="text-xs bg-gray-50 text-gray-600 px-2 py-1 rounded border border-gray-100">
-                         {req}
-                       </span>
-                     ))}
-                   </div>
-                   
-                   <Separator className="my-3" />
-                   
-                   <div className="flex gap-4 overflow-x-auto pb-1">
-                     {Object.entries(recipe.outputs).map(([channel, qty]) => (
-                       <div key={channel} className="flex flex-col items-center min-w-[60px]">
-                         <span className="text-[10px] uppercase text-gray-400 mb-1">{channel}</span>
-                         <span className="text-sm font-medium text-gray-900 bg-gray-50 w-full text-center py-1 rounded">
-                           x{qty}
-                         </span>
-                       </div>
-                     ))}
-                   </div>
-
-                   {isAdjustMode && (
-                     <div className="mt-4 pt-3 border-t border-gray-100 animate-in fade-in">
-                        <Button variant="ghost" size="sm" className="w-full text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 h-8 text-xs">
-                          Customize Recipe Details
-                        </Button>
+                   <div className="text-xs text-gray-500 mb-6 flex items-center gap-2">
+                     <div className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center">
+                       <Sparkles className="w-2.5 h-2.5 text-gray-400" />
                      </div>
-                   )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* --- SECTION 5: ADS CREATIVE --- */}
-        <motion.div variants={itemVariants} className="space-y-4">
-          <div className="flex items-center gap-2 px-1">
-             <h3 className="font-serif text-lg text-gray-900">Ads Creative</h3>
-             <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200 border-0 text-[10px]">New</Badge>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-             {ads.map((ad) => (
-               <div key={ad.id} className="bg-gradient-to-br from-gray-50 to-white border border-gray-200 p-4 rounded-xl relative overflow-hidden">
-                 <div className="absolute top-0 right-0 w-16 h-16 bg-purple-500/5 rounded-bl-full" />
-                 
-                 <div className="relative z-10">
-                   <div className="flex justify-between items-start mb-2">
-                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{ad.platform}</span>
-                     <Badge variant="secondary" className="text-[10px] bg-white border border-gray-100">{ad.funnelStage}</Badge>
+                     Visual Theme: {ad.format.includes('Reels') ? 'Dynamic Motion' : 'Carousel Story'}
                    </div>
                    
-                   <h4 className="font-medium text-gray-900 mb-1">{ad.hook}</h4>
-                   <p className="text-xs text-gray-500 mb-3">{ad.format}</p>
-                   
-                   <div className="inline-flex items-center gap-1.5 bg-gray-900 text-white text-xs px-3 py-1.5 rounded-full">
-                     <span>CTA: {ad.cta}</span>
+                   <div className="inline-flex items-center gap-2 bg-gray-900 text-white text-xs font-medium px-4 py-2 rounded-full shadow-lg shadow-gray-900/10 group-hover:scale-105 transition-transform">
+                     <span>{ad.cta}</span>
+                     <ArrowRight className="w-3 h-3" />
                    </div>
                  </div>
-               </div>
+               </motion.div>
              ))}
           </div>
         </motion.div>
@@ -328,7 +402,7 @@ export function CampaignSummary({ onNavigate }: CampaignSummaryProps) {
       </motion.div>
 
       {/* --- STICKY CTA --- */}
-      <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-100 p-4 pb-8 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+      <div className="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-xl border-t border-gray-100 p-4 pb-8 z-50 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.1)] transition-all duration-300">
         <div className="max-w-2xl mx-auto flex flex-col gap-4">
           <div className="flex items-center gap-4">
             <div className="flex-1">
