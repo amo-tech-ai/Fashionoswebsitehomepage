@@ -27,7 +27,9 @@ import {
   Paperclip,
   Share2,
   Edit,
-  Star
+  Star,
+  MapPin,
+  UploadCloud
 } from "lucide-react";
 import { 
   LineChart, 
@@ -621,7 +623,6 @@ function FilesTab() {
 
 // --- Icons Helpers ---
 function MapPinIcon({ className }: { className?: string }) { return <MapPin className={className} />; }
-import { MapPin, UploadCloud } from "lucide-react";
 
 // --- Main Page Component ---
 

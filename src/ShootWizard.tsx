@@ -7,24 +7,18 @@ import {
   Camera, 
   Video, 
   ShoppingBag, 
-  Star, 
-  Calendar as CalendarIcon, 
-  Clock,
-  MapPin,
-  User,
-  Plus,
-  X,
-  Instagram,
-  Facebook,
-  Youtube,
-  Linkedin,
-  Twitter,
   Globe,
-  Sparkles
+  Sparkles,
+  Instagram,
+  Youtube,
+  Menu,
+  X
 } from "lucide-react";
 import { ImageWithFallback } from "./components/figma/ImageWithFallback";
 import { Sidebar } from "./components/shared/Sidebar";
-import { ShootSummarySidebar } from "./components/wizard/ShootSummarySidebar";
+import { WizardModeSelection } from "./components/wizard/WizardModeSelection";
+import { WizardAIIntake } from "./components/wizard/WizardAIIntake";
+import { WizardAISidebar } from "./components/wizard/WizardAISidebar";
 
 import amazonImg from "figma:asset/41ffa841e5b6ae969b626aecc0e3cd3404a96df5.png";
 import instagramImg from "figma:asset/a7f7eb0fdd0513adec473287236c1cf6c46c0ee0.png";
@@ -46,7 +40,7 @@ type WizardStep =
   | "dateTime" 
   | "summary";
 
-interface WizardState {
+export interface WizardState {
   service: "photography" | "video" | "webdesign" | "socialmedia" | null;
   category: string | null;
   subType: string | null;
@@ -186,13 +180,54 @@ const TIME_SLOTS = {
   Evening: ["06:00 PM", "07:00 PM"]
 };
 
+// --- Mock AI Logic ---
+
+const getGeminiRecommendation = (step: WizardStep, context: any) => {
+  switch (step) {
+    case 'service':
+      return {
+        id: 'photo_rec',
+        title: 'Start with Photography',
+        reason: 'Your Shopify store needs high-res catalog images to improve conversion rates.',
+        confidence: 0.95
+      };
+    case 'category':
+      return {
+        id: 'fashion_rec',
+        title: 'Fashion Apparel',
+        reason: 'Detected "luxury streetwear" keywords and apparel products on your site.',
+        confidence: 0.98
+      };
+    case 'subType':
+      return {
+        id: 'onmodel_rec',
+        title: 'On-Model Photography',
+        reason: 'Competitors like Kith and Fear of God are using on-model shots. This drives higher engagement.',
+        confidence: 0.92
+      };
+    case 'talent':
+      return {
+        id: 'talent_rec',
+        title: 'Full Body Model',
+        reason: 'Essential for showing fit and drape. Increases click-through rate by ~22%.',
+        confidence: 0.88
+      };
+    default:
+      return null;
+  }
+};
+
 // --- Main Component ---
 
-export default function ShootWizard() {
+export default function ShootWizard({ onComplete }: { onComplete?: (data: WizardState) => void }) {
+  const [workflowStage, setWorkflowStage] = useState<'mode' | 'intake' | 'wizard'>('mode');
+  const [isAIEnabled, setIsAIEnabled] = useState(false);
+  const [aiContext, setAiContext] = useState<any>(null);
+  
   const [step, setStep] = useState<WizardStep>("service");
   const [direction, setDirection] = useState(1);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Mobile sidebar toggle
   const [currentMonth, setCurrentMonth] = useState(new Date());
   
   const [state, setState] = useState<WizardState>({
@@ -236,6 +271,22 @@ export default function ShootWizard() {
       setDirection(-1);
       setStep(stepOrder[currentStepIndex - 1]);
     }
+  };
+
+  const handleModeSelect = (mode: 'manual' | 'ai') => {
+    setIsAIEnabled(mode === 'ai');
+    setWorkflowStage(mode === 'ai' ? 'intake' : 'wizard');
+  };
+
+  const handleAIAnalyze = (data: any) => {
+    setAiContext(data);
+    // Pre-fill state based on AI data (mock logic)
+    setState(prev => ({
+      ...prev,
+      category: data.detectedCategory || prev.category,
+      style: data.detectedStyle || prev.style
+    }));
+    setWorkflowStage('wizard');
   };
 
   // --- Render Steps ---
@@ -416,12 +467,11 @@ export default function ShootWizard() {
               }`}
             >
               <ImageWithFallback src={s.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt={s.label} />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
-              <div className="absolute bottom-0 inset-x-0 p-6 text-white text-center font-medium text-lg">
-                {s.label}
+              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
+                <span className="text-lg font-serif text-white">{s.label}</span>
               </div>
               {state.scenes.includes(s.id) && (
-                <div className="absolute top-4 right-4 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center shadow-lg animate-in fade-in zoom-in duration-200">
+                <div className="absolute top-3 right-3 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center shadow-lg">
                   <Check className="w-4 h-4" />
                 </div>
               )}
@@ -441,17 +491,16 @@ export default function ShootWizard() {
                 if (exists) setState({...state, scenes: state.scenes.filter(i => i !== s.id)});
                 else if (state.scenes.length < 2) setState({...state, scenes: [...state.scenes, s.id]});
               }}
-              className={`relative group cursor-pointer rounded-2xl overflow-hidden aspect-square shadow-sm transition-all duration-500 ${
+              className={`relative group cursor-pointer rounded-2xl overflow-hidden aspect-[4/5] shadow-sm transition-all duration-500 ${
                 state.scenes.includes(s.id) ? 'ring-4 ring-black' : 'hover:shadow-xl hover:-translate-y-2'
               }`}
             >
               <ImageWithFallback src={s.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt={s.label} />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
-              <div className="absolute bottom-0 inset-x-0 p-6 text-white text-center font-medium text-lg">
-                {s.label}
+              <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 via-black/20 to-transparent">
+                <span className="text-xl font-serif text-white">{s.label}</span>
               </div>
               {state.scenes.includes(s.id) && (
-                <div className="absolute top-4 right-4 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center shadow-lg animate-in fade-in zoom-in duration-200">
+                <div className="absolute top-3 right-3 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center shadow-lg">
                   <Check className="w-4 h-4" />
                 </div>
               )}
@@ -462,111 +511,44 @@ export default function ShootWizard() {
     </div>
   );
 
-  const renderTalent = () => {
-    const isModelRequired = state.talent && state.talent !== 'none';
-    
-    return (
-        <div className="w-full pt-6 md:pt-12">
-            <div className="max-w-3xl mx-auto text-center mb-10 md:mb-16">
-                <h1 className="text-4xl md:text-5xl font-serif text-gray-900 mb-4 tracking-tight">Talent Selection</h1>
-                <p className="text-gray-500 text-lg">Do you require models for this shoot?</p>
+  const renderTalent = () => (
+    <div className="w-full pt-6 md:pt-12">
+      <div className="max-w-3xl mx-auto text-center mb-10 md:mb-16">
+        <h1 className="text-4xl md:text-6xl font-serif text-gray-900 mb-4 tracking-tight">Talent Selection</h1>
+        <p className="text-gray-500 text-lg md:text-xl">Do you need models for this campaign?</p>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-4 md:px-8 max-w-7xl mx-auto">
+        {TALENT.map((t) => (
+          <div 
+            key={t.id}
+            onClick={() => setState({...state, talent: t.id})}
+            className={`relative group cursor-pointer rounded-2xl overflow-hidden aspect-[3/4] transition-all duration-500 shadow-sm ${
+              state.talent === t.id ? 'ring-2 ring-black scale-[1.02]' : 'hover:-translate-y-2 hover:shadow-xl'
+            }`}
+          >
+            <ImageWithFallback src={t.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt={t.label} />
+            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all duration-500" />
+            <div className="absolute bottom-0 left-0 p-6 w-full bg-gradient-to-t from-black/80 to-transparent">
+              <span className="text-2xl font-serif text-white">{t.label}</span>
             </div>
-            
-            <div className="max-w-3xl mx-auto px-4 md:px-8 space-y-8">
-                {/* Binary Choice */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <button
-                        onClick={() => setState({...state, talent: 'none'})}
-                        className={`p-6 rounded-2xl border text-left transition-all ${
-                            state.talent === 'none'
-                                ? 'border-black bg-gray-900 text-white ring-1 ring-black shadow-lg'
-                                : 'border-gray-200 bg-white hover:border-gray-300 text-gray-900 hover:bg-gray-50'
-                        }`}
-                    >
-                        <div className="flex justify-between items-start mb-4">
-                             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${state.talent === 'none' ? 'bg-white/20' : 'bg-gray-100'}`}>
-                                <X className={`w-5 h-5 ${state.talent === 'none' ? 'text-white' : 'text-gray-600'}`} />
-                             </div>
-                             {state.talent === 'none' && <Check className="w-5 h-5" />}
-                        </div>
-                        <h3 className="text-xl font-serif mb-1">Product Only</h3>
-                        <p className={`text-sm ${state.talent === 'none' ? 'text-gray-300' : 'text-gray-500'}`}>
-                           Focus purely on the merchandise. No models needed.
-                        </p>
-                    </button>
-                    
-                    <button
-                        onClick={() => {
-                             if (!isModelRequired) setState({...state, talent: 'fullbody'});
-                        }}
-                        className={`p-6 rounded-2xl border text-left transition-all ${
-                            isModelRequired
-                                ? 'border-black bg-gray-900 text-white ring-1 ring-black shadow-lg'
-                                : 'border-gray-200 bg-white hover:border-gray-300 text-gray-900 hover:bg-gray-50'
-                        }`}
-                    >
-                        <div className="flex justify-between items-start mb-4">
-                             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isModelRequired ? 'bg-white/20' : 'bg-gray-100'}`}>
-                                <User className={`w-5 h-5 ${isModelRequired ? 'text-white' : 'text-gray-600'}`} />
-                             </div>
-                             {isModelRequired && <Check className="w-5 h-5" />}
-                        </div>
-                        <h3 className="text-xl font-serif mb-1">Models Required</h3>
-                        <p className={`text-sm ${isModelRequired ? 'text-gray-300' : 'text-gray-500'}`}>
-                           Select specific model types for your campaign.
-                        </p>
-                    </button>
-                </div>
-                
-                {/* Expanded Selection */}
-                <AnimatePresence>
-                    {isModelRequired && (
-                        <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="overflow-hidden"
-                        >
-                            <div className="pt-4 pb-2">
-                                <h4 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-6 text-center">Select Model Type</h4>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                    {TALENT.filter(t => t.id !== 'none').map(t => (
-                                        <div 
-                                            key={t.id}
-                                            onClick={() => setState({...state, talent: t.id})}
-                                            className={`relative cursor-pointer rounded-xl overflow-hidden aspect-[3/4] group ${
-                                                state.talent === t.id ? 'ring-2 ring-black' : ''
-                                            }`}
-                                        >
-                                            <ImageWithFallback src={t.image || ''} className="w-full h-full object-cover" alt={t.label} />
-                                            <div className={`absolute inset-0 transition-colors ${state.talent === t.id ? 'bg-black/40' : 'bg-black/20 group-hover:bg-black/10'}`} />
-                                            <div className="absolute bottom-0 inset-x-0 p-4">
-                                                <p className="text-white font-medium text-center">{t.label}</p>
-                                            </div>
-                                            {state.talent === t.id && (
-                                                <div className="absolute top-3 right-3 w-6 h-6 bg-white text-black rounded-full flex items-center justify-center shadow-sm">
-                                                    <Check className="w-3 h-3" />
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </div>
-        </div>
-    );
-  };
+            {state.talent === t.id && (
+              <div className="absolute top-4 right-4 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center shadow-lg">
+                <Check className="w-4 h-4" />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   const renderAddOns = () => (
     <div className="w-full pt-6 md:pt-12">
       <div className="max-w-3xl mx-auto text-center mb-10 md:mb-16">
-        <h1 className="text-4xl md:text-6xl font-serif text-gray-900 mb-4 tracking-tight">Optional Upgrades</h1>
-        <p className="text-gray-500 text-lg md:text-xl">Enhance your shoot with these extras.</p>
+        <h1 className="text-4xl md:text-6xl font-serif text-gray-900 mb-4 tracking-tight">Upgrades</h1>
+        <p className="text-gray-500 text-lg md:text-xl">Enhance your production value.</p>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-4 md:px-8 max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 px-4 md:px-8 max-w-5xl mx-auto">
         {ADD_ONS.map((a) => (
           <div 
             key={a.id}
@@ -575,30 +557,26 @@ export default function ShootWizard() {
               if (exists) setState({...state, addOns: state.addOns.filter(i => i !== a.id)});
               else setState({...state, addOns: [...state.addOns, a.id]});
             }}
-            className={`relative group cursor-pointer rounded-2xl overflow-hidden aspect-[4/5] transition-all duration-500 shadow-sm hover:shadow-2xl ${
-              state.addOns.includes(a.id) ? 'ring-2 ring-black scale-[1.02] z-10' : 'hover:-translate-y-2 hover:z-10 z-0'
+            className={`flex gap-6 p-4 rounded-2xl border transition-all cursor-pointer group bg-white ${
+              state.addOns.includes(a.id) 
+                ? 'border-black bg-gray-50 ring-1 ring-black' 
+                : 'border-gray-200 hover:border-gray-400 hover:shadow-lg'
             }`}
           >
-            <ImageWithFallback src={a.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt={a.label} />
-            <div className={`absolute inset-0 transition-all duration-500 ${state.addOns.includes(a.id) ? 'bg-black/40' : 'bg-black/20 group-hover:bg-black/10'}`} />
-            
-            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 bg-gradient-to-t from-black/90 via-transparent to-transparent">
-              <div className="flex flex-col justify-end text-white h-full">
-                <h3 className="text-2xl font-serif mb-1 tracking-tight">{a.label}</h3>
-                <div className="flex items-center justify-between mt-2">
-                  <p className="text-sm opacity-80">Add to package</p>
-                  <div className="text-sm font-bold bg-white/20 backdrop-blur px-3 py-1 rounded-full border border-white/10">
-                    +${a.price}
-                  </div>
-                </div>
-              </div>
+            <div className="w-24 h-24 shrink-0 rounded-xl overflow-hidden">
+               <ImageWithFallback src={a.image} className="w-full h-full object-cover" alt={a.label} />
             </div>
-            
-            {state.addOns.includes(a.id) && (
-              <div className="absolute top-4 right-4 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center shadow-lg animate-in fade-in zoom-in duration-300">
-                 <Check className="w-4 h-4" />
+            <div className="flex-1 py-1">
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="text-xl font-serif text-gray-900">{a.label}</h3>
+                {state.addOns.includes(a.id) && (
+                  <div className="w-6 h-6 bg-black text-white rounded-full flex items-center justify-center">
+                    <Check className="w-3 h-3" />
+                  </div>
+                )}
               </div>
-            )}
+              <p className="text-lg font-medium text-gray-900 mb-1">+${a.price}</p>
+            </div>
           </div>
         ))}
       </div>
@@ -608,10 +586,10 @@ export default function ShootWizard() {
   const renderChannels = () => (
     <div className="w-full pt-6 md:pt-12">
       <div className="max-w-3xl mx-auto text-center mb-10 md:mb-16">
-        <h1 className="text-4xl md:text-6xl font-serif text-gray-900 mb-4 tracking-tight">Channels</h1>
-        <p className="text-gray-500 text-lg md:text-xl">Where will you be posting this content?</p>
+        <h1 className="text-4xl md:text-6xl font-serif text-gray-900 mb-4 tracking-tight">Distribution</h1>
+        <p className="text-gray-500 text-lg md:text-xl">Where will this content live? We'll optimize formats.</p>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-8 px-4 md:px-8 max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4 px-4 md:px-8 max-w-7xl mx-auto">
         {CHANNELS.map((c) => (
           <div 
             key={c.id}
@@ -620,362 +598,277 @@ export default function ShootWizard() {
               if (exists) setState({...state, channels: state.channels.filter(i => i !== c.id)});
               else setState({...state, channels: [...state.channels, c.id]});
             }}
-            className={`flex flex-col items-center justify-center p-6 md:p-8 rounded-2xl border cursor-pointer transition-all duration-300 aspect-square shadow-sm ${
-              state.channels.includes(c.id) ? 'border-black bg-gray-50 shadow-md ring-1 ring-black scale-[1.02]' : 'border-gray-200 hover:border-gray-300 hover:shadow-lg hover:-translate-y-1'
+            className={`flex flex-col items-center justify-center p-8 rounded-2xl border transition-all cursor-pointer aspect-square ${
+              state.channels.includes(c.id) 
+                ? 'border-black bg-gray-900 text-white' 
+                : 'border-gray-200 bg-white hover:border-gray-400 hover:shadow-xl'
             }`}
           >
             {c.image ? (
-              <div className="w-16 h-16 mb-6 relative flex items-center justify-center">
-                 <ImageWithFallback 
-                   src={c.image} 
-                   className="w-full h-full object-contain drop-shadow-sm" 
-                   alt={c.label}
-                 />
-              </div>
+                <div className="w-12 h-12 mb-4">
+                     <ImageWithFallback src={c.image} alt={c.label} className="w-full h-full object-contain" />
+                </div>
             ) : (
-              <c.icon className={`w-12 h-12 mb-6 ${state.channels.includes(c.id) ? 'text-black' : 'text-gray-400'}`} />
+                <c.icon className={`w-10 h-10 mb-4 ${state.channels.includes(c.id) ? 'text-white' : 'text-gray-900'}`} />
             )}
-            <span className={`font-medium text-center text-base md:text-lg ${state.channels.includes(c.id) ? 'text-black font-bold' : 'text-gray-600'}`}>{c.label}</span>
             
-            {state.channels.includes(c.id) && (
-               <div className="mt-4">
-                 <div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center animate-in fade-in zoom-in duration-200">
-                   <Check className="w-4 h-4" />
-                 </div>
-               </div>
-            )}
+            <span className="font-medium text-lg text-center">{c.label}</span>
           </div>
         ))}
       </div>
     </div>
   );
 
-  const renderDateTime = () => {
-    const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
-    const startDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
-    
-    const nextMonth = () => {
-      setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
-    };
-    
-    const prevMonth = () => {
-      setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
-    };
-
-    return (
-      <div className="w-full pt-6 md:pt-12">
-        <div className="max-w-3xl mx-auto text-center mb-10 md:mb-16">
-          <h1 className="text-4xl md:text-6xl font-serif text-gray-900 mb-4 tracking-tight">When to Shoot?</h1>
-          <p className="text-gray-500 text-lg md:text-xl">Select a preferred date and time.</p>
-        </div>
-        <div className="grid lg:grid-cols-2 gap-8 md:gap-12 bg-white rounded-[2rem] shadow-sm border border-gray-100 p-6 md:p-10 max-w-7xl mx-auto">
-          {/* Calendar */}
-          <div>
-            <div className="flex items-center justify-between mb-8">
-              <h3 className="font-bold text-gray-900 flex items-center gap-3 text-xl font-serif tracking-tight">
-                <CalendarIcon className="w-6 h-6" /> 
-                {currentMonth.toLocaleDateString('default', { month: 'long', year: 'numeric' })}
-              </h3>
-              <div className="flex gap-2">
-                <button onClick={prevMonth} className="p-3 hover:bg-gray-100 rounded-full transition-colors border border-gray-100 hover:border-gray-200">
-                  <ArrowLeft className="w-5 h-5" />
-                </button>
-                <button onClick={nextMonth} className="p-3 hover:bg-gray-100 rounded-full transition-colors border border-gray-100 hover:border-gray-200">
-                  <ArrowRight className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-7 gap-2 text-center mb-4">
-              {["S","M","T","W","T","F","S"].map((d, i) => <div key={i} className="text-xs font-bold text-gray-400 uppercase tracking-widest">{d}</div>)}
-            </div>
-            
-            <div className="grid grid-cols-7 gap-2 sm:gap-3">
-              {Array.from({ length: startDay }).map((_, i) => (
-                <div key={`empty-${i}`} />
-              ))}
-              {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(d => {
-                const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), d);
-                const isSelected = state.date?.toDateString() === date.toDateString();
-                const isToday = new Date().toDateString() === date.toDateString();
-                
-                return (
-                  <button
-                    key={d}
-                    onClick={() => setState({...state, date})}
-                    className={`aspect-square rounded-xl flex items-center justify-center text-sm font-medium transition-all duration-300 relative overflow-hidden ${
-                      isSelected
-                        ? 'bg-black text-white shadow-lg scale-105' 
-                        : isToday 
-                          ? 'bg-gray-50 text-black font-bold ring-1 ring-gray-200'
-                          : 'hover:bg-gray-50 text-gray-700 hover:scale-105'
-                    }`}
-                  >
-                    {isSelected && (
-                      <motion.div 
-                        layoutId="selectedDate"
-                        className="absolute inset-0 bg-black -z-10"
-                      />
-                    )}
-                    {d}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Time Slots */}
-          <div className="space-y-10 border-t lg:border-t-0 lg:border-l border-gray-100 pt-10 lg:pt-0 lg:pl-12">
-            {Object.entries(TIME_SLOTS).map(([period, slots]) => (
-              <div key={period}>
-                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-5 flex items-center gap-2">
-                  <Clock className="w-4 h-4" /> {period}
-                </h4>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {slots.map(time => (
-                    <button
-                      key={time}
-                      onClick={() => setState({...state, timeSlot: time})}
-                      className={`py-4 px-4 rounded-2xl text-sm font-medium border transition-all duration-300 ${
-                        state.timeSlot === time
-                          ? 'border-black bg-black text-white shadow-md transform scale-[1.02]'
-                          : 'border-gray-200 hover:border-gray-400 text-gray-900 hover:bg-gray-50'
-                      }`}
-                    >
-                      {time}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+  const renderDateTime = () => (
+    <div className="w-full pt-6 md:pt-12">
+      <div className="max-w-3xl mx-auto text-center mb-10 md:mb-16">
+        <h1 className="text-4xl md:text-6xl font-serif text-gray-900 mb-4 tracking-tight">Production Date</h1>
+        <p className="text-gray-500 text-lg md:text-xl">Select your preferred shoot day.</p>
       </div>
-    );
-  };
+      
+      <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-12">
+         {/* Calendar */}
+         <div className="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm">
+            <div className="flex justify-between items-center mb-8">
+               <h3 className="text-xl font-bold font-serif">{currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>
+               <div className="flex gap-2">
+                  <button className="p-2 hover:bg-gray-100 rounded-full"><ArrowLeft className="w-5 h-5" /></button>
+                  <button className="p-2 hover:bg-gray-100 rounded-full"><ArrowRight className="w-5 h-5" /></button>
+               </div>
+            </div>
+            <div className="grid grid-cols-7 gap-4 mb-4">
+               {['S','M','T','W','T','F','S'].map(d => (
+                  <div key={d} className="text-center text-xs font-bold text-gray-400 uppercase">{d}</div>
+               ))}
+            </div>
+            <div className="grid grid-cols-7 gap-4">
+               {Array.from({length: 31}, (_, i) => i + 1).map(day => (
+                  <button 
+                     key={day}
+                     onClick={() => setState({...state, date: new Date(2025, 5, day)})}
+                     className={`aspect-square rounded-full flex items-center justify-center text-sm font-medium transition-all ${
+                        state.date?.getDate() === day
+                           ? 'bg-black text-white shadow-lg'
+                           : 'hover:bg-gray-100 text-gray-700'
+                     }`}
+                  >
+                     {day}
+                  </button>
+               ))}
+            </div>
+         </div>
+
+         {/* Time Slots */}
+         <div className="space-y-8">
+            {Object.entries(TIME_SLOTS).map(([period, slots]) => (
+               <div key={period}>
+                  <h4 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">{period}</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                     {slots.map(slot => (
+                        <button
+                           key={slot}
+                           onClick={() => setState({...state, timeSlot: slot})}
+                           className={`py-3 px-4 rounded-xl border text-sm font-medium transition-all text-center ${
+                              state.timeSlot === slot
+                                 ? 'border-black bg-black text-white'
+                                 : 'border-gray-200 hover:border-black text-gray-900'
+                           }`}
+                        >
+                           {slot}
+                        </button>
+                     ))}
+                  </div>
+               </div>
+            ))}
+         </div>
+      </div>
+    </div>
+  );
 
   const renderSummary = () => (
     <div className="w-full pt-6 md:pt-12">
-      <div className="max-w-3xl mx-auto text-center mb-10 md:mb-16">
-        <h1 className="text-4xl md:text-6xl font-serif text-gray-900 mb-4 tracking-tight">Review Your Shoot</h1>
-        <p className="text-gray-500 text-lg md:text-xl">Here is your personalized plan.</p>
+      <div className="max-w-2xl mx-auto text-center mb-10">
+        <h1 className="text-4xl md:text-5xl font-serif text-gray-900 mb-4">Review Brief</h1>
+        <p className="text-gray-500 text-lg">Verify your details before we generate the proposal.</p>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8 md:gap-12 max-w-7xl mx-auto px-4">
-        <div className="lg:col-span-2 space-y-8">
-          <div className="bg-white p-8 md:p-10 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-8 transition-all hover:shadow-lg duration-500">
-            <div className="flex items-start justify-between pb-8 border-b border-gray-100">
-              <div>
-                <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Service</div>
-                <div className="text-3xl md:text-5xl font-serif text-gray-900 capitalize tracking-tight">{state.service} Production</div>
-              </div>
-              <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center text-gray-900 border border-gray-100">
-                {state.service === 'photography' ? <Camera className="w-8 h-8" /> : <Video className="w-8 h-8" />}
-              </div>
-            </div>
-
-            <div className="grid sm:grid-cols-2 gap-8 md:gap-12">
-              <div>
-                <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Category</div>
-                <div className="font-medium text-xl capitalize text-gray-900">{state.category || "-"}</div>
-              </div>
-              <div>
-                <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Type</div>
-                <div className="font-medium text-xl capitalize text-gray-900">{state.subType || "-"}</div>
-              </div>
-              <div>
-                <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Style</div>
-                <div className="font-medium text-xl capitalize text-gray-900">{state.style || "-"}</div>
-              </div>
-              <div>
-                <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Talent</div>
-                <div className="font-medium text-xl capitalize text-gray-900">{state.talent || "-"}</div>
-              </div>
-            </div>
-
-            <div className="pt-8 border-t border-gray-100">
-              <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Scenes</div>
-              <div className="flex flex-wrap gap-3">
-                {state.scenes.length > 0 ? state.scenes.map(s => (
-                  <span key={s} className="px-6 py-3 bg-gray-50 border border-gray-200 rounded-full text-sm font-medium capitalize text-gray-800">{s}</span>
-                )) : <span className="text-gray-400 italic text-lg">None selected</span>}
-              </div>
-            </div>
-
-            <div className="pt-8 border-t border-gray-100">
-               <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Date & Time</div>
-               <div className="font-medium text-xl flex flex-wrap items-center gap-3 text-gray-900">
-                 <div className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-lg">
-                   <CalendarIcon className="w-5 h-5 text-gray-500" />
-                   {state.date ? state.date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }) : "Date not selected"} 
-                 </div>
-                 {state.timeSlot && (
-                   <div className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-lg">
-                     <Clock className="w-5 h-5 text-gray-500" />
-                     {state.timeSlot}
-                   </div>
-                 )}
+      <div className="max-w-3xl mx-auto px-6 mb-12">
+        <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm space-y-6">
+            <div className="grid md:grid-cols-2 gap-8">
+               <div>
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Service</h3>
+                  <div className="text-lg font-medium capitalize">{state.service}</div>
+               </div>
+               <div>
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Category</h3>
+                  <div className="text-lg font-medium capitalize">{state.category}</div>
+               </div>
+               <div>
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Style</h3>
+                  <div className="text-lg font-medium capitalize">{state.style}</div>
+               </div>
+               <div>
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Talent</h3>
+                  <div className="text-lg font-medium capitalize">{state.talent}</div>
+               </div>
+               <div>
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Scenes</h3>
+                  <div className="text-lg font-medium capitalize">{state.scenes.join(", ")}</div>
+               </div>
+               <div>
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Date</h3>
+                  <div className="text-lg font-medium capitalize">{state.date?.toLocaleDateString()}</div>
                </div>
             </div>
-          </div>
-        </div>
 
-        <div className="space-y-6">
-          <div className="bg-gray-900 text-white p-8 md:p-10 rounded-[2.5rem] shadow-xl sticky top-8">
-            <h3 className="font-serif text-3xl mb-8 tracking-tight">Estimated Total</h3>
-            <div className="space-y-5 mb-10">
-              <div className="flex justify-between text-gray-400 text-lg">
-                <span>Base Package</span>
-                <span>$1,500</span>
-              </div>
-              {state.addOns.map(id => {
-                const addon = ADD_ONS.find(a => a.id === id);
-                return addon ? (
-                  <div key={id} className="flex justify-between text-gray-300 text-lg">
-                    <span>{addon.label}</span>
-                    <span>+${addon.price}</span>
-                  </div>
-                ) : null;
-              })}
-              <div className="pt-8 mt-8 border-t border-gray-700 flex justify-between text-3xl font-serif font-medium">
-                <span>Total</span>
-                <span>
-                  ${1500 + state.addOns.reduce((sum, id) => sum + (ADD_ONS.find(a => a.id === id)?.price || 0), 0)}
-                </span>
-              </div>
-            </div>
-            <button className="w-full py-5 bg-white text-black rounded-2xl font-bold text-lg hover:bg-gray-100 transition-all hover:scale-[1.02] active:scale-95 mb-4 shadow-lg">
-              Confirm Booking
+            <button 
+              onClick={() => onComplete?.(state)}
+              className="w-full py-5 bg-black text-white rounded-2xl font-bold text-lg hover:bg-gray-800 transition-all hover:scale-[1.02] active:scale-95 mb-4 shadow-lg"
+            >
+              Generate Proposal
             </button>
-            <button className="w-full py-5 border border-gray-600 text-white rounded-2xl font-medium text-lg hover:bg-gray-800 transition-colors hover:border-gray-500">
-              Save Draft
-            </button>
-          </div>
         </div>
       </div>
     </div>
   );
 
-  const serviceData = {
-    services: SERVICES,
-    categories: CATEGORIES,
-    subTypes: SUB_TYPES,
-    styles: STYLES,
-    scenes: SCENES,
-    talent: TALENT,
-    addOns: ADD_ONS
+  const renderContent = () => {
+    switch (step) {
+      case "service": return renderService();
+      case "category": return renderCategory();
+      case "subType": return renderSubType();
+      case "style": return renderStyle();
+      case "scenes": return renderScenes();
+      case "talent": return renderTalent();
+      case "addOns": return renderAddOns();
+      case "channels": return renderChannels();
+      case "dateTime": return renderDateTime();
+      case "summary": return renderSummary();
+      default: return renderService();
+    }
   };
 
+  // --- Main Render Flow ---
+
+  // 1. Mode Selection
+  if (workflowStage === 'mode') {
+    return <WizardModeSelection onSelectMode={handleModeSelect} />;
+  }
+
+  // 2. AI Intake
+  if (workflowStage === 'intake') {
+    return (
+      <WizardAIIntake 
+        onAnalyze={handleAIAnalyze}
+        onSkip={() => {
+          setIsAIEnabled(false);
+          setWorkflowStage('wizard');
+        }} 
+      />
+    );
+  }
+
+  // 3. Main Wizard (Standard + AI Sidebar)
   return (
-    <div className="h-screen bg-[#F8F5F1] flex flex-col overflow-hidden">
-      {/* Top Navigation Bar */}
-      <div className="h-16 border-b border-gray-200 bg-white/80 backdrop-blur flex-shrink-0 z-50 flex items-center justify-between px-4 md:px-6 lg:px-12">
-        <div className="flex items-center gap-4">
-          <div className="text-xl font-serif font-bold tracking-tight">FashionOS</div>
-          {/* Mobile Step Indicator */}
-          <div className="md:hidden text-[10px] font-bold uppercase tracking-widest text-gray-400 border-l border-gray-300 pl-4 ml-2">
-             Step {currentStepIndex + 1}/{totalSteps}
-          </div>
+    <div className="min-h-screen bg-white text-gray-900 pb-20 relative font-sans selection:bg-black selection:text-white flex flex-col md:flex-row">
+      
+      {/* Optional: Standard Nav Sidebar (Left) */}
+      <Sidebar 
+          activeScreen="wizard" 
+          onNavigate={() => {}} // Handle navigation if needed
+          isMobileOpen={isMobileMenuOpen}
+          onMobileClose={() => setIsMobileMenuOpen(false)}
+      />
+
+      {/* Main Content Area */}
+      <div className="flex-1 min-h-screen flex flex-col transition-all duration-300 md:ml-64">
+        
+        {/* Top Progress Bar */}
+        <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-100">
+           <div className="max-w-[1600px] mx-auto px-6 h-20 flex items-center justify-between">
+              {/* Back Button */}
+              {currentStepIndex > 0 ? (
+                <button 
+                   onClick={handleBack}
+                   className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-black transition-colors"
+                >
+                   <ArrowLeft className="w-4 h-4" /> Back
+                </button>
+              ) : (
+                <div />
+              )}
+              
+              {/* Progress Dots */}
+              <div className="flex gap-3">
+                 {stepOrder.map((s, i) => (
+                    <div 
+                       key={s} 
+                       className={`h-1 rounded-full transition-all duration-500 ${
+                          i === currentStepIndex ? 'w-8 bg-black' : 
+                          i < currentStepIndex ? 'w-2 bg-black' : 
+                          'w-2 bg-gray-200'
+                       }`} 
+                    />
+                 ))}
+              </div>
+
+              {/* Next Button */}
+              {currentStepIndex < totalSteps - 1 ? (
+                <button 
+                   onClick={handleNext}
+                   className="flex items-center gap-2 px-6 py-2 bg-black text-white rounded-full text-sm font-bold hover:bg-gray-800 transition-all hover:scale-105 shadow-sm"
+                >
+                   Next <ArrowRight className="w-4 h-4" />
+                </button>
+              ) : (
+                 <div />
+              )}
+           </div>
         </div>
         
-        {/* Desktop Progress */}
-        <div className="hidden md:flex items-center gap-4">
-           <div className="text-xs font-bold uppercase tracking-widest text-gray-400">
-             Step {currentStepIndex + 1} of {totalSteps}
-           </div>
-           <div className="w-32 h-1 bg-gray-100 rounded-full overflow-hidden">
-             <motion.div 
-               className="h-full bg-black"
-               initial={{ width: 0 }}
-               animate={{ width: `${((currentStepIndex + 1) / totalSteps) * 100}%` }}
-             />
-           </div>
-        </div>
+        {/* Content Wrapper */}
+        <div className="flex-1 relative flex">
+          {/* Main Wizard Content */}
+          <main className={`flex-1 transition-all duration-500 ${isAIEnabled && isSidebarOpen ? 'md:mr-80' : ''}`}>
+             <AnimatePresence mode="wait" custom={direction}>
+                <motion.div
+                   key={step}
+                   custom={direction}
+                   initial={{ opacity: 0, x: direction * 50 }}
+                   animate={{ opacity: 1, x: 0 }}
+                   exit={{ opacity: 0, x: direction * -50 }}
+                   transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                   className="w-full"
+                >
+                   {renderContent()}
+                </motion.div>
+             </AnimatePresence>
+          </main>
 
-        {/* Actions */}
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => setIsSidebarOpen(true)}
-            className="xl:hidden p-2 hover:bg-gray-100 rounded-full text-gray-600 transition-colors relative"
-          >
-            <ShoppingBag className="w-5 h-5" />
-            {state.service && (
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-            )}
-          </button>
-          <button className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
-            <X className="w-5 h-5" />
-          </button>
+          {/* AI Sidebar (Right) */}
+          {isAIEnabled && (
+            <WizardAISidebar 
+              step={step}
+              recommendation={getGeminiRecommendation(step, aiContext) || undefined}
+              onApply={() => {
+                // Mock apply logic
+                const rec = getGeminiRecommendation(step, aiContext);
+                if (rec) {
+                  // Example: apply 'fashion' category
+                  if (step === 'category' && rec.id === 'fashion_rec') {
+                    setState({...state, category: 'fashion'});
+                  }
+                  // In real app, this would be dynamic based on rec
+                }
+              }}
+              onIgnore={() => {}}
+              isOpen={isSidebarOpen}
+              onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+            />
+          )}
         </div>
       </div>
 
-      {/* Flex Container for Main + Sidebar */}
-      <div className="flex flex-1 overflow-hidden relative">
-          
-          {/* Left Column (Content + Footer) */}
-          <div className="flex-1 flex flex-col relative overflow-hidden">
-              {/* Main Content */}
-              <main className="flex-1 px-4 md:px-8 lg:px-12 pt-8 pb-24 overflow-y-auto scroll-smooth">
-                <div className="max-w-7xl mx-auto h-full">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={step}
-                      initial={{ opacity: 0, x: direction * 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: direction * -20 }}
-                      transition={{ duration: 0.3 }}
-                      className="h-full"
-                    >
-                      {step === "service" && renderService()}
-                      {step === "category" && renderCategory()}
-                      {step === "subType" && renderSubType()}
-                      {step === "style" && renderStyle()}
-                      {step === "scenes" && renderScenes()}
-                      {step === "talent" && renderTalent()}
-                      {step === "addOns" && renderAddOns()}
-                      {step === "channels" && renderChannels()}
-                      {step === "dateTime" && renderDateTime()}
-                      {step === "summary" && renderSummary()}
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
-              </main>
-
-              {/* Sticky Footer */}
-              <div className="bg-white border-t border-gray-200 p-4 md:p-6 z-30">
-                <div className="max-w-7xl mx-auto flex flex-col-reverse md:flex-row items-center justify-between gap-4">
-                  <button 
-                    onClick={handleBack}
-                    disabled={currentStepIndex === 0}
-                    className={`w-full md:w-auto flex items-center justify-center gap-2 text-sm font-medium px-8 py-4 rounded-xl transition-colors ${
-                      currentStepIndex === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-900 hover:bg-gray-100'
-                    }`}
-                  >
-                    <ArrowLeft className="w-4 h-4" /> Back
-                  </button>
-
-                  {step !== "summary" && (
-                    <button 
-                      onClick={handleNext}
-                      className="w-full md:w-auto flex items-center justify-center gap-2 bg-black text-white px-10 py-4 rounded-xl font-medium hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl active:scale-95"
-                    >
-                      Next <ArrowRight className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-          </div>
-
-          {/* Right Sidebar */}
-          <ShootSummarySidebar 
-             state={state} 
-             onUpdateState={(updates) => setState({...state, ...updates})}
-             serviceData={serviceData}
-             mobileOpen={isSidebarOpen}
-             onMobileClose={() => setIsSidebarOpen(false)}
-          />
-
-      </div>
     </div>
   );
 }

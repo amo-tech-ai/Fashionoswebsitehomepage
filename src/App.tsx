@@ -14,7 +14,7 @@ import WebDesignServices from "./WebDesignServices";
 import WebsiteWizard from "./WebsiteWizard";
 import { DesignerWizard } from "./components/designer-wizard/DesignerWizard";
 import Studios from "./Studios";
-import ShootWizard from "./ShootWizard";
+import ShootWizard, { WizardState } from "./ShootWizard";
 import Directory from "./Directory";
 import DirectoryDetail from "./DirectoryDetail";
 import EventDetail from "./EventDetail";
@@ -43,28 +43,51 @@ import { SponsorDetail } from "./components/sponsors/SponsorDetail";
 import { DesignerDirectory } from "./components/designers/DesignerDirectory";
 import { DesignerProfile } from "./components/designers/DesignerProfile";
 import { BrandProfileDashboard } from "./components/dashboards/BrandProfileDashboard";
+import { AIAssistant } from "./components/shared/AIAssistant";
+import { Footer } from "./components/Footer";
+
+import EcommercePhotography from "./EcommercePhotography";
+import StyleGuide from "./components/StyleGuide";
+
+import { SiteArchitecture } from "./components/SiteArchitecture";
+import { ProposalPreview } from "./components/commerce/ProposalPreview";
+import { BookingFlow } from "./components/commerce/BookingFlow";
+
+import { BrandShootStart } from "./components/brand-shoot/BrandShootStart";
+import { BrandSignalCapture } from "./components/brand-shoot/BrandSignalCapture";
+import { AIThinking } from "./components/brand-shoot/AIThinking";
+import { CampaignSummary } from "./components/brand-shoot/CampaignSummary";
+import { ProposalConfirmation } from "./components/brand-shoot/ProposalConfirmation";
+import { AIOptimizationCenter } from "./components/brand-shoot/AIOptimizationCenter";
+
+import { BrandShootProvider } from "./context/BrandShootContext";
 
 export default function App() {
-  const [activeScreen, setActiveScreen] = useState("home");
+  const [activeScreen, setActiveScreen] = useState("home-v3");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  // Add State for Wizard
+  const [wizardState, setWizardState] = useState<WizardState | null>(null);
 
   // Handle initial URL load and browser back/forward
   useEffect(() => {
     const handlePathChange = () => {
       const path = window.location.pathname.toLowerCase();
       // Simple routing logic based on path
-      if (path === "/" || path === "/home") setActiveScreen("home");
+      if (path === "/" || path === "/home") setActiveScreen("home-v3");
       else if (path === "/home-v2" || path === "/v2") setActiveScreen("home-v2");
       else if (path === "/home-v3" || path === "/v3") setActiveScreen("home-v3");
       else if (path.includes("/services") || path === "/photography") setActiveScreen("photography");
       else if (path.includes("/clothing")) setActiveScreen("clothing");
-      else if (path.includes("/product")) setActiveScreen("product");
+      else if (path.includes("/product") && !path.includes("products")) setActiveScreen("product");
+      else if (path.includes("/ecommerce-photography")) setActiveScreen("ecommerce-photography");
       else if (path.includes("/video")) setActiveScreen("video");
       else if (path.includes("/amazon")) setActiveScreen("amazon");
       else if (path.includes("/instagram")) setActiveScreen("instagram");
       else if (path.includes("/website-brief")) setActiveScreen("website-brief-dashboard");
       else if (path.includes("/website-wizard")) setActiveScreen("website-wizard");
+      else if (path.includes("/style-guide")) setActiveScreen("style-guide");
       else if (path.includes("/designer-wizard")) setActiveScreen("designer-wizard");
+      else if (path.includes("/brand-profile-dashboard")) setActiveScreen("brand-profile-dashboard");
       else if (path.includes("/web-design")) setActiveScreen("webdesign");
       else if (path.includes("/wizard") || path.includes("/shoot")) setActiveScreen("wizard");
       else if (path.includes("/studios") || path === "/studio") setActiveScreen("studio");
@@ -88,6 +111,17 @@ export default function App() {
       else if (path.includes("/sponsors")) {
         setActiveScreen(path.includes("profile") ? "sponsor-profile" : "sponsors");
       }
+      else if (path.includes("/architecture")) setActiveScreen("architecture");
+      else if (path.includes("/proposal")) setActiveScreen("proposal");
+      else if (path.includes("/booking")) setActiveScreen("booking");
+      
+      // Brand Shoot AI Flow
+      else if (path === "/start") setActiveScreen("brand-shoot-start");
+      else if (path.includes("/brand-signal-capture")) setActiveScreen("brand-signal-capture");
+      else if (path.includes("/ai-thinking")) setActiveScreen("ai-thinking");
+      else if (path.includes("/campaign-summary")) setActiveScreen("campaign-summary");
+      else if (path.includes("/proposal-confirmation")) setActiveScreen("proposal-confirmation");
+      else if (path.includes("/ai-optimization")) setActiveScreen("ai-optimization");
     };
 
     handlePathChange();
@@ -110,6 +144,8 @@ export default function App() {
         return <Clothing />;
       case "product":
         return <Product />;
+      case "ecommerce-photography":
+        return <EcommercePhotography />;
       case "video":
         return <VideoServices />;
       case "amazon":
@@ -126,8 +162,10 @@ export default function App() {
         return <BrandProfileDashboard onNavigate={setActiveScreen} />;
       case "website-brief-dashboard":
         return <WebsiteWizard initialStep={9} />;
+      case "style-guide":
+        return <StyleGuide />;
       case "wizard":
-        return <ShootWizard />;
+        return <ShootWizard onComplete={(data) => { setWizardState(data); setActiveScreen("proposal"); }} />;
       case "studio":
         return <Studios />;
       case "directory":
@@ -181,7 +219,7 @@ export default function App() {
       case "contracts":
         return <ContractsManager />;
       case "analytics":
-        return <ROIAnalytics />;
+        return <ROIAnalytics onNavigate={setActiveScreen} />;
       case "events-list":
         return <Events />;
       case "sponsors":
@@ -192,22 +230,44 @@ export default function App() {
         return <DesignerDirectory onNavigate={setActiveScreen} />;
       case "designer-profile":
         return <DesignerProfile onNavigate={setActiveScreen} />;
+      case "architecture":
+        return <SiteArchitecture />;
+      case "proposal":
+        return <ProposalPreview onNavigate={setActiveScreen} proposalData={wizardState} />;
+      case "booking":
+        return <BookingFlow onNavigate={setActiveScreen} />;
+
+      // Brand Shoot AI Flow
+      case "brand-shoot-start":
+        return <BrandShootStart onNavigate={setActiveScreen} />;
+      case "brand-signal-capture":
+        return <BrandSignalCapture onNavigate={setActiveScreen} />;
+      case "ai-thinking":
+        return <AIThinking onNavigate={setActiveScreen} />;
+      case "campaign-summary":
+        return <CampaignSummary onNavigate={setActiveScreen} />;
+      case "proposal-confirmation":
+        return <ProposalConfirmation onNavigate={setActiveScreen} />;
+      case "ai-optimization":
+        return <AIOptimizationCenter onNavigate={setActiveScreen} />;
       
       default:
-        return <AppHome />;
+        return <HomePageV3 />;
     }
   };
 
   // Determine if current page is a marketing page (no top nav needed)
-  const isMarketingPage = ["home", "home-v2", "home-v3", "photography", "clothing", "product", "video", "amazon", "instagram", "webdesign", "website-wizard", "designer-wizard", "studio", "directory", "directorydetail", "events", "eventdetail", "wizard"].includes(activeScreen);
+  const isMarketingPage = ["home", "home-v2", "home-v3", "photography", "ecommerce-photography", "clothing", "product", "video", "amazon", "instagram", "webdesign", "studio", "directory", "directorydetail", "events", "eventdetail", "style-guide", "architecture"].includes(activeScreen);
 
   // Determine if we should hide the sidebar (e.g. for the full-screen wizard)
-  const isFullScreen = activeScreen === "wizard" || activeScreen === "website-wizard" || activeScreen === "designer-wizard";
+  const isFullScreen = activeScreen === "wizard" || activeScreen === "website-wizard" || activeScreen === "designer-wizard" || activeScreen === "event-wizard" || activeScreen === "directory-wizard" || activeScreen === "proposal" || activeScreen === "booking" || 
+    activeScreen === "brand-shoot-start" || activeScreen === "brand-signal-capture" || activeScreen === "ai-thinking" || activeScreen === "campaign-summary" || activeScreen === "proposal-confirmation" || activeScreen === "ai-optimization";
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Sidebar Navigation */}
-      {!isFullScreen && (
+    <BrandShootProvider>
+      <div className="min-h-screen bg-gray-50">
+        {/* Sidebar Navigation */}
+      {!isFullScreen && !isMarketingPage && (
         <Sidebar 
           activeScreen={activeScreen} 
           onNavigate={setActiveScreen}
@@ -217,9 +277,9 @@ export default function App() {
       )}
       
       {/* Main Content Area */}
-      <div className={`${!isFullScreen ? 'lg:ml-64' : ''} transition-all duration-300`}>
+      <div className={`${!isFullScreen && !isMarketingPage ? 'lg:ml-64' : ''} transition-all duration-300`}>
         {/* Show NavigationBar only for dashboard pages */}
-        {!isMarketingPage && (
+        {!isMarketingPage && !isFullScreen && (
           <NavigationBar 
             activeScreen={activeScreen}
             onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -241,7 +301,18 @@ export default function App() {
         )}
         
         {renderContent()}
+
+        {/* Global AI Assistant */}
+        <AIAssistant onNavigate={setActiveScreen} currentScreen={activeScreen} />
+
+        {/* Footer for Dashboard Pages */}
+        {!isMarketingPage && !isFullScreen && (
+          <div className="mt-20">
+            <Footer />
+          </div>
+        )}
       </div>
-    </div>
+      </div>
+    </BrandShootProvider>
   );
 }

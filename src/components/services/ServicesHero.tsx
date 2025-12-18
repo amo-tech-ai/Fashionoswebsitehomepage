@@ -35,13 +35,14 @@ export function ServicesHero({ heroImage, collageImages }: ServicesHeroProps) {
               </p>
             </div>
 
-            <motion.button
-              className="bg-black text-white px-12 py-5 rounded-full hover:bg-gray-800 transition-all duration-300"
+            <motion.a
+              href="/wizard"
+              className="inline-block bg-black text-white px-12 py-5 rounded-full hover:bg-gray-800 transition-all duration-300"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
               Book a Shoot
-            </motion.button>
+            </motion.a>
 
             <div className="flex flex-wrap gap-6 pt-4">
               {badges.map((badge, index) => (

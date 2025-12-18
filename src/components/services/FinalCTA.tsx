@@ -28,14 +28,15 @@ export function FinalCTA() {
             </p>
           </div>
 
-          <motion.button
+          <motion.a
+            href="/wizard"
             className="bg-black text-white px-14 py-6 rounded-full hover:bg-gray-800 transition-all duration-300 inline-flex items-center gap-3 group text-lg"
             whileHover={{ scale: 1.02, gap: "1rem" }}
             whileTap={{ scale: 0.98 }}
           >
             Start Your Brief
             <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform duration-300" />
-          </motion.button>
+          </motion.a>
 
           <div className="flex flex-col md:flex-row items-center justify-center gap-8 pt-8">
             {contactMethods.map((method, index) => (

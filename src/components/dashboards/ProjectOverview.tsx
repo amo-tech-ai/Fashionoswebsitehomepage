@@ -10,52 +10,24 @@ import {
   FileImage, 
   ArrowRight,
   TrendingUp,
-  AlertCircle
+  AlertCircle,
+  Zap
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useBrandShoot } from '../../context/BrandShootContext';
 
 export function ProjectOverview({ onNavigate }: { onNavigate: (page: string) => void }) {
+  const { activeProjects } = useBrandShoot();
   const [activeTab, setActiveTab] = useState('all');
 
   const stats = [
-    { label: "Active Projects", value: "12", trend: "+2 this week", icon: TrendingUp },
+    { label: "Active Projects", value: activeProjects.length.toString(), trend: "+2 this week", icon: TrendingUp },
     { label: "Pending Review", value: "8", trend: "Needs attention", icon: AlertCircle },
     { label: "Shoots this Week", value: "3", trend: "On schedule", icon: Calendar },
     { label: "Completed", value: "156", trend: "+12% vs last month", icon: CheckCircle2 },
   ];
 
-  const activeShoots = [
-    {
-      id: 1,
-      name: "SS25 Campaign",
-      client: "Acme Fashion",
-      status: "Shooting",
-      date: "Oct 24, 2025",
-      deliverables: "18 Photos, 3 Videos",
-      progress: 65,
-      image: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&q=80&w=300&h=200"
-    },
-    {
-      id: 2,
-      name: "Holiday Lookbook",
-      client: "Velvet & Silk",
-      status: "Editing",
-      date: "Oct 20, 2025",
-      deliverables: "45 Photos",
-      progress: 80,
-      image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=300&h=200"
-    },
-    {
-      id: 3,
-      name: "Minimalist Essentials",
-      client: "Basis",
-      status: "Scheduled",
-      date: "Nov 02, 2025",
-      deliverables: "12 Photos",
-      progress: 15,
-      image: "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=300&h=200"
-    }
-  ];
+  const activeShoots = activeProjects; // Use context data instead of hardcoded
 
   const deliverables = [
     { id: 1, name: "Hero Shot - Beige Trench", status: "Needs Editing", due: "Oct 28", assigned: "Alex M." },
@@ -86,11 +58,11 @@ export function ProjectOverview({ onNavigate }: { onNavigate: (page: string) => 
             <Filter className="w-4 h-4" />
           </button>
           <button 
-            onClick={() => onNavigate('wizard')}
+            onClick={() => onNavigate('brand-shoot-start')} // Link to new AI flow
             className="flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-colors shadow-lg shadow-gray-900/10"
           >
-            <Plus className="w-4 h-4" />
-            <span>New Shoot</span>
+            <Zap className="w-4 h-4 text-yellow-400" />
+            <span>New AI Shoot</span>
           </button>
         </div>
       </div>

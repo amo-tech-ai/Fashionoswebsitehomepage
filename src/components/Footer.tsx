@@ -12,44 +12,56 @@ export function Footer() {
 
   const footerSections = [
     {
-      title: "About",
+      title: "Platform",
       links: [
-        "Our Story", 
-        "Team", 
-        "Careers", 
-        "Press"
+        { text: "Overview", href: "/overview" },
+        { text: "Command Center", href: "/command-center" },
+        { text: "Shot Lists", href: "/shotlist" },
+        { text: "Inventory", href: "/products" },
+        { text: "Events Schedule", href: "/events-list" },
+        { text: "Finance", href: "/billing" },
+        { text: "Analytics", href: "/analytics" }
       ]
     },
     {
-      title: "Review Versions",
+      title: "Create",
       links: [
-        { text: "Home V1 (Original)", href: "/" },
-        { text: "Home V2 (Previous)", href: "/home-v2" },
-        { text: "Home V3 (Latest)", href: "/home-v3" }
+        { text: "New Brand Shoot (AI)", href: "/start" },
+        { text: "Classic Shoot Wizard", href: "/wizard" },
+        { text: "New Event Wizard", href: "/event-wizard" },
+        { text: "New Website Wizard", href: "/website-wizard" },
+        { text: "New Designer Profile", href: "/designer-wizard" }
       ]
     },
     {
       title: "Services",
       links: [
-        { text: "All Services", href: "/services" },
-        { text: "Social Media Services", href: "/instagram" },
+        { text: "Ecommerce Photography", href: "/ecommerce-photography" },
         { text: "Website Design", href: "/web-design" },
-        { text: "Photography Services", href: "/photography" },
-        { text: "Clothing Photography", href: "/clothing" },
-        { text: "Product Photography", href: "/product" },
         { text: "Video Production", href: "/video" },
-        { text: "Amazon Content", href: "/amazon" },
-        { text: "Start New Shoot", href: "/wizard" },
-        { text: "Studio Hire", href: "/studios" }
+        { text: "Studio Hire", href: "/studios" },
+        { text: "Social Media", href: "/instagram" },
+        { text: "Amazon Content", href: "/amazon" }
       ]
     },
     {
-      title: "Directory",
-      links: ["Models", "Photographers", "Designers", "Stylists"]
+      title: "Versions",
+      links: [
+        { text: "Home V1 (Original)", href: "/" },
+        { text: "Home V2 (Previous)", href: "/home-v2" },
+        { text: "Home V3 (Latest)", href: "/home-v3" },
+        { text: "Directory", href: "/directory" }
+      ]
     },
     {
-      title: "Contact",
-      links: ["hello@fashionos.com", "+1 (555) 123-4567", "New York, NY", "Book a Call"]
+      title: "Company",
+      links: [
+        { text: "About Us", href: "#" },
+        { text: "Design System", href: "/style-guide" },
+        { text: "Contact", href: "#" },
+        { text: "Careers", href: "#" },
+        { text: "Press", href: "#" }
+      ]
     }
   ];
 

@@ -45,7 +45,6 @@ export function CommandCenter({ onNavigate }: CommandCenterProps) {
     { id: "tasks", label: "Tasks Flow" },
     { id: "sponsors", label: "Sponsors & Activations" },
     { id: "timeline", label: "Timeline" },
-    { id: "ai", label: "AI Insights" },
     { id: "roi", label: "ROI Dashboard" }
   ];
 
@@ -422,7 +421,7 @@ export function CommandCenter({ onNavigate }: CommandCenterProps) {
 
       </div>
 
-      {/* 3. FOOTER WORKFLOW MAP */}
+      {/* 3. FOOTER WORKFLOW MAP (Desktop) */}
       <div className="fixed bottom-0 left-0 lg:left-64 right-0 bg-white border-t border-gray-100 px-6 py-3 z-20 hidden md:flex items-center justify-between shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)]">
          <div className="flex items-center gap-6">
             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Event Progress</span>
@@ -447,6 +446,22 @@ export function CommandCenter({ onNavigate }: CommandCenterProps) {
          <div className="text-xs text-gray-400 font-medium">
             Last updated: Just now
          </div>
+      </div>
+
+      {/* Mobile Workflow Progress (Visible only on small screens) */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 z-20">
+        <div className="flex items-center justify-between mb-2">
+           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Event Progress</span>
+           <span className="text-xs font-bold text-[#1A1A1A]">78%</span>
+        </div>
+        <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+           <div className="bg-[#1A1A1A] h-full rounded-full" style={{ width: "78%" }} />
+        </div>
+        <div className="flex justify-between mt-2 text-[10px] text-gray-500 font-medium">
+           <span>Pre-Production</span>
+           <span className="text-[#1A1A1A] font-bold">Venue Ops</span>
+           <span className="text-gray-300">Showtime</span>
+        </div>
       </div>
 
     </div>

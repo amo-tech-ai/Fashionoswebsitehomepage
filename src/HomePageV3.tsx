@@ -239,8 +239,8 @@ export default function HomePageV3() {
       <section className="py-24 bg-black text-white overflow-hidden">
         <div className="container mx-auto px-6 lg:px-12">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-serif mb-4">Production, Simplified.</h2>
-            <p className="text-gray-400 font-light">From concept to call sheet in one workflow.</p>
+            <h2 className="text-4xl font-serif mb-4">AI-Native Brand Shoots</h2>
+            <p className="text-gray-400 font-light">From concept to call sheet in one AI-guided workflow.</p>
           </div>
 
           <div className="relative">
@@ -249,10 +249,10 @@ export default function HomePageV3() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
               {[
-                { step: "01", title: "Book", desc: "Select talent & dates" },
-                { step: "02", title: "Plan", desc: "Shot lists & moodboards" },
+                { step: "01", title: "Scan", desc: "AI analyzes your brand DNA" },
+                { step: "02", title: "Plan", desc: "Auto-generated shot lists" },
                 { step: "03", title: "Shoot", desc: "Live capture integration" },
-                { step: "04", title: "Deliver", desc: "Instant retouch & approval" }
+                { step: "04", title: "Optimize", desc: "Instant AI retouching" }
               ].map((item, i) => (
                 <div key={i} className="bg-gray-900 p-8 border border-gray-800 hover:border-white transition-colors">
                    <span className="text-4xl font-serif text-gray-700 block mb-4">{item.step}</span>
@@ -263,8 +263,8 @@ export default function HomePageV3() {
             </div>
             
             <div className="text-center mt-12">
-              <button onClick={() => handleNavigation("/wizard")} className="bg-white text-black px-8 py-4 text-xs uppercase tracking-widest hover:bg-gray-200 transition-colors">
-                Start a Shoot
+              <button onClick={() => handleNavigation("/start")} className="bg-white text-black px-8 py-4 text-xs uppercase tracking-widest hover:bg-gray-200 transition-colors flex items-center gap-2 mx-auto">
+                <Zap className="w-4 h-4" /> Start AI Shoot
               </button>
             </div>
           </div>
