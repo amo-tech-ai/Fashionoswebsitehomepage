@@ -543,6 +543,13 @@ const ROUTE_MAPPINGS: Record<string, AssistantKitConfig> = {
     quickActions: ['Save Profile', 'Preview', 'Publish', 'Get Help'],
     defaultInsights: ['Completion Status', 'Missing Info'],
   },
+  'directory-wizard': {
+    kitName: KIT_NAMES.DIRECTORY,
+    pageName: 'Directory Profile Wizard',
+    primarySkill: SKILL_NAMES.DIRECTORY_SKILL,
+    quickActions: ['Save Profile', 'Preview', 'Publish', 'Add Portfolio'],
+    defaultInsights: ['Profile Completion', 'Missing Fields', 'Best Practices'],
+  },
 
   // =========================================================================
   // PROPOSAL & BOOKING PAGES

@@ -206,78 +206,171 @@ function SystemMapSection() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true });
 
-  const nodes = [
-    { label: "Beauty Strategy", angle: 0 },
-    { label: "Look Tagging", angle: 60 },
-    { label: "Creator + MUA", angle: 120 },
-    { label: "Channel Distribution", angle: 180 },
-    { label: "ROI & Attribution", angle: 240 },
-    { label: "Insights", angle: 300 },
-  ];
-
   return (
     <section ref={ref} className="py-32 px-6 bg-white">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <motion.div
-          className="text-center mb-20"
+          className="text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-4xl md:text-5xl mb-6 text-[#2D2D2D]" style={{ fontFamily: 'Georgia, serif' }}>
+          <h2 className="text-5xl md:text-6xl mb-6 text-[#2D2D2D]" style={{ fontFamily: 'Georgia, serif' }}>
             One System. Full Visibility.
           </h2>
+          <p className="text-lg text-[#706F6C] max-w-3xl mx-auto leading-relaxed">
+            FashionOS connects event activations, commerce, marketing channels, and ROI reporting — in one unified platform.
+          </p>
         </motion.div>
 
-        {/* Central Hub Diagram */}
-        <div className="relative w-full max-w-3xl mx-auto aspect-square">
-          {/* Center Circle */}
+        {/* Hub-and-Spoke Layout */}
+        <div className="relative w-full max-w-5xl mx-auto" style={{ minHeight: '700px' }}>
+          {/* Central Hub */}
           <motion.div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full border-2 border-[#D4C5A9] bg-white flex items-center justify-center shadow-lg"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-white border border-[#E5E1DA] flex items-center justify-center shadow-sm z-10"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ duration: 0.6, delay: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
           >
             <div className="text-center">
-              <div className="text-xl" style={{ fontFamily: 'Georgia, serif' }}>FashionOS</div>
-              <div className="text-xs text-[#706F6C] mt-1">Beauty System</div>
+              <div className="text-3xl mb-2 text-[#2D2D2D]" style={{ fontFamily: 'Georgia, serif' }}>
+                FashionOS
+              </div>
+              <div className="text-sm text-[#706F6C] tracking-wider uppercase">
+                Sponsorship System
+              </div>
             </div>
           </motion.div>
 
-          {/* Outer Nodes */}
-          {nodes.map((node, i) => {
-            const radius = 220;
-            const x = Math.cos((node.angle * Math.PI) / 180) * radius;
-            const y = Math.sin((node.angle * Math.PI) / 180) * radius;
+          {/* Top-Left: Event Activations */}
+          <motion.div
+            className="absolute top-0 left-0 w-64 h-40"
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <div className="w-full h-full rounded-lg bg-white border border-[#E5E1DA] flex items-center justify-center hover:border-[#D4C5A9] transition-all duration-300">
+              <span className="text-base text-[#2D2D2D]">Event Activations</span>
+            </div>
+            {/* Connector Line */}
+            <svg className="absolute top-full left-1/2 w-1 h-32 -translate-x-1/2" style={{ overflow: 'visible' }}>
+              <motion.line
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="128"
+                stroke="#E5E1DA"
+                strokeWidth="1"
+                initial={{ pathLength: 0 }}
+                animate={isInView ? { pathLength: 1 } : {}}
+                transition={{ duration: 0.6, delay: 0.6 }}
+              />
+            </svg>
+          </motion.div>
 
-            return (
-              <motion.div
-                key={i}
-                className="absolute top-1/2 left-1/2 w-32 h-32 -ml-16 -mt-16"
-                style={{
-                  transform: `translate(${x}px, ${y}px)`
-                }}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={isInView ? { opacity: 1, scale: 1 } : {}}
-                transition={{ duration: 0.4, delay: 0.5 + i * 0.1 }}
-              >
-                <div className="w-full h-full rounded-xl border border-[#E5E1DA] bg-white flex items-center justify-center text-center p-4 shadow-sm hover:border-[#D4C5A9] transition-colors">
-                  <span className="text-sm text-[#2D2D2D]">{node.label}</span>
-                </div>
+          {/* Top-Right: Live Commerce */}
+          <motion.div
+            className="absolute top-0 right-0 w-64 h-40"
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.5 }}
+          >
+            <div className="w-full h-full rounded-lg bg-white border border-[#E5E1DA] flex items-center justify-center hover:border-[#D4C5A9] transition-all duration-300">
+              <span className="text-base text-[#2D2D2D]">Live Commerce</span>
+            </div>
+            {/* Connector Line */}
+            <svg className="absolute top-full right-1/2 w-1 h-32 translate-x-1/2" style={{ overflow: 'visible' }}>
+              <motion.line
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="128"
+                stroke="#E5E1DA"
+                strokeWidth="1"
+                initial={{ pathLength: 0 }}
+                animate={isInView ? { pathLength: 1 } : {}}
+                transition={{ duration: 0.6, delay: 0.7 }}
+              />
+            </svg>
+          </motion.div>
 
-                {/* Connection Line */}
-                <motion.div
-                  className="absolute top-1/2 left-1/2 w-[2px] h-20 bg-gradient-to-b from-[#D4C5A9]/30 to-transparent origin-bottom"
-                  style={{
-                    transform: `translate(-50%, -100%) rotate(${node.angle + 180}deg)`
-                  }}
-                  initial={{ scaleY: 0 }}
-                  animate={isInView ? { scaleY: 1 } : {}}
-                  transition={{ duration: 0.5, delay: 0.6 + i * 0.1 }}
-                />
-              </motion.div>
-            );
-          })}
+          {/* Bottom-Left: Audience & Leads */}
+          <motion.div
+            className="absolute bottom-0 left-0 w-64 h-40"
+            initial={{ opacity: 0, y: -20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.6 }}
+          >
+            {/* Connector Line */}
+            <svg className="absolute bottom-full left-1/2 w-1 h-32 -translate-x-1/2" style={{ overflow: 'visible' }}>
+              <motion.line
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="128"
+                stroke="#E5E1DA"
+                strokeWidth="1"
+                initial={{ pathLength: 0 }}
+                animate={isInView ? { pathLength: 1 } : {}}
+                transition={{ duration: 0.6, delay: 0.8 }}
+              />
+            </svg>
+            <div className="w-full h-full rounded-lg bg-white border border-[#E5E1DA] flex items-center justify-center hover:border-[#D4C5A9] transition-all duration-300">
+              <span className="text-base text-[#2D2D2D]">Audience & Leads</span>
+            </div>
+          </motion.div>
+
+          {/* Bottom-Right: ROI Analytics */}
+          <motion.div
+            className="absolute bottom-0 right-0 w-64 h-40"
+            initial={{ opacity: 0, y: -20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.7 }}
+          >
+            {/* Connector Line */}
+            <svg className="absolute bottom-full right-1/2 w-1 h-32 translate-x-1/2" style={{ overflow: 'visible' }}>
+              <motion.line
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="128"
+                stroke="#E5E1DA"
+                strokeWidth="1"
+                initial={{ pathLength: 0 }}
+                animate={isInView ? { pathLength: 1 } : {}}
+                transition={{ duration: 0.6, delay: 0.9 }}
+              />
+            </svg>
+            <div className="w-full h-full rounded-lg bg-white border border-[#E5E1DA] flex items-center justify-center hover:border-[#D4C5A9] transition-all duration-300">
+              <span className="text-base text-[#2D2D2D]">ROI Analytics</span>
+            </div>
+          </motion.div>
+
+          {/* Center-Top: AI Agents (5th node) */}
+          <motion.div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -mt-56 w-64 h-40"
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.8 }}
+          >
+            <div className="w-full h-full rounded-lg bg-white border border-[#E5E1DA] flex items-center justify-center hover:border-[#D4C5A9] transition-all duration-300">
+              <span className="text-base text-[#2D2D2D]">AI Agents</span>
+            </div>
+            {/* Connector Line */}
+            <svg className="absolute top-full left-1/2 w-1 h-24 -translate-x-1/2" style={{ overflow: 'visible' }}>
+              <motion.line
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="96"
+                stroke="#E5E1DA"
+                strokeWidth="1"
+                initial={{ pathLength: 0 }}
+                animate={isInView ? { pathLength: 1 } : {}}
+                transition={{ duration: 0.6, delay: 1.0 }}
+              />
+            </svg>
+          </motion.div>
         </div>
       </div>
     </section>
