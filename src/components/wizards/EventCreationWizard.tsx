@@ -1,161 +1,452 @@
-import { useState } from "react";
-import { toast } from "sonner";
-import { 
-  Sparkles, 
-  ChevronRight, 
-  ChevronLeft, 
-  Check, 
-} from "lucide-react";
-import { useSponsor } from "../../context/SponsorContext";
-import { useEvent } from "../../context/EventContext";
+/**
+ * Event Creation Wizard - Complete Implementation
+ * 
+ * Multi-step wizard for creating events with AI-powered assistance.
+ * Integrates form validation, AI analysis, and realtime feedback.
+ * 
+ * Features:
+ * - 4-step wizard flow
+ * - Form validation with Zod
+ * - AI task generation
+ * - Risk analysis
+ * - Success confirmation
+ * - Mobile responsive
+ * 
+ * Usage:
+ * ```tsx
+ * <EventCreationWizard
+ *   onComplete={(event) => navigate('/events/' + event.id)}
+ *   onCancel={() => navigate('/events')}
+ * />
+ * ```
+ */
 
-// Import Steps
-import { Step1Basics } from "./steps/Step1Basics";
-import { Step2Venue } from "./steps/Step2Venue";
-import { Step3Casting } from "./steps/Step3Casting";
-import { Step4Sponsors } from "./steps/Step4Sponsors";
-import { Step5Deliverables } from "./steps/Step5Deliverables";
-import { Step6Review } from "./steps/Step6Review";
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Calendar, MapPin, Users, DollarSign, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { useEventForm } from '../../lib/hooks/useFormValidation';
+import { aiOrchestrator } from '../../lib/ai/workflows/AIOrchestrator';
+import { AIResultsPanel } from '../ai/AIResultsPanel';
+import { EventCreatedSuccess } from '../shared/SuccessScreen';
+import { LoadingSkeleton } from '../shared/LoadingSkeleton';
 
-// Shared data for lookup (could be in a separate file)
-const MOCK_SPONSORS_LOOKUP = [
-  { id: 1, name: "Dior", tier: "Platinum", logo: "D", category: "Fashion", amount: 150000 },
-  { id: 2, name: "Chanel", tier: "Platinum", logo: "C", category: "Fashion", amount: 125000 },
-  { id: 3, name: "Sephora", tier: "Gold", logo: "S", category: "Beauty", amount: 80000 },
-  { id: 4, name: "Vogue", tier: "Media", logo: "V", category: "Media", amount: 0 }, // Media partners often barter
-  { id: 5, name: "Moët & Chandon", tier: "Gold", logo: "M", category: "Hospitality", amount: 60000 },
+// ============================================================================
+// TYPES
+// ============================================================================
+
+export interface EventCreationWizardProps {
+  onComplete: (event: any) => void;
+  onCancel: () => void;
+}
+
+interface WizardStep {
+  id: number;
+  title: string;
+  description: string;
+}
+
+const WIZARD_STEPS: WizardStep[] = [
+  { id: 1, title: 'Basic Details', description: 'Event name, type, and date' },
+  { id: 2, title: 'Venue & Logistics', description: 'Location and capacity' },
+  { id: 3, title: 'Budget & Goals', description: 'Financial planning' },
+  { id: 4, title: 'Review & AI Analysis', description: 'Confirm and generate plan' },
 ];
 
-export function EventCreationWizard({ onComplete }: { onComplete?: () => void }) {
-  const [step, setStep] = useState(1);
-  const { addSponsor } = useSponsor();
-  const { createEvent } = useEvent();
-  
-  const [formData, setFormData] = useState({
-    name: "NYFW SS25 – Runway Revolution",
-    type: "Runway Show",
-    date: "",
-    location: "",
-    brandUrl: "",
-    theme: "Modern minimalism with high-contrast lighting",
-    venueId: null as number | null,
-    layoutId: "straight",
-    models: 25,
-    looks: 40,
-    selectedSponsors: [1, 2],
-    activationTab: "Hospitality",
-    selectedActivations: [1],
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
+export function EventCreationWizard({ onComplete, onCancel }: EventCreationWizardProps) {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [aiAnalysis, setAiAnalysis] = useState<any>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const { form, onSubmit, isSubmitting } = useEventForm({
+    onSuccess: async (data) => {
+      // Run AI analysis
+      setIsAnalyzing(true);
+      try {
+        const result = await aiOrchestrator.runEventCreationWorkflow({
+          name: data.name,
+          type: data.type,
+          date: data.date || new Date().toISOString(),
+          venue: data.venue,
+          budget_total: data.budget_total,
+          attendee_target: data.attendee_target,
+        });
+
+        setAiAnalysis(result.data);
+        setIsAnalyzing(false);
+        setShowSuccess(true);
+
+        // Auto-complete after 3 seconds
+        setTimeout(() => {
+          onComplete(result.data?.event);
+        }, 3000);
+      } catch (error) {
+        console.error('AI analysis failed:', error);
+        setIsAnalyzing(false);
+        // Still allow completion
+        onComplete(data);
+      }
+    },
   });
 
-  const nextStep = () => setStep(s => Math.min(s + 1, 6));
-  const prevStep = () => setStep(s => Math.max(s - 1, 1));
-
-  const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleNext = () => {
+    if (currentStep < WIZARD_STEPS.length) {
+      setCurrentStep(currentStep + 1);
+    }
   };
 
-  const handleComplete = () => {
-    // 1. Create the Event in EventContext
-    createEvent({
-      name: formData.name,
-      type: 'runway_show', // Simple mapping for now
-      status: 'planning',
-      start_date: formData.date || new Date().toISOString(),
-      attendee_target: 3000, // Based on venue selection
-      budget_total: 500000,
-      
-      // Enriched Data for AI
-      theme: formData.theme,
-      models_count: formData.models,
-      looks_count: formData.looks,
-      venue_name: formData.location || "TBD",
-      mood_keywords: formData.theme.split(' ').filter(w => w.length > 3), // Simple keyword extraction
-    });
-
-    // 2. Add selected sponsors to the CRM Context
-    formData.selectedSponsors.forEach(sponsorId => {
-        const sponsorData = MOCK_SPONSORS_LOOKUP.find(s => s.id === sponsorId);
-        if (sponsorData) {
-            addSponsor({
-                event_id: 'new-event-001', // Ideally this ID comes from the created event
-                company_name: sponsorData.name,
-                tier: sponsorData.tier as any,
-                amount: sponsorData.amount,
-                status: 'proposal', // Start them at proposal stage
-                contact_name: 'TBD',
-                fit_score: 85 + Math.floor(Math.random() * 10), // Mock high fit score
-                notes: `Added via Event Wizard for ${formData.name}`
-            });
-        }
-    });
-
-    // 3. Complete Wizard
-    onComplete?.();
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
   };
+
+  const handleFinish = () => {
+    form.handleSubmit(onSubmit)();
+  };
+
+  // Show success screen
+  if (showSuccess && aiAnalysis) {
+    return (
+      <EventCreatedSuccess
+        eventName={form.getValues('name')}
+        tasksGenerated={aiAnalysis.tasks?.length || 0}
+        onViewEvent={() => onComplete(aiAnalysis.event)}
+        onCreateAnother={() => {
+          setShowSuccess(false);
+          setCurrentStep(1);
+          form.reset();
+        }}
+      />
+    );
+  }
 
   return (
-    <div className="fixed inset-0 bg-[#F7F7F5] z-50 overflow-y-auto">
-      <div className="min-h-screen flex flex-col max-w-5xl mx-auto px-4 py-8">
-        
-        {/* Header */}
-        <div className="flex items-center justify-between mb-12">
-          <div className="flex items-center gap-4">
-             <div className="w-10 h-10 bg-[#1A1A1A] rounded-full flex items-center justify-center text-white">
-                <Sparkles className="w-5 h-5" />
-             </div>
-             <div>
-                <h1 className="text-2xl font-serif font-medium text-[#1A1A1A]">New Event</h1>
-                <p className="text-sm text-gray-500">AI-Powered Wizard</p>
-             </div>
-          </div>
-          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-gray-200 shadow-sm">
-             <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">Step {step} of 6</span>
-             <div className="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                <div className="h-full bg-[#1A1A1A] transition-all duration-300" style={{ width: `${(step / 6) * 100}%` }} />
-             </div>
-          </div>
-        </div>
-
-        {/* Content Area */}
-        <div className="flex-1 mb-24">
-           {step === 1 && <Step1Basics formData={formData} handleInputChange={handleInputChange} />}
-           {step === 2 && <Step2Venue formData={formData} handleInputChange={handleInputChange} />}
-           {step === 3 && <Step3Casting formData={formData} handleInputChange={handleInputChange} />}
-           {step === 4 && <Step4Sponsors formData={formData} handleInputChange={handleInputChange} />}
-           {step === 5 && <Step5Deliverables />}
-           {step === 6 && <Step6Review formData={formData} setStep={setStep} />}
-        </div>
-
-        {/* Footer Navigation */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
-           <div className="max-w-5xl mx-auto flex items-center justify-between">
-              <button 
-                onClick={prevStep}
-                disabled={step === 1}
-                className="px-6 py-3 rounded-xl font-medium text-gray-600 hover:text-black disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
-              >
-                 <ChevronLeft className="w-5 h-5" /> Back
-              </button>
-              
-              {step < 6 ? (
-                <button 
-                  onClick={nextStep}
-                  className="px-8 py-3 bg-[#1A1A1A] text-white rounded-xl font-medium hover:bg-gray-800 transition-colors shadow-lg shadow-gray-200 flex items-center gap-2"
+    <div className="max-w-4xl mx-auto p-6">
+      {/* Progress Bar */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          {WIZARD_STEPS.map((step, index) => (
+            <React.Fragment key={step.id}>
+              <div className="flex flex-col items-center">
+                <div
+                  className={`
+                    w-10 h-10 rounded-full flex items-center justify-center font-medium text-sm
+                    ${currentStep >= step.id
+                      ? 'bg-[#111111] text-white'
+                      : 'bg-gray-200 text-gray-500'
+                    }
+                  `}
                 >
-                   Next Step <ChevronRight className="w-5 h-5" />
-                </button>
-              ) : (
-                <button 
-                  onClick={handleComplete}
-                  className="px-8 py-3 bg-[#1A1A1A] text-white rounded-xl font-medium hover:bg-gray-800 transition-colors shadow-lg shadow-gray-200 flex items-center gap-2"
-                >
-                   <Check className="w-5 h-5" /> Create Event Workspace
-                </button>
+                  {step.id}
+                </div>
+                <div className="text-xs text-gray-600 mt-2 text-center max-w-[100px]">
+                  {step.title}
+                </div>
+              </div>
+              {index < WIZARD_STEPS.length - 1 && (
+                <div
+                  className={`
+                    flex-1 h-1 mx-2 rounded
+                    ${currentStep > step.id ? 'bg-[#111111]' : 'bg-gray-200'}
+                  `}
+                />
               )}
-           </div>
+            </React.Fragment>
+          ))}
         </div>
-
       </div>
+
+      {/* Form Content */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentStep}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.3 }}
+        >
+          <form className="bg-white rounded-lg border border-gray-200 p-8">
+            {/* Step 1: Basic Details */}
+            {currentStep === 1 && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="font-serif text-2xl text-gray-900 mb-2">Basic Event Details</h2>
+                  <p className="text-sm text-gray-600">Let's start with the essentials</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Event Name *
+                  </label>
+                  <Input
+                    {...form.register('name')}
+                    placeholder="e.g., NYFW SS26 Emerging Designers Showcase"
+                    className="w-full"
+                  />
+                  {form.formState.errors.name && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {form.formState.errors.name.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Event Type *
+                  </label>
+                  <Select
+                    onValueChange={(value) => form.setValue('type', value as any)}
+                    defaultValue={form.getValues('type')}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select event type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="runway_show">Runway Show</SelectItem>
+                      <SelectItem value="photoshoot">Photoshoot</SelectItem>
+                      <SelectItem value="popup">Pop-up Event</SelectItem>
+                      <SelectItem value="activation">Brand Activation</SelectItem>
+                      <SelectItem value="campaign">Campaign Launch</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Event Date *
+                  </label>
+                  <Input
+                    {...form.register('date')}
+                    type="date"
+                    className="w-full"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Description
+                  </label>
+                  <Textarea
+                    {...form.register('description')}
+                    placeholder="Brief description of your event..."
+                    rows={4}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Venue & Logistics */}
+            {currentStep === 2 && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="font-serif text-2xl text-gray-900 mb-2">Venue & Logistics</h2>
+                  <p className="text-sm text-gray-600">Where and how many people?</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <MapPin className="w-4 h-4 inline mr-2" />
+                    Venue / Location
+                  </label>
+                  <Input
+                    {...form.register('venue')}
+                    placeholder="e.g., Skylight Modern, New York"
+                    className="w-full"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Users className="w-4 h-4 inline mr-2" />
+                    Target Attendees
+                  </label>
+                  <Input
+                    {...form.register('attendee_target', { valueAsNumber: true })}
+                    type="number"
+                    placeholder="e.g., 300"
+                    className="w-full"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Estimated number of guests/attendees
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Event Duration (hours)
+                  </label>
+                  <Input
+                    type="number"
+                    placeholder="e.g., 3"
+                    className="w-full"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Budget & Goals */}
+            {currentStep === 3 && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="font-serif text-2xl text-gray-900 mb-2">Budget & Goals</h2>
+                  <p className="text-sm text-gray-600">Financial planning and objectives</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <DollarSign className="w-4 h-4 inline mr-2" />
+                    Total Budget
+                  </label>
+                  <Input
+                    {...form.register('budget_total', { valueAsNumber: true })}
+                    type="number"
+                    placeholder="e.g., 50000"
+                    className="w-full"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    AI will help allocate budget across categories
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Primary Goal
+                  </label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select primary goal" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="awareness">Brand Awareness</SelectItem>
+                      <SelectItem value="sales">Drive Sales</SelectItem>
+                      <SelectItem value="engagement">Community Engagement</SelectItem>
+                      <SelectItem value="launch">Product Launch</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+
+            {/* Step 4: Review & AI Analysis */}
+            {currentStep === 4 && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="font-serif text-2xl text-gray-900 mb-2">Review & Confirm</h2>
+                  <p className="text-sm text-gray-600">
+                    AI will generate tasks, analyze risks, and create your event plan
+                  </p>
+                </div>
+
+                {/* Summary */}
+                <div className="bg-gray-50 rounded-lg p-6 space-y-4">
+                  <div>
+                    <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Event Name</div>
+                    <div className="font-medium text-gray-900">{form.watch('name') || 'Not specified'}</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Type</div>
+                      <div className="text-sm text-gray-900 capitalize">
+                        {form.watch('type')?.replace('_', ' ') || 'Not specified'}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Date</div>
+                      <div className="text-sm text-gray-900">
+                        {form.watch('date') ? new Date(form.watch('date')).toLocaleDateString() : 'Not specified'}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Venue</div>
+                      <div className="text-sm text-gray-900">{form.watch('venue') || 'TBD'}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Budget</div>
+                      <div className="text-sm text-gray-900">
+                        {form.watch('budget_total') ? `$${form.watch('budget_total').toLocaleString()}` : 'Not specified'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* AI Analysis Results */}
+                {isAnalyzing && (
+                  <LoadingSkeleton variant="card" count={1} />
+                )}
+
+                {aiAnalysis && !isAnalyzing && (
+                  <AIResultsPanel
+                    type="event-analysis"
+                    data={aiAnalysis}
+                    onAction={(action, data) => {
+                      console.log('AI Action:', action, data);
+                    }}
+                  />
+                )}
+              </div>
+            )}
+
+            {/* Navigation Buttons */}
+            <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
+              <div>
+                {currentStep > 1 && (
+                  <Button
+                    type="button"
+                    onClick={handleBack}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    Back
+                  </Button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  onClick={onCancel}
+                  variant="outline"
+                >
+                  Cancel
+                </Button>
+
+                {currentStep < WIZARD_STEPS.length ? (
+                  <Button
+                    type="button"
+                    onClick={handleNext}
+                    className="bg-[#111111] hover:bg-black text-white flex items-center gap-2"
+                  >
+                    Next
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    onClick={handleFinish}
+                    disabled={isSubmitting || isAnalyzing}
+                    className="bg-[#111111] hover:bg-black text-white"
+                  >
+                    {isAnalyzing ? 'Analyzing...' : 'Create Event'}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </form>
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }

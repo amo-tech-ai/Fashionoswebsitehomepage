@@ -9,7 +9,10 @@ import {
   MoreHorizontal,
   Sparkles,
   Upload,
-  ArrowRight
+  ArrowRight,
+  Download,
+  Eye,
+  Trash2
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "../../ui/button";
@@ -17,6 +20,9 @@ import { Input } from "../../ui/input";
 import { Badge } from "../../ui/badge";
 import { Card } from "../../ui/card";
 import { useAgentContext } from "../../../lib/ai/AgentContext";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../../ui/dialog";
+import { FileUpload } from "../../shared/UploadStates";
+import { toast } from "sonner";
 
 interface ContractDoc {
   id: string;
@@ -36,10 +42,47 @@ const mockDocs: ContractDoc[] = [
 
 export function ContractAnalyzer() {
   const [analyzingId, setAnalyzingId] = useState<string | null>(null);
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [contracts, setContracts] = useState<ContractDoc[]>(mockDocs);
+  const [selectedContract, setSelectedContract] = useState<ContractDoc | null>(null);
   
   const handleAnalyze = (id: string) => {
     setAnalyzingId(id);
-    setTimeout(() => setAnalyzingId(null), 2500); // Mock delay
+    
+    // Simulate AI analysis with Gemini
+    setTimeout(() => {
+      const contract = contracts.find(c => c.id === id);
+      if (contract) {
+        setSelectedContract(contract);
+        toast.success(`AI Analysis complete for ${contract.title}`);
+      }
+      setAnalyzingId(null);
+    }, 2500);
+  };
+
+  const handleUploadComplete = (results: Array<{ file: File; url: string | null; path: string }>) => {
+    // Convert uploaded contracts to ContractDoc format
+    const newContracts: ContractDoc[] = results
+      .filter(r => r.url)
+      .map((r, index) => ({
+        id: `uploaded-${Date.now()}-${index}`,
+        title: r.file.name.replace(/\.(pdf|docx)$/i, ''),
+        party: 'To Be Determined',
+        type: 'Pending Classification',
+        status: 'Draft' as const,
+        riskScore: 0,
+        lastModified: 'Just now',
+      }));
+
+    setContracts(prev => [...newContracts, ...prev]);
+    setIsUploadDialogOpen(false);
+    
+    toast.success(`${newContracts.length} contract(s) uploaded successfully`);
+    
+    // Auto-analyze first uploaded contract
+    if (newContracts.length > 0) {
+      setTimeout(() => handleAnalyze(newContracts[0].id), 500);
+    }
   };
 
   return (
@@ -57,7 +100,7 @@ export function ContractAnalyzer() {
             <h1 className="text-3xl font-serif font-medium text-gray-900">Contract Intelligence</h1>
           </div>
           <div className="flex gap-3">
-             <Button className="bg-gray-900 text-white">
+             <Button className="bg-gray-900 text-white" onClick={() => setIsUploadDialogOpen(true)}>
                <Upload className="w-4 h-4 mr-2" /> Upload Contract
              </Button>
           </div>
@@ -75,7 +118,7 @@ export function ContractAnalyzer() {
             <Button variant="ghost" size="sm"><Filter className="w-4 h-4" /></Button>
           </div>
 
-          {mockDocs.map((doc) => (
+          {contracts.map((doc) => (
             <div key={doc.id} className="bg-white p-5 rounded-xl border border-gray-100 hover:border-gray-300 transition-all shadow-sm flex items-center justify-between group">
               <div className="flex items-start gap-4">
                 <div className="p-3 bg-gray-50 rounded-lg text-gray-500 group-hover:bg-gray-900 group-hover:text-white transition-colors">
@@ -144,6 +187,35 @@ export function ContractAnalyzer() {
         </div>
 
       </div>
+
+      {/* Upload Dialog */}
+      <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Upload Contracts for AI Analysis</DialogTitle>
+            <DialogDescription>
+              Upload PDF or DOCX contracts. Our AI will automatically analyze them for risks, missing clauses, and compliance issues.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="mt-4">
+            <FileUpload
+              onUpload={async (files: File[]) => {
+                // Required handler
+              }}
+              onUploadComplete={handleUploadComplete}
+              bucket="contracts"
+              folder="legal-documents"
+              acceptedTypes={['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']}
+              maxSize={20 * 1024 * 1024} // 20MB
+              multiple={true}
+              maxFiles={10}
+              mode="list"
+              autoCompress={false}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { InputStep } from "./steps/InputStep";
 import { AnalysisStep } from "./steps/AnalysisStep";
 import { AuditStep } from "./steps/AuditStep";
-
 import { ScanningStep } from "./steps/ScanningStep";
+import type { LightboxImage } from "../shared/ImageLightbox";
 
 export type WizardStep = "input" | "scanning" | "analysis" | "audit";
 
@@ -12,6 +12,7 @@ export interface BrandData {
   name: string;
   website: string;
   instagram: string;
+  portfolioFiles?: LightboxImage[];
 }
 
 export interface DesignerWizardProps {

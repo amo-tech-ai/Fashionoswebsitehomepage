@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { AppShell } from "./components/shared/AppShell";
 import { NavigationBar } from "./components/shared/NavigationBar";
+import { SupabaseStatus } from "./components/shared/SupabaseStatus";
 import { Footer } from "./components/Footer";
 import AppHome from "./AppHome";
 import HomePageV2 from "./HomePageV2";
@@ -34,6 +35,7 @@ import { VenueManagement } from "./components/dashboards/VenueManagement";
 import { ROIAnalytics } from "./components/dashboards/ROIAnalytics";
 import { EventCreationWizard } from "./components/wizards/EventCreationWizard";
 import { DirectoryProfileWizard } from "./components/wizards/DirectoryProfileWizard";
+import { BrandShootWizard } from "./components/wizards/BrandShootWizard";
 import { ContractsManager } from "./components/dashboards/ContractsManager";
 import { ActivationsManager } from "./components/dashboards/ActivationsManager";
 import { TasksAndDeliverables } from "./components/dashboards/TasksAndDeliverables";
@@ -88,6 +90,15 @@ import ElectronicsSponsorshipPageV2 from "./components/pages/ElectronicsSponsors
 import BeautySponsorshipPage from "./components/pages/BeautySponsorshipPage";
 import AutomotiveSponsorshipPage from "./components/pages/AutomotiveSponsorshipPage";
 import RealEstateSponsorshipPage from "./components/pages/RealEstateSponsorshipPage";
+
+import { RealTimeAssistant } from "./components/assistant/RealTimeAssistant";
+import { ChatBubble } from "./components/assistant/ChatBubble";
+
+// AI Demo
+import { AIWorkflowDemo } from "./components/examples/AIWorkflowDemo";
+import { FileUploadDemo } from "./components/examples/FileUploadDemo";
+
+import { Modal } from "./components/shared/Modal";
 
 function AppContent() {
   const { setWizardData, wizardData } = useBrandShoot();
@@ -174,6 +185,8 @@ function AppContent() {
       else if (path.includes("/casting-availability")) setActiveScreen("casting-availability");
       else if (path.includes("/casting-matchmaker")) setActiveScreen("casting-matchmaker");
       else if (path.includes("/scout/setup")) setActiveScreen("scout-setup");
+      // Demo Pages
+      else if (path.includes("/upload-demo")) setActiveScreen("upload-demo");
     };
 
     handlePathChange();
@@ -231,9 +244,13 @@ function AppContent() {
       
       // Dashboard Pages
       case "event-wizard":
-        return <EventCreationWizard onComplete={() => handleNavigate("events")} />;
+        return <EventCreationWizard onComplete={() => handleNavigate("events")} onCancel={() => handleNavigate("events")} />;
       case "directory-wizard":
         return <DirectoryProfileWizard onComplete={() => handleNavigate("overview")} />;
+      case "brand-shoot-wizard":
+        return <BrandShootWizard onComplete={() => handleNavigate("proposal")} onCancel={() => handleNavigate("overview")} />;
+      case "ai-demo":
+        return <AIWorkflowDemo />;
       case "overview":
         return <ProjectOverview onNavigate={handleNavigate} />;
       case "shotlist":
@@ -340,6 +357,8 @@ function AppContent() {
         return <ProposalReady onNavigate={handleNavigate} />;
       case "production-timeline":
         return <ProductionTimeline onNavigate={handleNavigate} />;
+      case "upload-demo":
+        return <FileUploadDemo />;
       
       default:
         return <HomePageV3 />;
@@ -419,6 +438,7 @@ export default function App() {
         <EventProvider>
           <AgentProvider>
             <AppContent />
+            <SupabaseStatus />
           </AgentProvider>
         </EventProvider>
       </SponsorProvider>

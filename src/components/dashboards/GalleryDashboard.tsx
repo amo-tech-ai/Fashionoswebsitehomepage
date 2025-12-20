@@ -19,12 +19,19 @@ import {
   ChevronLeft,
   ChevronRight,
   Maximize2,
-  Image as ImageIcon
+  Image as ImageIcon,
+  FolderPlus,
+  Trash2
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '../ui/sheet';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { useBrandShoot, GalleryAsset } from '../../context/BrandShootContext';
+import { FileUpload } from '../shared/UploadStates';
+import { ImageLightbox, type LightboxImage } from '../shared/ImageLightbox';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 
 // --- Helper for Mocking AI Ingest ---
 const generateMockAssets = (count: number): GalleryAsset[] => {
@@ -65,6 +72,67 @@ export function GalleryDashboard() {
   const [isResizeOpen, setIsResizeOpen] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [isIngesting, setIsIngesting] = useState(false);
+  
+  // Upload Dialog State
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [albumName, setAlbumName] = useState('Summer 2025');
+  const [albumDescription, setAlbumDescription] = useState('');
+  const [uploadedImages, setUploadedImages] = useState<LightboxImage[]>([]);
+  
+  // Lightbox state
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  // --- Upload Handler ---
+  const handleUploadComplete = (results: Array<{ file: File; url: string | null; path: string }>) => {
+    // Convert uploaded files to gallery assets
+    const newAssets: GalleryAsset[] = results
+      .filter(r => r.url)
+      .map((r, index) => ({
+        id: Date.now() + index,
+        name: r.file.name,
+        type: 'image',
+        status: 'Pending',
+        aiScore: Math.floor(Math.random() * 20) + 80,
+        aiReason: `Uploaded to ${albumName}. AI analysis in progress...`,
+        url: r.url!,
+        date: new Date().toLocaleDateString(),
+      }));
+
+    // Match to shot list if available
+    const matchedAssets = newAssets.map((asset, i) => {
+      const shotMatch = shotList.find((s, idx) => idx === i % shotList.length);
+      if (shotMatch && shotList.length > 0) {
+        return {
+          ...asset,
+          linkedShotId: shotMatch.id,
+          aiReason: `Matched to shot: "${shotMatch.name}" based on visual composition.`
+        };
+      }
+      return asset;
+    });
+
+    setAssets(prev => [...matchedAssets, ...prev]);
+    
+    // Track uploaded images for preview
+    const newImages: LightboxImage[] = results
+      .filter(r => r.url)
+      .map(r => ({
+        url: r.url!,
+        name: r.file.name,
+        size: r.file.size,
+        type: r.file.type,
+        alt: `Gallery image: ${r.file.name}`,
+      }));
+    
+    setUploadedImages(prev => [...prev, ...newImages]);
+  };
+
+  const closeUploadDialog = () => {
+    setIsUploadDialogOpen(false);
+    setUploadedImages([]);
+    setAlbumDescription('');
+  };
 
   // --- Simulation Logic ---
   const simulateIngest = () => {
@@ -162,11 +230,10 @@ export function GalleryDashboard() {
                     <Button 
                         variant="outline" 
                         className="gap-2 rounded-xl border-gray-200 hover:bg-white hover:text-[#111111] text-gray-600 h-10 px-5 text-xs font-bold" 
-                        onClick={simulateIngest} 
-                        disabled={isIngesting}
+                        onClick={() => setIsUploadDialogOpen(true)}
                     >
-                        {isIngesting ? <Sparkles className="w-4 h-4 animate-spin text-indigo-500" /> : <Upload className="w-4 h-4" />}
-                        <span className="hidden sm:inline">{isIngesting ? "Cura Ingesting..." : "Smart Import"}</span>
+                        <Upload className="w-4 h-4" />
+                        <span className="hidden sm:inline">Upload Assets</span>
                     </Button>
                     <Button className="gap-2 bg-[#111111] text-white hover:bg-black rounded-xl h-10 px-5 shadow-lg shadow-black/5 text-xs font-bold">
                         <Share2 className="w-4 h-4" />
@@ -461,6 +528,80 @@ export function GalleryDashboard() {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* --- UPLOAD DIALOG --- */}
+      <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Upload New Album</DialogTitle>
+            <DialogDescription>
+              Create a new album and upload images for review.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2 pb-4">
+            <div className="space-y-2">
+              <p className="text-sm font-medium leading-none">Album Name</p>
+              <Input
+                id="albumName"
+                value={albumName}
+                onChange={(e) => setAlbumName(e.target.value)}
+                placeholder="Summer 2025"
+              />
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-medium leading-none">Description</p>
+              <Textarea
+                id="albumDescription"
+                value={albumDescription}
+                onChange={(e) => setAlbumDescription(e.target.value)}
+                placeholder="Add a description for this album..."
+              />
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-medium leading-none">Upload Images</p>
+              <FileUpload
+                onUpload={async (files: File[]) => {
+                  // onUpload is required but actual upload handled by onUploadComplete
+                }}
+                onUploadComplete={handleUploadComplete}
+                bucket="event-galleries"
+                folder={albumName.toLowerCase().replace(/\s+/g, '-')}
+                acceptedTypes={['image/jpeg', 'image/png', 'image/webp']}
+                maxSize={15 * 1024 * 1024} // 15MB
+                multiple={true}
+                maxFiles={50}
+                mode="gallery"
+                autoCompress={true}
+              />
+            </div>
+          </div>
+          <div className="flex items-center justify-end space-x-2">
+            <Button
+              variant="outline"
+              onClick={closeUploadDialog}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => setIsUploadDialogOpen(false)}
+              disabled={uploadedImages.length === 0}
+            >
+              Save Album
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* --- LIGHTBOX PREVIEW --- */}
+      <ImageLightbox
+        images={uploadedImages}
+        initialIndex={lightboxIndex}
+        isOpen={isLightboxOpen}
+        onClose={() => setIsLightboxOpen(false)}
+        showDownload={true}
+        showDelete={true}
+        showMetadata={true}
+      />
 
     </div>
   );
