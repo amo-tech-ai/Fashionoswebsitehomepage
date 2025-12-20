@@ -1,289 +1,399 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
-  CloudRain, 
-  Sun, 
-  Navigation, 
-  AlertOctagon, 
   Clock, 
   MapPin, 
   Users, 
-  ArrowRightLeft, 
-  CheckCircle2,
-  History,
+  AlertTriangle, 
+  CheckCircle2, 
+  CloudRain, 
+  Sun, 
+  Zap,
   MoreVertical,
-  Coffee,
-  Calendar,
-  ChevronLeft
+  Phone,
+  ArrowLeft
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { useBrandShoot } from '../../context/BrandShootContext';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { useBrandShoot, ScheduleBlock } from '../../context/BrandShootContext';
 import { MOCK_MODELS } from '../casting/CuraCasting';
 
-interface ScheduleBlock {
+// --- Mock Data Extensions ---
+interface TeamMember {
   id: string;
-  time: string;
-  endTime: string;
-  title: string;
-  location: string;
-  talent: string;
-  type: 'indoor' | 'outdoor' | 'break' | 'admin';
-  description?: string;
+  name: string;
+  role: string;
+  status: 'checked_in' | 'en_route' | 'delayed' | 'pending';
+  avatar: string;
+  eta?: string;
 }
 
+const INITIAL_CREW: TeamMember[] = [
+  { id: 'c1', name: 'Elena R.', role: 'Photographer', status: 'checked_in', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop' },
+  { id: 'c2', name: 'Marcus T.', role: 'Stylist', status: 'delayed', eta: '25m', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop' },
+];
+
 export function DynamicCallSheet({ onBack }: { onBack?: () => void }) {
-  const { bookedTalent, callSheetSchedule, setCallSheetSchedule, updateChecklist } = useBrandShoot();
-  const [hasIntervention, setHasIntervention] = useState(true);
-  const [changeLog, setChangeLog] = useState<{time: string, text: string}[]>([]);
+  const { callSheetSchedule, setCallSheetSchedule, campaignPlan, bookedTalent } = useBrandShoot();
   
-  // Use context schedule
-  const schedule = callSheetSchedule;
-  const setSchedule = setCallSheetSchedule;
+  // Simulation State
+  const [currentTime, setCurrentTime] = useState<string>('09:30 AM'); // Start inside the first/second block
+  const [weatherAlert, setWeatherAlert] = useState<boolean>(true);
+  const [team, setTeam] = useState<TeamMember[]>(INITIAL_CREW);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  // --- Connect Logic: Hydrate Team from Context ---
+  useEffect(() => {
+    // Convert bookedTalent (ids) to TeamMember objects
+    const bookedModels: TeamMember[] = bookedTalent.map(id => {
+        const model = MOCK_MODELS.find(m => m.id === id);
+        return {
+            id: `model-${id}`,
+            name: model?.name || 'Unknown Model',
+            role: 'Talent',
+            status: 'en_route', // Default status for models
+            avatar: model?.image || '',
+            eta: '15m'
+        };
+    });
 
-  const handlePublish = () => {
-    updateChecklist('callSheetIssued', true);
-    // Could add toast here
-    onBack?.();
+    // Merge Crew + Booked Talent
+    setTeam([...INITIAL_CREW, ...bookedModels]);
+  }, [bookedTalent]);
+
+  // Calculate status for each block based on "currentTime"
+  const parseTime = (timeStr: string) => {
+    const [time, period] = timeStr.split(' ');
+    let [hours, minutes] = time.split(':').map(Number);
+    if (period === 'PM' && hours !== 12) hours += 12;
+    if (period === 'AM' && hours === 12) hours = 0;
+    return hours * 60 + minutes;
   };
-  
-  // Compute talent string
-  const talentNames = bookedTalent.length > 0 
-    ? bookedTalent.map(id => MOCK_MODELS.find(m => m.id === id)?.name).filter(Boolean).join(", ")
-    : "Sarah, David"; // Default fallback
 
-  const handleSwap = () => {
-    // Swap the 9am and 1pm slots
-    const newSchedule = [...schedule];
-    const morningSlot = newSchedule[1];
-    const afternoonSlot = newSchedule[3];
-    
-    // Swap times
-    const tempTime = morningSlot.time;
-    const tempEndTime = morningSlot.endTime;
-    
-    morningSlot.time = afternoonSlot.time;
-    morningSlot.endTime = afternoonSlot.endTime;
-    
-    afternoonSlot.time = tempTime;
-    afternoonSlot.endTime = tempEndTime;
+  const currentMinutes = parseTime(currentTime);
 
-    // Swap positions in array
-    newSchedule[1] = afternoonSlot;
-    newSchedule[3] = morningSlot;
+  const getBlockStatus = (block: ScheduleBlock) => {
+    const start = parseTime(block.time);
+    const end = parseTime(block.endTime);
+    
+    if (currentMinutes >= end) return 'completed';
+    if (currentMinutes >= start && currentMinutes < end) return 'active';
+    if (currentMinutes < start && start - currentMinutes <= 30) return 'upcoming'; // 30m buffer
+    return 'pending';
+  };
 
-    setSchedule(newSchedule);
-    setHasIntervention(false);
-    setChangeLog(prev => [...prev, {
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      text: 'Schedule optimized by AI based on weather forecast.'
-    }]);
+  // Auto-scroll reference
+  const activeBlockRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (activeBlockRef.current) {
+      activeBlockRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, []); // Run on mount
+
+  // Handlers
+  const handleSwapSchedule = () => {
+    const newSchedule = [...callSheetSchedule];
+    const outdoorIdx = newSchedule.findIndex(b => b.type === 'outdoor');
+    if (outdoorIdx !== -1) {
+        newSchedule[outdoorIdx] = {
+            ...newSchedule[outdoorIdx],
+            title: '⚠️ Weather Hold: Rooftop',
+            type: 'break',
+            description: 'Holding for rain to pass. Prepare Studio B as backup.'
+        };
+        setCallSheetSchedule(newSchedule);
+        setWeatherAlert(false); // Clear alert after action
+    }
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFBF9] font-sans text-gray-900 pb-20">
+    <div className="min-h-screen bg-[#F2F2F2] font-sans text-[#111111] overflow-hidden flex flex-col">
       
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-30">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-           <div className="flex items-center gap-3">
-             <button onClick={onBack} className="p-2 -ml-2 text-gray-400 hover:text-gray-900 rounded-lg hover:bg-gray-50">
-               <ChevronLeft className="w-5 h-5" />
-             </button>
-             <div>
-                <h1 className="font-serif text-lg font-medium leading-none mb-1">Call Sheet</h1>
-                <p className="text-xs text-gray-500">Oct 24, 2024 • Production Day 2</p>
-             </div>
-           </div>
-           <div className="flex items-center gap-2">
-             <Button variant="outline" size="sm" className="hidden sm:flex h-8 text-xs">
-                Download PDF
-             </Button>
-             <Button 
-                onClick={handlePublish}
-                size="sm" 
-                className="bg-indigo-600 hover:bg-indigo-700 text-white h-8 text-xs border-0"
-             >
-                Publish Call Sheet
-             </Button>
-             <div className="w-8 h-8 bg-gray-900 text-white rounded-full flex items-center justify-center font-serif text-sm">
-                JS
-             </div>
-           </div>
-        </div>
-
-        {/* Status Strip */}
-        <div className="bg-gray-50 border-b border-gray-100">
-           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center gap-6 overflow-x-auto">
-              
-              {/* Weather Status */}
-              <div className="flex items-center gap-3 pr-6 border-r border-gray-200 shrink-0">
-                 <div className="flex flex-col">
-                    <span className="text-[10px] uppercase text-gray-400 font-bold tracking-wider">Weather</span>
-                    <div className="flex items-center gap-2">
-                       {hasIntervention ? (
-                           <CloudRain className="w-4 h-4 text-indigo-500" />
-                       ) : (
-                           <Sun className="w-4 h-4 text-amber-500" />
-                       )}
-                       <span className="text-sm font-medium">62°F • {hasIntervention ? 'Rain at 3PM' : 'Clear Skies'}</span>
-                    </div>
-                 </div>
-              </div>
-
-              {/* Traffic Status */}
-              <div className="flex items-center gap-3 shrink-0">
-                 <div className="flex flex-col">
-                    <span className="text-[10px] uppercase text-gray-400 font-bold tracking-wider">Traffic Risk</span>
-                    <div className="flex items-center gap-2">
-                       <Navigation className="w-4 h-4 text-green-600" />
-                       <span className="text-sm font-medium text-green-700">Low (12 mins to Loc)</span>
-                    </div>
-                 </div>
-              </div>
-
-           </div>
-        </div>
-      </div>
-
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        {/* AI Intervention Card */}
-        <AnimatePresence>
-          {hasIntervention && (
-            <motion.div 
-              initial={{ opacity: 0, y: -20, height: 0 }}
-              animate={{ opacity: 1, y: 0, height: 'auto' }}
-              exit={{ opacity: 0, scale: 0.95, height: 0 }}
-              className="mb-8 overflow-hidden"
-            >
-              <div className="bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 rounded-xl p-5 shadow-sm relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-100/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                
-                <div className="flex items-start gap-4 relative z-10">
-                   <div className="w-10 h-10 bg-white rounded-lg shadow-sm border border-indigo-100 flex items-center justify-center shrink-0 text-indigo-600">
-                      <AlertOctagon className="w-5 h-5" />
-                   </div>
-                   <div className="flex-1">
-                      <h3 className="text-sm font-bold text-indigo-900 mb-1">Schedule Optimization Suggested</h3>
-                      <p className="text-sm text-indigo-700/80 leading-relaxed mb-4">
-                        Heavy rain is forecasted for 3:00 PM. AI suggests swapping the <strong>Morning Studio Block</strong> with the <strong>Afternoon Outdoor Block</strong> to ensure dry conditions for the rooftop scene.
-                      </p>
-                      <div className="flex gap-3">
-                         <Button 
-                           onClick={handleSwap}
-                           className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/10 border-0 h-9"
-                         >
-                           <ArrowRightLeft className="w-4 h-4 mr-2" />
-                           Apply Schedule Swap
-                         </Button>
-                         <Button 
-                            variant="outline" 
-                            onClick={() => setHasIntervention(false)}
-                            className="bg-white border-indigo-200 text-indigo-600 hover:bg-indigo-50 h-9"
-                         >
-                           Dismiss
-                         </Button>
-                      </div>
-                   </div>
-                </div>
-              </div>
-            </motion.div>
+      {/* --- Top App Header --- */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 px-6 py-4 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-4">
+          {onBack && (
+            <button onClick={onBack} className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors">
+              <ArrowLeft className="w-5 h-5 text-gray-500" />
+            </button>
           )}
-        </AnimatePresence>
-
-        {/* Timeline */}
-        <div className="relative space-y-6 before:absolute before:left-[19px] before:top-4 before:bottom-4 before:w-[2px] before:bg-gray-100">
-           <AnimatePresence mode='popLayout'>
-             {schedule.map((block) => (
-               <motion.div 
-                  layout
-                  key={block.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  className="relative pl-12 group"
-               >
-                  {/* Time Node */}
-                  <div className={`
-                    absolute left-0 top-0 w-10 h-10 rounded-full border-4 border-[#FDFBF9] flex items-center justify-center shadow-sm z-10
-                    ${block.type === 'break' ? 'bg-orange-50 text-orange-600' : 
-                      block.type === 'admin' ? 'bg-gray-100 text-gray-500' :
-                      'bg-white text-gray-900'}
-                  `}>
-                     {block.type === 'break' ? <Coffee className="w-4 h-4" /> : 
-                      block.type === 'admin' ? <Clock className="w-4 h-4" /> :
-                      <div className="w-2.5 h-2.5 bg-gray-900 rounded-full" />}
-                  </div>
-
-                  {/* Card */}
-                  <div className={`
-                    p-5 rounded-2xl border transition-all duration-300
-                    ${block.type === 'indoor' ? 'bg-white border-gray-200 hover:border-gray-300' :
-                      block.type === 'outdoor' ? 'bg-white border-gray-200 hover:border-indigo-300 shadow-sm' :
-                      block.type === 'break' ? 'bg-orange-50/50 border-orange-100 border-dashed' :
-                      'bg-gray-50 border-gray-100'}
-                  `}>
-                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
-                        <div>
-                           <div className="flex items-center gap-2 mb-1">
-                              <span className="font-mono text-xs font-medium text-gray-500">{block.time} - {block.endTime}</span>
-                              {block.type === 'indoor' && <Badge variant="secondary" className="bg-purple-50 text-purple-700 hover:bg-purple-100 border-0 h-5 text-[10px]">Indoor</Badge>}
-                              {block.type === 'outdoor' && <Badge variant="secondary" className="bg-sky-50 text-sky-700 hover:bg-sky-100 border-0 h-5 text-[10px]">Outdoor</Badge>}
-                           </div>
-                           <h3 className="font-serif text-lg font-medium text-gray-900">{block.title}</h3>
-                        </div>
-                        <button className="text-gray-400 hover:text-gray-900 opacity-0 group-hover:opacity-100 transition-opacity">
-                           <MoreVertical className="w-4 h-4" />
-                        </button>
-                     </div>
-
-                     {block.description && (
-                       <p className="text-sm text-gray-500 mb-4">{block.description}</p>
-                     )}
-
-                     {(block.type === 'indoor' || block.type === 'outdoor') && (
-                       <div className="flex flex-wrap gap-4 pt-3 border-t border-gray-100/50">
-                          <div className="flex items-center gap-1.5 text-xs text-gray-600">
-                             <MapPin className="w-3.5 h-3.5 text-gray-400" />
-                             {block.location}
-                          </div>
-                          <div className="flex items-center gap-1.5 text-xs text-gray-600">
-                             <Users className="w-3.5 h-3.5 text-gray-400" />
-                             {block.talent}
-                          </div>
-                       </div>
-                     )}
-                  </div>
-               </motion.div>
-             ))}
-           </AnimatePresence>
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="font-serif text-xl font-bold text-[#111111]">{campaignPlan?.strategy?.title || "Campaign Shoot"}</h1>
+              <Badge variant="secondary" className="bg-red-600 text-white border-0 animate-pulse px-2 py-0.5 text-[10px] uppercase tracking-wider">
+                Live
+              </Badge>
+            </div>
+            <p className="text-xs text-gray-500 font-medium tracking-wide mt-0.5 uppercase">
+              Day 1 of 2 • New York, NY • <span className="text-gray-900 font-bold">{currentTime}</span>
+            </p>
+          </div>
         </div>
 
-        {/* Change Log */}
-        {changeLog.length > 0 && (
-          <div className="mt-12 pt-8 border-t border-gray-200">
-             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-               <History className="w-3 h-3" />
-               Change Log
-             </h4>
-             <div className="space-y-3">
-               {changeLog.map((log, i) => (
-                 <motion.div 
-                   key={i}
-                   initial={{ opacity: 0, x: -10 }}
-                   animate={{ opacity: 1, x: 0 }}
-                   className="flex items-start gap-3 text-sm"
-                 >
-                    <span className="font-mono text-gray-400 text-xs mt-0.5">{log.time}</span>
-                    <span className="text-gray-600">{log.text}</span>
-                 </motion.div>
-               ))}
-             </div>
+        <div className="flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-2 text-xs font-medium text-gray-500 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
+             <div className="w-2 h-2 rounded-full bg-green-500" />
+             All Systems Online
           </div>
-        )}
+          <Button variant="outline" size="sm" className="hidden md:flex border-gray-300">
+            View Contract
+          </Button>
+          <Button variant="destructive" size="sm" className="bg-[#111111] text-white hover:bg-black">
+            <Phone className="w-3.5 h-3.5 mr-2" />
+            Emergency
+          </Button>
+        </div>
+      </header>
 
+      {/* --- Main Content --- */}
+      <div className="flex-1 overflow-hidden">
+        <div className="h-full max-w-[1800px] mx-auto flex flex-col md:flex-row">
+            
+            {/* LEFT COLUMN (Primary - 70%) */}
+            <div className="flex-1 h-full overflow-y-auto p-6 md:p-8 space-y-8 scrollbar-hide">
+                
+                {/* Weather & Environment Panel */}
+                <div className="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-sm">
+                    <div className="flex items-center gap-6">
+                        <div className="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center">
+                            {weatherAlert ? <CloudRain className="w-8 h-8 text-indigo-500" /> : <Sun className="w-8 h-8 text-amber-500" />}
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2 mb-1">
+                                <h3 className="font-bold text-lg text-[#111111]">62°F / Rain</h3>
+                                {weatherAlert && (
+                                    <Badge variant="destructive" className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-amber-200 text-[10px] uppercase tracking-wider">
+                                        Alert
+                                    </Badge>
+                                )}
+                            </div>
+                            <p className="text-sm text-gray-500 max-w-md">
+                                {weatherAlert 
+                                    ? "Precipitation expected at 2:00 PM. Indoor block swap recommended for Scene 2." 
+                                    : "Clear skies for the remainder of the day. Outdoor light optimal."}
+                            </p>
+                        </div>
+                    </div>
+                    {weatherAlert && (
+                        <div className="flex flex-col items-end gap-2 w-full md:w-auto">
+                             <div className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-1.5 bg-indigo-50 px-2 py-1 rounded-md">
+                                <Zap className="w-3 h-3" /> AI Recommendation
+                             </div>
+                             <Button onClick={handleSwapSchedule} className="w-full md:w-auto bg-[#111111] text-white hover:bg-black shadow-lg shadow-black/10">
+                                Apply Schedule Adjustment
+                             </Button>
+                        </div>
+                    )}
+                </div>
+
+                {/* Live Timeline */}
+                <div>
+                    <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                        <Clock className="w-4 h-4" /> Today's Schedule
+                    </h2>
+                    
+                    <div className="space-y-4 relative">
+                        {/* Timeline Connector Line */}
+                        <div className="absolute left-[88px] top-4 bottom-4 w-0.5 bg-gray-200 z-0 hidden md:block" />
+
+                        {callSheetSchedule.map((block, index) => {
+                            const status = getBlockStatus(block);
+                            const isActive = status === 'active';
+                            const isCompleted = status === 'completed';
+                            const isAtRisk = block.type === 'outdoor' && weatherAlert; // Simple risk logic
+
+                            return (
+                                <div 
+                                    key={block.id}
+                                    ref={isActive ? activeBlockRef : null}
+                                    className={`relative z-10 flex flex-col md:flex-row gap-6 transition-all duration-500 ${isCompleted ? 'opacity-60 grayscale' : 'opacity-100'}`}
+                                >
+                                    {/* Time Column */}
+                                    <div className="w-24 shrink-0 text-right pt-4 hidden md:block">
+                                        <p className={`text-sm font-bold ${isActive ? 'text-[#111111]' : 'text-gray-400'}`}>{block.time}</p>
+                                        <p className="text-xs text-gray-400">{block.endTime}</p>
+                                    </div>
+
+                                    {/* Card */}
+                                    <motion.div 
+                                        layout
+                                        className={`
+                                            flex-1 rounded-2xl p-5 border transition-all duration-300
+                                            ${isActive 
+                                                ? 'bg-white border-[#111111] shadow-xl shadow-gray-200/50 scale-[1.02] ring-1 ring-[#111111]/5' 
+                                                : 'bg-white border-gray-100 hover:border-gray-200 shadow-sm'}
+                                            ${isAtRisk && !isCompleted ? 'border-amber-300 bg-amber-50/30' : ''}
+                                        `}
+                                    >
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className="flex items-center gap-3">
+                                                {/* Mobile Time */}
+                                                <div className="md:hidden text-xs font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                                    {block.time}
+                                                </div>
+                                                
+                                                <Badge className={`
+                                                    rounded-full border-0 font-bold tracking-wide uppercase text-[10px] px-2.5 py-0.5
+                                                    ${isActive ? 'bg-[#111111] text-white animate-pulse' : 
+                                                      isCompleted ? 'bg-gray-100 text-gray-500' : 
+                                                      'bg-indigo-50 text-indigo-600'}
+                                                `}>
+                                                    {isCompleted ? 'Completed' : isActive ? 'Live Now' : 'Upcoming'}
+                                                </Badge>
+                                                
+                                                {isAtRisk && !isCompleted && (
+                                                    <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-amber-200 flex items-center gap-1">
+                                                        <AlertTriangle className="w-3 h-3" /> Risk
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-400">
+                                                <MoreVertical className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+
+                                        <div className="flex flex-col md:flex-row justify-between gap-6">
+                                            <div>
+                                                <h3 className={`font-serif text-xl font-medium mb-1 ${isActive ? 'text-[#111111]' : 'text-gray-700'}`}>
+                                                    {block.title}
+                                                </h3>
+                                                <p className="text-sm text-gray-500 mb-4">{block.description}</p>
+                                                
+                                                <div className="flex items-center gap-4 text-xs font-medium text-gray-600">
+                                                    <div className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1.5 rounded-md border border-gray-100">
+                                                        <MapPin className="w-3.5 h-3.5 text-gray-400" />
+                                                        {block.location}
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1.5 rounded-md border border-gray-100">
+                                                        <Users className="w-3.5 h-3.5 text-gray-400" />
+                                                        {block.talent}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Right side stats/actions (only active block) */}
+                                            {isActive && (
+                                                <div className="flex flex-col justify-end items-end gap-3 min-w-[140px]">
+                                                    <div className="text-right">
+                                                        <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Samples</p>
+                                                        <p className="text-lg font-serif font-medium">12 Items</p>
+                                                    </div>
+                                                    <div className="w-full h-px bg-gray-100 my-1" />
+                                                    <div className="text-right">
+                                                        <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Progress</p>
+                                                        <p className="text-lg font-serif font-medium text-emerald-600">45%</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
+
+            {/* RIGHT COLUMN (Secondary - 30%) */}
+            <div className="w-full md:w-[400px] border-l border-gray-200 bg-white h-full overflow-y-auto p-6 space-y-8 shadow-[-4px_0_24px_rgba(0,0,0,0.02)] z-20">
+                
+                {/* AI Producer Panel (Sticky) */}
+                <div className="sticky top-0 bg-white z-20 pb-6 border-b border-gray-100">
+                    <div className="bg-[#111111] text-white rounded-2xl p-5 shadow-xl shadow-gray-200/50 relative overflow-hidden">
+                        {/* Abstract Background Decoration */}
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                        
+                        <div className="flex items-center gap-2 mb-3 text-indigo-300">
+                            <Zap className="w-4 h-4" />
+                            <span className="text-xs font-bold uppercase tracking-wider">AI Producer</span>
+                        </div>
+                        
+                        <h4 className="font-medium text-lg mb-2 leading-tight">Delay Look 3 by 20 mins?</h4>
+                        <p className="text-sm text-gray-300 mb-4 leading-relaxed">
+                            Based on Marcus T.'s delayed arrival (ETA 25m), shifting the next block will maintain lighting consistency.
+                        </p>
+
+                        <div className="flex gap-2">
+                            <Button size="sm" className="bg-white text-black hover:bg-gray-200 text-xs font-bold flex-1">
+                                Apply Change
+                            </Button>
+                            <Button size="sm" variant="outline" className="border-white/20 text-white hover:bg-white/10 text-xs font-bold flex-1">
+                                Dismiss
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Team Check-In */}
+                <div>
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-bold text-gray-900">On-Set Status</h3>
+                        <Button variant="ghost" size="sm" className="h-8 text-xs text-gray-500">
+                            View All
+                        </Button>
+                    </div>
+
+                    <div className="space-y-3">
+                        {team.map(member => (
+                            <div key={member.id} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-gray-200 transition-colors bg-gray-50/50">
+                                <div className="relative">
+                                    <Avatar className="w-10 h-10 border border-white shadow-sm">
+                                        <AvatarImage src={member.avatar} />
+                                        <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white flex items-center justify-center
+                                        ${member.status === 'checked_in' ? 'bg-green-500' : 
+                                          member.status === 'en_route' ? 'bg-blue-500' : 
+                                          member.status === 'delayed' ? 'bg-amber-500' : 'bg-gray-300'}
+                                    `}>
+                                        {member.status === 'checked_in' && <CheckCircle2 className="w-2.5 h-2.5 text-white" />}
+                                        {member.status === 'delayed' && <Clock className="w-2.5 h-2.5 text-white" />}
+                                    </div>
+                                </div>
+                                
+                                <div className="flex-1 min-w-0">
+                                    <h4 className="font-medium text-sm text-gray-900 truncate">{member.name}</h4>
+                                    <p className="text-xs text-gray-500 truncate">{member.role}</p>
+                                </div>
+
+                                <div className="text-right">
+                                    <Badge variant="secondary" className={`
+                                        text-[10px] font-bold uppercase tracking-wider border-0
+                                        ${member.status === 'checked_in' ? 'bg-green-100 text-green-700' : 
+                                          member.status === 'en_route' ? 'bg-blue-100 text-blue-700' : 
+                                          member.status === 'delayed' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-500'}
+                                    `}>
+                                        {member.status.replace('_', ' ')}
+                                    </Badge>
+                                    {member.eta && (
+                                        <p className="text-[10px] text-gray-400 font-medium mt-1">ETA {member.eta}</p>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                        {team.length === INITIAL_CREW.length && (
+                            <div className="text-center p-4 border border-dashed border-gray-200 rounded-xl bg-gray-50/50">
+                                <p className="text-xs text-gray-400">No talent booked yet.</p>
+                                <Button variant="link" onClick={onBack} className="text-xs text-indigo-600 h-auto p-0 mt-1">
+                                    Go to Casting
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+
+                    <Button className="w-full mt-6 bg-[#111111] text-white h-12 rounded-xl shadow-lg shadow-black/5 font-bold text-sm gap-2">
+                        <CheckCircle2 className="w-4 h-4" />
+                        I'm Here (Check-In)
+                    </Button>
+                </div>
+
+            </div>
+
+        </div>
       </div>
+
     </div>
   );
 }

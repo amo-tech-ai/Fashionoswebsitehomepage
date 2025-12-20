@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useBrandShoot } from '../../context/BrandShootContext';
+import { Badge } from '../ui/badge';
 
 // --- Components ---
 

@@ -15,6 +15,7 @@ import {
   Zap
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { toast } from "sonner";
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Card } from '../ui/card';
@@ -24,7 +25,27 @@ import { MOCK_MODELS } from './CuraCasting';
 // Extended status types for this specific dashboard
 type AvailabilityStatus = 'checking' | 'available' | 'hold' | 'booked' | 'unavailable';
 
-interface ModelStatus extends typeof MOCK_MODELS[0] {
+interface ModelStatus {
+  id: number;
+  name: string;
+  agency: string;
+  image: string;
+  location: string;
+  tags: string[];
+  rate: string;
+  matchScore: number;
+  matchReason: string;
+  availability: string;
+  reasoning: {
+      summary: string;
+      points: string[];
+  };
+  stats: {
+      height: string;
+      instagram: string;
+      engagement: string;
+  };
+  portfolio: string[];
   status: AvailabilityStatus;
   responseParams?: {
     time: string;
@@ -47,7 +68,7 @@ export function CastingAvailability({ onNavigate }: { onNavigate: (page: string)
       ? MOCK_MODELS.filter(m => bookedTalent.includes(m.id))
       : MOCK_MODELS; // Fallback to all if none selected for demo
 
-    const initialModels = baseList.map(m => ({
+    const initialModels: ModelStatus[] = baseList.map(m => ({
       ...m,
       status: 'checking' as AvailabilityStatus,
       confidence: m.matchScore
@@ -136,6 +157,19 @@ export function CastingAvailability({ onNavigate }: { onNavigate: (page: string)
       }
       return 0;
   });
+
+  const handleBookModel = (modelId: number, modelName: string) => {
+    // Update local state
+    setModels(current => current.map(m => 
+        m.id === modelId ? { ...m, status: 'booked' } : m
+    ));
+    
+    // In a real app, this would also update the backend/context
+    // For now, we'll just show the success state
+    toast.success(`Booking request sent for ${modelName}`, {
+        description: "Agency has been notified. Contract will be generated."
+    });
+  };
 
   return (
     <div className="min-h-screen bg-[#FDFBF9] font-sans text-gray-900 pb-20">
@@ -316,9 +350,10 @@ export function CastingAvailability({ onNavigate }: { onNavigate: (page: string)
                                     <Button 
                                         size="sm" 
                                         className={`flex-1 text-xs h-8 ${model.status === 'unavailable' ? 'bg-gray-100 text-gray-400 hover:bg-gray-100' : 'bg-indigo-600 hover:bg-indigo-700 text-white'}`}
-                                        disabled={model.status === 'checking' || model.status === 'unavailable'}
+                                        disabled={model.status === 'checking' || model.status === 'unavailable' || model.status === 'booked'}
+                                        onClick={() => handleBookModel(model.id, model.name)}
                                     >
-                                        {model.status === 'booked' ? "View Contract" : "Book Now"}
+                                        {model.status === 'booked' ? "Contract Sent" : "Book Now"}
                                     </Button>
                                 </div>
                             </div>

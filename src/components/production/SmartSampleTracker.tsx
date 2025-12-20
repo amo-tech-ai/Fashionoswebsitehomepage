@@ -1,51 +1,68 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
-  QrCode, 
-  Camera, 
-  CheckCircle2, 
-  Box, 
-  ArrowLeft, 
+  Scan, 
+  Search, 
+  Filter, 
   AlertTriangle, 
-  Scan,
-  Shirt,
+  CheckCircle2, 
+  Clock, 
+  Package, 
+  Truck, 
+  MapPin, 
+  X,
+  ChevronRight,
   MoreVertical,
-  RotateCcw
+  ArrowRight,
+  Sparkles,
+  Camera,
+  RotateCcw,
+  Box,
+  Layers
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
+import { useBrandShoot, SampleItem } from '../../context/BrandShootContext';
+import { ImageWithFallback } from '../figma/ImageWithFallback';
 
-interface SampleItem {
-  id: string;
-  name: string;
-  sku: string;
-  variant: string;
-  image: string;
-  status: 'awaiting' | 'on_set' | 'shot' | 'returned';
-  isHero: boolean;
-  priority: number;
+// --- Extended Types for Logistics ---
+interface LogisticsSample extends SampleItem {
+  eta?: string;
+  risk?: 'High' | 'Medium' | 'None';
+  location?: string;
+  assignedShots?: string[];
 }
 
-import { useBrandShoot } from '../../context/BrandShootContext';
+const STATUS_COLUMNS = [
+  { id: 'awaiting', label: 'Requested', color: 'bg-gray-100 text-gray-600', icon: Clock },
+  { id: 'shipped', label: 'Shipped', color: 'bg-blue-50 text-blue-600', icon: Truck },
+  { id: 'received', label: 'Received', color: 'bg-emerald-50 text-emerald-600', icon: Package },
+  { id: 'on_set', label: 'On Set', color: 'bg-purple-50 text-purple-600', icon: Camera },
+  { id: 'returned', label: 'Returned', color: 'bg-stone-100 text-stone-500', icon: RotateCcw },
+];
 
 export function SmartSampleTracker({ onBack }: { onBack?: () => void }) {
-  const { sampleList, setSampleList, updateChecklist } = useBrandShoot();
+  const { sampleList, setSampleList } = useBrandShoot();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
-  
-  // Use context state directly
-  const samples = sampleList;
-  
-  // Sync checklist based on sample status
-  useEffect(() => {
-    // If we have at least one item on set, we consider the styling breakdown/sample intake active/done
-    const hasItemsOnSet = samples.some(s => s.status === 'on_set' || s.status === 'shot');
-    if (hasItemsOnSet) {
-        updateChecklist('stylingBreakdown', true);
-    }
-  }, [samples, updateChecklist]);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Hydrate context data with logistics mock fields
+  const logisticsData: LogisticsSample[] = useMemo(() => {
+    return sampleList.map(item => ({
+      ...item,
+      eta: item.status === 'awaiting' ? 'Tomorrow 10:00' : 'Arrived',
+      risk: item.status === 'awaiting' && item.isHero ? 'High' : 'None',
+      location: item.status === 'on_set' ? 'Studio A' : item.status === 'received' ? 'Prep Room' : 'Transit',
+      assignedShots: ['Shot 4', 'Shot 12']
+    }));
+  }, [sampleList]);
+
+  const selectedSample = logisticsData.find(s => s.id === selectedId);
+  const highRiskCount = logisticsData.filter(s => s.risk === 'High').length;
 
   const handleStatusChange = (id: string, newStatus: SampleItem['status']) => {
-    setSampleList(samples.map(item => 
+    setSampleList(sampleList.map(item => 
       item.id === id ? { ...item, status: newStatus } : item
     ));
   };
@@ -53,230 +70,353 @@ export function SmartSampleTracker({ onBack }: { onBack?: () => void }) {
   const simulateScan = () => {
     setIsScanning(true);
     setTimeout(() => {
-      // Simulate finding a random pending item
-      const pendingItems = samples.filter(s => s.status === 'awaiting' || s.status === 'on_set');
-      if (pendingItems.length > 0) {
-        handleStatusChange(pendingItems[0].id, 'shot');
+      // Find a non-on-set item to "scan"
+      const target = logisticsData.find(s => s.status !== 'on_set' && s.status !== 'returned');
+      if (target) {
+        handleStatusChange(target.id, 'on_set');
+        setSelectedId(target.id);
       }
       setIsScanning(false);
     }, 2000);
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFBF9] pb-24 font-sans text-gray-900 relative overflow-hidden">
+    <div className="min-h-screen bg-[#FDFBF9] font-sans text-[#111111] overflow-hidden flex flex-col">
       
-      {/* Top Header */}
-      <div className="bg-white/80 backdrop-blur-md sticky top-0 z-30 border-b border-gray-100">
-        <div className="px-5 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-             <button onClick={onBack} className="p-2 -ml-2 text-gray-400 hover:text-gray-900">
-               <ArrowLeft className="w-5 h-5" />
-             </button>
-             <div>
-               <h1 className="font-serif text-lg font-medium leading-none mb-1">FW24 Campaign</h1>
-               <p className="text-xs text-gray-500 font-medium tracking-wide uppercase">Oct 24 • Day 2 of 3</p>
+      {/* --- Top Header --- */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-30 px-6 py-4 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-4">
+           <div>
+             <h1 className="font-serif text-xl font-bold text-[#111111]">Smart Sample Tracker</h1>
+             <div className="flex items-center gap-2 mt-1">
+                <Badge variant="secondary" className="bg-[#111111] text-white border-0 text-[10px] uppercase tracking-wider px-2">
+                    Shoot Day Live
+                </Badge>
+                <span className="text-xs text-gray-500 font-medium">Logistics • {logisticsData.length} SKUs</span>
              </div>
-          </div>
-          <button 
-            onClick={simulateScan}
-            className="w-10 h-10 bg-gray-900 rounded-full flex items-center justify-center text-white shadow-lg hover:scale-105 transition-transform"
-          >
-            <Scan className="w-5 h-5" />
-          </button>
+           </div>
         </div>
 
-        {/* Status Bar */}
-        <div className="px-5 pb-4 flex items-center justify-between text-center divide-x divide-gray-100">
-          <div className="flex-1">
-            <div className="text-xs text-gray-400 uppercase tracking-wider mb-0.5">Total</div>
-            <div className="text-lg font-serif font-medium">{stats.total}</div>
-          </div>
-          <div className="flex-1">
-            <div className="text-xs text-green-600 uppercase tracking-wider mb-0.5 font-medium">Shot</div>
-            <div className="text-lg font-serif font-medium text-green-700">{stats.shot}</div>
-          </div>
-          <div className="flex-1">
-            <div className="text-xs text-amber-600 uppercase tracking-wider mb-0.5 font-medium">Pending</div>
-            <div className="text-lg font-serif font-medium text-amber-700">{stats.pending}</div>
-          </div>
-          <div className="flex-1">
-            <div className="text-xs text-gray-400 uppercase tracking-wider mb-0.5">Returned</div>
-            <div className="text-lg font-serif font-medium text-gray-500">{stats.returned}</div>
-          </div>
+        <div className="flex items-center gap-3">
+           <div className="relative hidden md:block">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input 
+                type="text" 
+                placeholder="Search SKU..." 
+                className="pl-9 pr-4 py-2 bg-gray-50 border-transparent rounded-full text-sm focus:bg-white focus:ring-1 focus:ring-[#111111] transition-all w-64"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+           </div>
+           <Button variant="outline" className="gap-2 border-gray-200">
+              <Filter className="w-4 h-4" />
+              <span className="hidden sm:inline">Filter</span>
+           </Button>
+           <Button 
+             onClick={simulateScan}
+             className="bg-[#111111] text-white hover:bg-black gap-2 shadow-lg shadow-black/10"
+           >
+             <Scan className="w-4 h-4" />
+             Scan Check-In
+           </Button>
         </div>
       </div>
 
-      {/* Main List */}
-      <div className="p-5 space-y-4">
-        <AnimatePresence>
-          {samples.map((item) => (
-            <SampleCard 
-              key={item.id} 
-              item={item} 
-              onMarkShot={() => handleStatusChange(item.id, 'shot')}
-              onReturn={() => handleStatusChange(item.id, 'returned')}
-            />
-          ))}
-        </AnimatePresence>
+      {/* --- Main Content Grid --- */}
+      <div className="flex-1 overflow-hidden flex">
+        
+        {/* LEFT ZONE: Status Pipeline (Kanban) */}
+        <div className="flex-1 overflow-x-auto overflow-y-hidden bg-[#FDFBF9] p-6">
+           <div className="flex gap-6 h-full min-w-max">
+              {STATUS_COLUMNS.map(column => {
+                  const items = logisticsData.filter(item => {
+                      if (column.id === 'shipped') return item.status === 'awaiting' && !item.isHero; // Mock logic for demo
+                      if (column.id === 'awaiting') return item.status === 'awaiting' && item.isHero; 
+                      return item.status === column.id;
+                  });
+
+                  return (
+                      <div key={column.id} className="w-[320px] flex flex-col h-full">
+                          {/* Column Header */}
+                          <div className="flex items-center justify-between mb-4 px-1">
+                              <div className="flex items-center gap-2">
+                                  <div className={`p-1.5 rounded-md ${column.color}`}>
+                                      <column.icon className="w-4 h-4" />
+                                  </div>
+                                  <span className="font-bold text-sm text-gray-900 uppercase tracking-wide">{column.label}</span>
+                              </div>
+                              <Badge variant="secondary" className="bg-white border border-gray-200 text-gray-500 font-mono">
+                                  {items.length}
+                              </Badge>
+                          </div>
+
+                          {/* Drop Zone / List */}
+                          <div className="flex-1 bg-gray-100/50 rounded-2xl border border-gray-200/50 p-3 overflow-y-auto space-y-3">
+                              {items.map(item => (
+                                  <motion.div
+                                      layoutId={item.id}
+                                      key={item.id}
+                                      onClick={() => setSelectedId(item.id)}
+                                      className={`
+                                          relative bg-white p-3 rounded-xl border shadow-sm cursor-pointer hover:shadow-md transition-all group
+                                          ${selectedId === item.id ? 'ring-2 ring-[#111111] border-transparent' : 'border-gray-100'}
+                                          ${item.risk === 'High' ? 'border-amber-200 bg-amber-50/20' : ''}
+                                      `}
+                                  >
+                                      <div className="flex gap-3">
+                                          <div className="w-16 h-20 bg-gray-50 rounded-lg overflow-hidden shrink-0 border border-gray-100 relative">
+                                              <ImageWithFallback src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                              {item.isHero && (
+                                                  <div className="absolute bottom-0 inset-x-0 bg-black/60 p-0.5 text-center backdrop-blur-sm">
+                                                      <span className="text-[8px] font-bold text-white uppercase tracking-wider">Hero</span>
+                                                  </div>
+                                              )}
+                                          </div>
+                                          <div className="flex-1 min-w-0">
+                                              <div className="flex justify-between items-start mb-1">
+                                                  <span className="text-[10px] font-mono text-gray-400">{item.sku}</span>
+                                                  {item.risk === 'High' && (
+                                                      <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+                                                  )}
+                                              </div>
+                                              <h4 className="font-serif text-sm font-medium text-gray-900 leading-tight mb-2 truncate">{item.name}</h4>
+                                              <div className="flex flex-wrap gap-1">
+                                                  <Badge variant="outline" className="text-[9px] h-5 px-1.5 bg-gray-50 border-gray-100 text-gray-500">
+                                                      {item.variant}
+                                                  </Badge>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </motion.div>
+                              ))}
+                              {items.length === 0 && (
+                                  <div className="h-24 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-xl text-gray-300 text-xs font-medium">
+                                      No Items
+                                  </div>
+                              )}
+                          </div>
+                      </div>
+                  );
+              })}
+           </div>
+        </div>
+
+        {/* RIGHT ZONE: Sidebar (Contextual) */}
+        <div className="w-[400px] border-l border-gray-200 bg-white flex flex-col shadow-xl z-20">
+            
+            {/* AI Logistics Monitor (Always Visible at Bottom or Top?) -> Let's put it Top if no selection, or Bottom if selection */}
+            {/* Actually, let's make it a dedicated section */}
+            
+            {selectedSample ? (
+                <div className="flex-1 flex flex-col h-full">
+                    {/* Sample Detail Header */}
+                    <div className="p-6 border-b border-gray-100 flex items-start justify-between bg-gray-50/30">
+                        <div>
+                            <Button variant="ghost" size="sm" onClick={() => setSelectedId(null)} className="h-8 -ml-2 text-gray-500 mb-2">
+                                <ArrowRight className="w-4 h-4 mr-1 rotate-180" /> Back to Monitor
+                            </Button>
+                            <h2 className="font-serif text-2xl text-[#111111]">{selectedSample.name}</h2>
+                            <p className="text-sm text-gray-500 font-mono mt-1">{selectedSample.sku}</p>
+                        </div>
+                        <Badge className={`
+                            ${selectedSample.risk === 'High' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}
+                            border-0 px-3 py-1
+                        `}>
+                            {selectedSample.risk === 'High' ? 'Risk Alert' : 'On Track'}
+                        </Badge>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 overflow-y-auto p-6 space-y-8">
+                        {/* Main Image */}
+                        <div className="aspect-[3/4] bg-gray-100 rounded-2xl overflow-hidden border border-gray-200 shadow-sm relative group">
+                            <ImageWithFallback src={selectedSample.image} alt={selectedSample.name} className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <Button variant="secondary" className="gap-2">
+                                    <Scan className="w-4 h-4" /> Re-Scan
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* Metadata Grid */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Size/Variant</span>
+                                <p className="text-sm font-medium text-gray-900 mt-1">{selectedSample.variant}</p>
+                            </div>
+                            <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Location</span>
+                                <div className="flex items-center gap-1.5 mt-1">
+                                    <MapPin className="w-3.5 h-3.5 text-gray-400" />
+                                    <p className="text-sm font-medium text-gray-900">{selectedSample.location}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Timeline / Assigned Shots */}
+                        <div>
+                            <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-3">Assigned Usage</h3>
+                            <div className="space-y-2">
+                                {selectedSample.assignedShots?.map((shot, i) => (
+                                    <div key={i} className="flex items-center justify-between p-3 border border-gray-100 rounded-xl hover:border-gray-300 transition-colors cursor-pointer">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 bg-gray-100 rounded-md flex items-center justify-center">
+                                                <Camera className="w-4 h-4 text-gray-400" />
+                                            </div>
+                                            <span className="text-sm font-medium text-gray-700">{shot}</span>
+                                        </div>
+                                        <ChevronRight className="w-4 h-4 text-gray-300" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* AI Alert Box */}
+                        {selectedSample.risk === 'High' && (
+                            <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 flex gap-3">
+                                <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+                                <div>
+                                    <h4 className="text-sm font-bold text-amber-800 mb-1">Logistics Risk</h4>
+                                    <p className="text-xs text-amber-700 leading-relaxed">
+                                        This item is assigned to Shot 4 (Tomorrow 9AM) but has not yet been scanned at the studio.
+                                    </p>
+                                    <Button size="sm" className="mt-3 bg-amber-600 hover:bg-amber-700 text-white border-0 h-8 text-xs">
+                                        Contact Courier
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Action Footer */}
+                    <div className="p-4 border-t border-gray-200 bg-white">
+                        <div className="grid grid-cols-2 gap-3">
+                            <Button variant="outline" className="w-full">Flag Issue</Button>
+                            <Button 
+                                className="w-full bg-[#111111] hover:bg-black text-white"
+                                onClick={() => handleStatusChange(selectedSample.id, 'received')}
+                            >
+                                Mark Received
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <div className="flex-1 p-6 flex flex-col">
+                    <div className="mb-8">
+                        <div className="w-12 h-12 bg-[#111111] rounded-xl flex items-center justify-center text-white mb-4 shadow-lg shadow-black/20">
+                            <Sparkles className="w-6 h-6" />
+                        </div>
+                        <h2 className="font-serif text-2xl text-gray-900 mb-2">AI Logistics</h2>
+                        <p className="text-gray-500 text-sm leading-relaxed">
+                            Cura is monitoring your inventory in real-time against the shoot schedule.
+                        </p>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="grid grid-cols-2 gap-4 mb-8">
+                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                            <span className="block text-2xl font-serif text-[#111111] mb-1">{logisticsData.length}</span>
+                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Total SKUs</span>
+                        </div>
+                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                            <span className="block text-2xl font-serif text-[#111111] mb-1">{Math.round((logisticsData.filter(s => s.status === 'on_set' || s.status === 'shot').length / logisticsData.length) * 100)}%</span>
+                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Readiness</span>
+                        </div>
+                    </div>
+
+                    {/* Insights List */}
+                    <div className="space-y-4">
+                        <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider">Live Insights</h3>
+                        
+                        {highRiskCount > 0 ? (
+                            <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                                    <span className="text-sm font-bold text-amber-800">{highRiskCount} Samples at Risk</span>
+                                </div>
+                                <p className="text-xs text-amber-700 mb-3">
+                                    High priority items for tomorrow's first look have not arrived.
+                                </p>
+                                <Button size="sm" className="w-full bg-white border border-amber-200 text-amber-800 hover:bg-amber-100">
+                                    View Delayed Items
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center gap-3">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                                <span className="text-sm font-medium text-emerald-800">All samples on track</span>
+                            </div>
+                        )}
+
+                        <div className="p-4 border border-gray-100 rounded-2xl hover:border-gray-200 transition-colors cursor-pointer group">
+                            <div className="flex justify-between items-start mb-2">
+                                <span className="text-sm font-bold text-gray-900">Optimization</span>
+                                <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-[#111111] transition-colors" />
+                            </div>
+                            <p className="text-xs text-gray-500">
+                                Batching "Accessories" shots could save 45 mins of setup time.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="mt-auto pt-6 border-t border-gray-100 text-center">
+                        <p className="text-[10px] text-gray-400 font-mono">Last synced: Just now</p>
+                    </div>
+                </div>
+            )}
+        </div>
+
       </div>
 
-      {/* Sticky Warning Footer */}
-      <AnimatePresence>
-        {pendingHeroes > 0 && (
-          <motion.div 
-            initial={{ y: 100 }}
-            animate={{ y: 0 }}
-            exit={{ y: 100 }}
-            className="fixed bottom-0 left-0 right-0 bg-white border-t border-red-100 p-4 pb-8 z-40 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]"
-          >
-            <div className="max-w-md mx-auto flex items-start gap-3">
-              <div className="p-2 bg-red-50 text-red-600 rounded-full shrink-0">
-                <AlertTriangle className="w-5 h-5" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-sm font-medium text-gray-900 mb-0.5">Critical Items Pending</h3>
-                <p className="text-xs text-gray-500 leading-relaxed">
-                  You have <span className="font-bold text-gray-900">{pendingHeroes} Hero items</span> remaining. 
-                  AI suggests prioritizing "Silk Pleated Trousers" next for optimal lighting match.
-                </p>
-              </div>
-              <Button size="sm" variant="outline" className="border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800 text-xs h-8">
-                View List
-              </Button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Simulated Scanner Overlay */}
+      {/* --- Scan Overlay --- */}
       <AnimatePresence>
         {isScanning && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center p-6"
+            className="fixed inset-0 z-50 bg-[#111111] flex flex-col items-center justify-center"
           >
-            <div className="w-full max-w-sm aspect-[3/4] border-2 border-white/30 rounded-3xl relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/50" />
-              
-              {/* Scanning Laser */}
-              <motion.div 
-                animate={{ top: ['0%', '100%', '0%'] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                className="absolute left-0 right-0 h-0.5 bg-green-400 shadow-[0_0_20px_rgba(74,222,128,0.8)]"
-              />
-              
-              <div className="absolute bottom-8 left-0 right-0 text-center">
-                 <p className="text-white font-medium mb-2">Scanning Barcode...</p>
-                 <p className="text-white/50 text-xs">Point camera at SKU tag</p>
-              </div>
-            </div>
-            <button 
-              onClick={() => setIsScanning(false)}
-              className="mt-8 text-white/70 text-sm hover:text-white"
-            >
-              Cancel
-            </button>
+             <div className="w-full max-w-md px-6 relative">
+                <div className="aspect-[3/4] bg-gray-900 rounded-[32px] overflow-hidden relative border border-white/20 shadow-2xl">
+                    {/* Camera Feed Simulation */}
+                    <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&q=80')] bg-cover bg-center opacity-50" />
+                    
+                    {/* Scanner UI */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <div className="w-64 h-64 border-2 border-white/30 rounded-3xl relative">
+                            <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-white rounded-tl-xl" />
+                            <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-white rounded-tr-xl" />
+                            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-white rounded-bl-xl" />
+                            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-white rounded-br-xl" />
+                            
+                            <motion.div 
+                                animate={{ top: ['0%', '100%', '0%'] }}
+                                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                                className="absolute left-2 right-2 h-0.5 bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.8)]"
+                            />
+                        </div>
+                        <p className="text-white font-mono text-xs mt-8 tracking-widest uppercase animate-pulse">Searching for Tag...</p>
+                    </div>
+                </div>
+
+                <div className="mt-8 text-center space-y-4">
+                    <h3 className="text-2xl text-white font-serif">Scan Sample Tag</h3>
+                    <p className="text-gray-400 text-sm">Align the QR code within the frame to check in.</p>
+                    <Button 
+                        variant="outline" 
+                        className="border-white/20 text-white hover:bg-white/10 rounded-full px-8"
+                        onClick={() => setIsScanning(false)}
+                    >
+                        Cancel
+                    </Button>
+                </div>
+             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
     </div>
-  );
-}
-
-function SampleCard({ item, onMarkShot, onReturn }: { item: SampleItem, onMarkShot: () => void, onReturn: () => void }) {
-  const isShot = item.status === 'shot';
-  
-  return (
-    <motion.div 
-      layout
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ 
-        opacity: 1, 
-        y: 0,
-        backgroundColor: isShot ? '#F0FDF4' : '#FFFFFF',
-        borderColor: isShot ? '#DCFCE7' : '#F3F4F6'
-      }}
-      className={`
-        relative p-3 rounded-2xl border shadow-sm flex items-start gap-4 overflow-hidden
-        ${isShot ? 'shadow-none' : 'hover:shadow-md transition-shadow'}
-      `}
-    >
-      {/* Background Pulse Animation on Success */}
-      {isShot && (
-        <motion.div 
-          initial={{ opacity: 0.5, scale: 0.8 }}
-          animate={{ opacity: 0, scale: 1.5 }}
-          transition={{ duration: 0.8 }}
-          className="absolute inset-0 bg-green-100 z-0"
-        />
-      )}
-
-      {/* Image */}
-      <div className="w-20 h-24 bg-gray-100 rounded-xl shrink-0 overflow-hidden relative z-10">
-        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-        {item.isHero && (
-           <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/60 to-transparent p-1">
-             <div className="flex items-center gap-1 justify-center">
-               <span className="text-[9px] font-bold text-white uppercase tracking-wider">Hero Item</span>
-             </div>
-           </div>
-        )}
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 min-w-0 py-1 relative z-10">
-        <div className="flex justify-between items-start mb-1">
-          <Badge variant="outline" className={`
-            text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 border-0
-            ${item.status === 'shot' ? 'bg-green-100 text-green-700' : 
-              item.status === 'on_set' ? 'bg-indigo-100 text-indigo-700' :
-              item.status === 'returned' ? 'bg-gray-100 text-gray-500' :
-              'bg-amber-100 text-amber-700'}
-          `}>
-            {item.status.replace('_', ' ')}
-          </Badge>
-          <button className="text-gray-300 hover:text-gray-600">
-            <MoreVertical className="w-4 h-4" />
-          </button>
-        </div>
-        
-        <h3 className="font-serif text-base font-medium text-gray-900 truncate pr-4">{item.name}</h3>
-        <p className="text-xs text-gray-500 mb-0.5">{item.sku}</p>
-        <p className="text-xs text-gray-400 mb-3">{item.variant}</p>
-
-        {/* Actions */}
-        <div className="flex items-center gap-2">
-           {item.status === 'shot' ? (
-             <div className="flex items-center gap-1.5 text-xs font-medium text-green-700 bg-white/50 px-2 py-1.5 rounded-lg border border-green-200">
-               <CheckCircle2 className="w-3.5 h-3.5" />
-               Captured 10:42 AM
-               <button onClick={onReturn} className="ml-2 pl-2 border-l border-green-200 hover:text-green-900 text-[10px] uppercase font-bold">
-                  Return
-               </button>
-             </div>
-           ) : (
-             <>
-               <Button 
-                 size="sm" 
-                 onClick={onMarkShot}
-                 className="h-8 bg-gray-900 hover:bg-black text-white text-xs px-3 rounded-lg flex-1"
-               >
-                 Mark Shot
-               </Button>
-               <Button 
-                 size="sm" 
-                 variant="outline"
-                 className="h-8 w-8 p-0 rounded-lg border-gray-200 text-gray-500"
-               >
-                 <QrCode className="w-4 h-4" />
-               </Button>
-             </>
-           )}
-        </div>
-      </div>
-    </motion.div>
   );
 }

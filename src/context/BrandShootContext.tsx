@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+import { EventTask } from '../lib/types/events.types';
+
 // --- Types ---
 
 export interface BrandSignals {

@@ -145,26 +145,28 @@ export function AIOptimizationCenter({ onNavigate }: AIOptimizationCenterProps) 
     <div className="min-h-screen bg-[#FDFBF9] pb-24 font-sans">
       
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-600/20">
-            <Wand2 className="w-5 h-5" />
+      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-gray-100/50">
+        <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#111111] rounded-xl flex items-center justify-center text-white shadow-lg shadow-black/10">
+              <Wand2 className="w-5 h-5" />
+            </div>
+            <div>
+              <h1 className="font-serif text-xl text-[#111111]">AI Optimization Center</h1>
+              <p className="text-xs text-gray-500 font-medium">Live monitoring & automated improvement</p>
+            </div>
           </div>
-          <div>
-            <h1 className="font-serif text-xl font-medium text-gray-900">AI Optimization Center</h1>
-            <p className="text-xs text-gray-500">Live monitoring & automated improvement</p>
+          <div className="flex gap-3">
+             <Button variant="outline" onClick={() => onNavigate('campaign-summary')} className="rounded-xl h-10 px-5 text-xs font-bold hover:bg-gray-50">Exit</Button>
+             <Button className="bg-[#111111] text-white hover:bg-black rounded-xl h-10 px-5 text-xs font-bold shadow-lg shadow-black/10">
+               <RefreshCw className="w-4 h-4 mr-2" />
+               Re-Analyze
+             </Button>
           </div>
-        </div>
-        <div className="flex gap-3">
-           <Button variant="outline" onClick={() => onNavigate('campaign-summary')}>Exit</Button>
-           <Button className="bg-gray-900 text-white hover:bg-black">
-             <RefreshCw className="w-4 h-4 mr-2" />
-             Re-Analyze
-           </Button>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-[1600px] mx-auto px-6 md:px-8 py-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
 
         {/* Left Column: Stats & List */}
         <div className="space-y-6">

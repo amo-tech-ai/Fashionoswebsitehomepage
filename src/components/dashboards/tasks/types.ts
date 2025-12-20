@@ -1,62 +1,53 @@
-import { 
-  ClipboardCheck, 
-  Building2, 
-  Palette, 
-  Zap, 
-  BarChart3,
-  Compass,
-  Presentation,
-  FileSignature,
-  Box,
-  Target,
-  Camera,
-  Share2,
-  Megaphone,
-  LineChart,
-  Store,
-  Wrench,
-  UserCheck,
-  ShieldCheck,
-  Upload,
-  Globe,
-  Archive
-} from "lucide-react";
+import { EventTask, EventSponsor, WorkflowPhase } from "../../../lib/types/events.types";
 
-// --- Types ---
+// Re-export core types to ensure consistency across the application
+export type { EventTask, EventSponsor, WorkflowPhase };
 
-export type Priority = 'High' | 'Medium' | 'Low';
-export type Status = 'Backlog' | 'In Progress' | 'Review' | 'Completed';
-export type DeliverableStatus = 'Pending' | 'In Progress' | 'Completed';
-export type ViewState = 'dashboard' | 'tasks-detail' | 'deliverables-detail';
-export type WorkflowCategory = 'event-planning' | 'sponsorship' | 'marketing' | 'operations' | 'media';
+// Alias EventTask to Task for backward compatibility, extending with UI-specific fields
+export type Task = EventTask & {
+  // Legacy fields for backward compatibility with UI components
+  dueDate?: string;
+  owner?: string;
+  category?: string; // Mapped to workflow_category
+  actionRoute?: string;
+  actionLabel?: string;
+};
 
-export interface Task {
-  id: string;
-  title: string;
-  priority: Priority;
-  dueDate: string;
-  owner: string;
-  status: Status;
-  category: string;
-}
+// Map legacy internal types to the strict schema if needed, or simply alias them
+export type Priority = EventTask['priority'];
+export type Status = EventTask['status'];
+export type WorkflowCategory = EventTask['workflow_category'];
 
-export interface Deliverable {
-  id: string;
-  name: string;
-  sponsor: string;
-  event: string;
-  dueDate: string;
-  status: DeliverableStatus;
-  type: string;
-  owner: string;
-}
-
+// UI-specific types that extend the core data model
 export interface FlowStep {
   id: string;
-  stepNumber: number;
   title: string;
-  description: string;
-  icon: any;
-  tasks: Task[];
-  deliverables: Deliverable[];
+  status: 'active' | 'completed' | 'upcoming' | 'pending';
+  progress: number;
+  tasks: Task[]; // Use Extended Task type
+  // Optional UI-only fields
+  stepNumber?: number;
+  description?: string;
+  icon?: any;
 }
+
+export type ViewState = 'dashboard' | 'tasks-detail' | 'deliverables-detail';
+export type DrawerMode = 'summary' | 'detail' | null;
+
+// Helper to map UI status strings to strict EventTask status
+export const mapStatusToStrict = (status: string): EventTask['status'] => {
+    const s = status.toLowerCase();
+    if (s === 'completed' || s === 'done') return 'done';
+    if (s === 'in progress' || s === 'active') return 'in_progress';
+    if (s === 'cancelled') return 'cancelled';
+    return 'to_do';
+};
+
+// Helper to map UI priority strings to strict EventTask priority
+export const mapPriorityToStrict = (priority: string): EventTask['priority'] => {
+    const p = priority.toLowerCase();
+    if (p === 'critical') return 'critical';
+    if (p === 'high') return 'high';
+    if (p === 'medium') return 'medium';
+    return 'low';
+};

@@ -1,63 +1,90 @@
 import { motion } from "motion/react";
 import { Instagram, Twitter, Linkedin } from "lucide-react";
 
-export function Footer() {
+interface FooterProps {
+  onNavigate?: (screen: string) => void;
+  activeScreen?: string;
+}
+
+export function Footer({ onNavigate, activeScreen }: FooterProps) {
   const handleNavigation = (href: string) => {
     if (href === "#") return;
     
-    // Update URL and trigger routing
-    window.history.pushState({}, "", href);
-    window.dispatchEvent(new PopStateEvent("popstate"));
+    // Extract route from href (remove leading slash)
+    const route = href.startsWith("/") ? href.slice(1) : href;
+    
+    // If onNavigate is provided, use it (for app pages)
+    if (onNavigate) {
+      onNavigate(route);
+    } else {
+      // Fallback for marketing pages
+      window.history.pushState({}, "", href);
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    }
   };
 
   const footerSections = [
     {
       title: "Platform",
       links: [
-        { text: "Overview", href: "/overview" },
-        { text: "Command Center", href: "/command-center" },
-        { text: "Shot Lists", href: "/shotlist" },
-        { text: "Inventory", href: "/products" },
-        { text: "Events Schedule", href: "/events-list" },
-        { text: "Finance", href: "/billing" },
-        { text: "Analytics", href: "/analytics" }
+        { text: "Overview", href: "/overview", id: "overview" },
+        { text: "Command Center", href: "/command-center", id: "command-center" },
+        { text: "Task Execution Engine", href: "/tasks", id: "tasks" },
+        { text: "Shot List Builder", href: "/shotlist", id: "shotlist" },
+        { text: "Cura Casting Agent", href: "/casting", id: "casting" },
+        { text: "Sponsorship V1", href: "/sponsorship", id: "sponsorship" },
+        { text: "Sponsorship V2", href: "/sponsorship-v2", id: "sponsorship-v2" },
+        { text: "Sponsorship V3", href: "/sponsorship-v3", id: "sponsorship-v3" },
+        { text: "Sponsorship V5", href: "/sponsorship-v5", id: "sponsorship-v5" },
+        { text: "Cosmetics Sponsor", href: "/sponsors/cosmetics", id: "sponsors-cosmetics" },
+        { text: "Electronics Sponsor", href: "/sponsors/electronics", id: "sponsors-electronics" },
+        { text: "Electronics V2", href: "/sponsors/electronics-v2", id: "sponsors-electronics-v2" },
+        { text: "Beauty Sponsor", href: "/sponsors/beauty", id: "sponsors-beauty" },
+        { text: "Automotive Sponsor", href: "/sponsors/automotive", id: "sponsors-automotive" },
+        { text: "Real Estate Sponsor", href: "/sponsors/real-estate", id: "sponsors-real-estate" },
+        { text: "Sponsor CRM", href: "/sponsors", id: "sponsors" },
+        { text: "Inventory", href: "/products", id: "products" },
+        { text: "Schedule", href: "/events-list", id: "events-list" },
+        { text: "Finance", href: "/billing", id: "billing" },
+        { text: "Analytics", href: "/analytics", id: "analytics" },
       ]
     },
     {
       title: "Create",
       links: [
-        { text: "New Brand Shoot (AI)", href: "/start" },
+        { text: "Brand Shoot (AI)", href: "/brand-shoot-start" },
         { text: "Classic Shoot Wizard", href: "/wizard" },
-        { text: "New Event Wizard", href: "/event-wizard" },
-        { text: "New Website Wizard", href: "/website-wizard" },
-        { text: "New Designer Profile", href: "/designer-wizard" }
+        { text: "Event Creation Wizard", href: "/event-wizard" },
+        { text: "Website Wizard", href: "/website-wizard" },
+        { text: "Designer Profile", href: "/directory-wizard" }
       ]
     },
     {
       title: "Services",
       links: [
         { text: "Ecommerce Photography", href: "/ecommerce-photography" },
-        { text: "Website Design", href: "/web-design" },
+        { text: "Website Design", href: "/webdesign" },
         { text: "Video Production", href: "/video" },
-        { text: "Studio Hire", href: "/studios" },
+        { text: "Studios", href: "/studio" },
         { text: "Social Media", href: "/instagram" },
         { text: "Amazon Content", href: "/amazon" }
       ]
     },
     {
-      title: "Versions",
+      title: "Explore",
       links: [
-        { text: "Home V1 (Original)", href: "/" },
-        { text: "Home V2 (Previous)", href: "/home-v2" },
         { text: "Home V3 (Latest)", href: "/home-v3" },
-        { text: "Directory", href: "/directory" }
+        { text: "Home V2", href: "/home-v2" },
+        { text: "Home V1", href: "/" },
+        { text: "Directory", href: "/directory" },
+        { text: "Design System", href: "/style-guide" },
+        { text: "Architecture", href: "/architecture" }
       ]
     },
     {
       title: "Company",
       links: [
         { text: "About Us", href: "#" },
-        { text: "Design System", href: "/style-guide" },
         { text: "Contact", href: "#" },
         { text: "Careers", href: "#" },
         { text: "Press", href: "#" }
@@ -89,20 +116,31 @@ export function Footer() {
                 {section.title}
               </h4>
               <ul className="space-y-3">
-                {section.links.map((link) => (
-                  <li key={typeof link === 'string' ? link : link.text}>
-                    <a
-                      href={typeof link === 'string' ? "#" : link.href}
-                      className="text-gray-600 hover:text-gray-900 transition-colors duration-200 text-sm"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleNavigation(typeof link === 'string' ? "#" : link.href);
-                      }}
-                    >
-                      {typeof link === 'string' ? link : link.text}
-                    </a>
-                  </li>
-                ))}
+                {section.links.map((link) => {
+                  const isLinkActive = activeScreen && typeof link !== 'string' && (link.id === activeScreen || (link.href && link.href.slice(1) === activeScreen));
+                  
+                  return (
+                    <li key={typeof link === 'string' ? link : link.text}>
+                      <a
+                        href={typeof link === 'string' ? "#" : link.href}
+                        className={`transition-colors duration-200 text-sm ${
+                          isLinkActive 
+                            ? "text-black font-semibold" 
+                            : "text-gray-600 hover:text-gray-900"
+                        }`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleNavigation(typeof link === 'string' ? "#" : link.href);
+                        }}
+                      >
+                        {typeof link === 'string' ? link : link.text}
+                        {isLinkActive && (
+                          <span className="ml-2 inline-block w-1.5 h-1.5 rounded-full bg-black align-middle" />
+                        )}
+                      </a>
+                    </li>
+                  );
+                })}
               </ul>
             </motion.div>
           ))}

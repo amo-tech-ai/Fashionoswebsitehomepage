@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { Sidebar } from "./components/shared/Sidebar";
+import { AppShell } from "./components/shared/AppShell";
 import { NavigationBar } from "./components/shared/NavigationBar";
+import { Footer } from "./components/Footer";
 import AppHome from "./AppHome";
 import HomePageV2 from "./HomePageV2";
 import HomePageV3 from "./HomePageV3";
@@ -28,7 +29,6 @@ import { BillingDashboard } from "./components/dashboards/BillingDashboard";
 import { CommandCenter } from "./components/dashboards/CommandCenter";
 import { RunwayStage } from "./components/dashboards/RunwayStage";
 import { CastingModels } from "./components/dashboards/CastingModels";
-import { CuraCasting } from "./components/dashboards/CuraCasting";
 import { DesignerCollection } from "./components/dashboards/DesignerCollection";
 import { VenueManagement } from "./components/dashboards/VenueManagement";
 import { ROIAnalytics } from "./components/dashboards/ROIAnalytics";
@@ -37,15 +37,16 @@ import { DirectoryProfileWizard } from "./components/wizards/DirectoryProfileWiz
 import { ContractsManager } from "./components/dashboards/ContractsManager";
 import { ActivationsManager } from "./components/dashboards/ActivationsManager";
 import { TasksAndDeliverables } from "./components/dashboards/TasksAndDeliverables";
-import { SponsorCRM } from "./components/dashboards/SponsorCRM";
+import { SponsorCRMv2 } from "./components/dashboards/SponsorCRMv2";
 import { SponsorProfile } from "./components/dashboards/SponsorProfile";
 
 import { SponsorDetail } from "./components/sponsors/SponsorDetail";
 import { DesignerDirectory } from "./components/designers/DesignerDirectory";
 import { DesignerProfile } from "./components/designers/DesignerProfile";
 import { BrandProfileDashboard } from "./components/dashboards/BrandProfileDashboard";
-import { AIAssistant } from "./components/shared/AIAssistant";
-import { Footer } from "./components/Footer";
+
+import { BudgetManager } from "./components/dashboards/finance/BudgetManager";
+import { ContractAnalyzer } from "./components/dashboards/finance/ContractAnalyzer";
 
 import EcommercePhotography from "./EcommercePhotography";
 import StyleGuide from "./components/StyleGuide";
@@ -72,11 +73,32 @@ import { ProposalReady } from "./components/workflow/ProposalReady";
 import { ProductionTimeline } from "./components/workflow/ProductionTimeline";
 
 import { BrandShootProvider, useBrandShoot } from "./context/BrandShootContext";
+import { SponsorProvider } from "./context/SponsorContext";
+import { EventProvider } from "./context/EventContext";
+import { AgentProvider } from "./lib/ai/AgentContext";
+import { AssistantShell } from "./components/assistant/AssistantShell";
+import { AICopilotDrawer } from "./components/shared/AICopilotDrawer";
+
+import SponsorshipPage from "./components/pages/SponsorshipPage";
+import SponsorshipPageV2 from "./components/pages/SponsorshipPageV2";
+import SponsorshipPageV3 from "./components/pages/SponsorshipPageV3";
+import SponsorshipPageV5 from "./components/pages/SponsorshipPageV5";
+import ElectronicsSponsorshipPage from "./components/pages/ElectronicsSponsorshipPage";
+import ElectronicsSponsorshipPageV2 from "./components/pages/ElectronicsSponsorshipPageV2";
+import BeautySponsorshipPage from "./components/pages/BeautySponsorshipPage";
+import AutomotiveSponsorshipPage from "./components/pages/AutomotiveSponsorshipPage";
+import RealEstateSponsorshipPage from "./components/pages/RealEstateSponsorshipPage";
 
 function AppContent() {
   const { setWizardData, wizardData } = useBrandShoot();
   const [activeScreen, setActiveScreen] = useState("home-v3");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Navigation function that updates BOTH state and URL
+  const handleNavigate = (screen: string) => {
+    setActiveScreen(screen);
+    window.history.pushState({}, "", `/${screen}`);
+  };
 
   // Handle initial URL load and browser back/forward
   useEffect(() => {
@@ -104,6 +126,8 @@ function AppContent() {
       else if (path.includes("/directory")) {
         setActiveScreen(path.includes("detail") ? "directorydetail" : "directory");
       }
+      // Explicit dashboard route for Events Schedule
+      else if (path === "/events-list") setActiveScreen("events-list");
       else if (path.includes("/events") || path.includes("/event-wizard")) {
         if (path.includes("create") || path.includes("wizard")) setActiveScreen("event-wizard");
         else setActiveScreen(path.includes("detail") ? "eventdetail" : "events");
@@ -112,6 +136,7 @@ function AppContent() {
       else if (path.includes("/tasks") || path.includes("/deliverables")) setActiveScreen("tasks");
       else if (path.includes("/contracts")) setActiveScreen("contracts");
       else if (path.includes("/analytics") || path.includes("/roi")) setActiveScreen("analytics");
+      else if (path.includes("/command-center")) setActiveScreen("command-center");
       else if (path.includes("/overview") || path.includes("/dashboard")) setActiveScreen("overview");
       else if (path.includes("/shotlist")) setActiveScreen("shotlist");
       else if (path.includes("/products")) setActiveScreen("products");
@@ -121,6 +146,16 @@ function AppContent() {
       else if (path.includes("/sponsors")) {
         setActiveScreen(path.includes("profile") ? "sponsor-profile" : "sponsors");
       }
+      else if (path === "/sponsorship") setActiveScreen("sponsorship");
+      else if (path === "/sponsorship-v2") setActiveScreen("sponsorship-v2");
+      else if (path === "/sponsorship-v3") setActiveScreen("sponsorship-v3");
+      else if (path === "/sponsorship-v5") setActiveScreen("sponsorship-v5");
+      else if (path === "/sponsors/cosmetics") setActiveScreen("sponsors/cosmetics");
+      else if (path === "/sponsors/electronics") setActiveScreen("sponsors/electronics");
+      else if (path === "/sponsors/electronics-v2") setActiveScreen("sponsors/electronics-v2");
+      else if (path === "/sponsors/beauty") setActiveScreen("sponsors/beauty");
+      else if (path === "/sponsors/automotive") setActiveScreen("sponsors/automotive");
+      else if (path === "/sponsors/real-estate") setActiveScreen("sponsors/real-estate");
       else if (path.includes("/architecture")) setActiveScreen("architecture");
       else if (path.includes("/proposal")) setActiveScreen("proposal");
       else if (path.includes("/booking")) setActiveScreen("booking");
@@ -134,7 +169,8 @@ function AppContent() {
       else if (path.includes("/ai-optimization")) setActiveScreen("ai-optimization");
       else if (path.includes("/sample-tracker")) setActiveScreen("sample-tracker");
       else if (path.includes("/call-sheet")) setActiveScreen("call-sheet");
-      else if (path.includes("/cura-casting")) setActiveScreen("cura-casting");
+      // Unified Casting Route
+      else if (path.includes("/casting")) setActiveScreen("casting");
       else if (path.includes("/casting-availability")) setActiveScreen("casting-availability");
       else if (path.includes("/casting-matchmaker")) setActiveScreen("casting-matchmaker");
       else if (path.includes("/scout/setup")) setActiveScreen("scout-setup");
@@ -173,15 +209,15 @@ function AppContent() {
       case "website-wizard":
         return <WebsiteWizard />;
       case "designer-wizard":
-        return <DesignerWizard onComplete={() => setActiveScreen("brand-profile-dashboard")} />;
+        return <DesignerWizard onComplete={() => handleNavigate("brand-profile-dashboard")} />;
       case "brand-profile-dashboard":
-        return <BrandProfileDashboard onNavigate={setActiveScreen} />;
+        return <BrandProfileDashboard onNavigate={handleNavigate} />;
       case "website-brief-dashboard":
         return <WebsiteWizard initialStep={9} />;
       case "style-guide":
         return <StyleGuide />;
       case "wizard":
-        return <ShootWizard onComplete={(data) => { setWizardData(data); setActiveScreen("proposal"); }} />;
+        return <ShootWizard onComplete={(data) => { setWizardData(data); handleNavigate("proposal"); }} />;
       case "studio":
         return <Studios />;
       case "directory":
@@ -195,13 +231,13 @@ function AppContent() {
       
       // Dashboard Pages
       case "event-wizard":
-        return <EventCreationWizard onComplete={() => setActiveScreen("events")} />;
+        return <EventCreationWizard onComplete={() => handleNavigate("events")} />;
       case "directory-wizard":
-        return <DirectoryProfileWizard onComplete={() => setActiveScreen("overview")} />;
+        return <DirectoryProfileWizard onComplete={() => handleNavigate("overview")} />;
       case "overview":
-        return <ProjectOverview onNavigate={setActiveScreen} />;
+        return <ProjectOverview onNavigate={handleNavigate} />;
       case "shotlist":
-        return <ShotListBuilder onBack={() => setActiveScreen('production-timeline')} />;
+        return <ShotListBuilder onBack={() => handleNavigate('production-timeline')} />;
       case "products":
         return <ProductsDashboard />;
       case "gallery":
@@ -209,17 +245,17 @@ function AppContent() {
       case "clients":
         return <ClientDashboard />;
       case "billing":
-        return <BillingDashboard />;
+        return <BudgetManager />;
       case "command-center":
-        return <CommandCenter onNavigate={setActiveScreen} />;
+        return <CommandCenter onNavigate={handleNavigate} />;
       case "runway":
         return <RunwayStage />;
       case "casting":
-        return <CuraCasting onNavigate={setActiveScreen} />;
+        return <CuraCasting onNavigate={handleNavigate} />;
       case "designer":
         return <DesignerCollection />;
       case "venues":
-        return <VenueManagement onNavigate={setActiveScreen} />;
+        return <VenueManagement onNavigate={handleNavigate} />;
       case "activations":
         return <ActivationsManager />;
       case "tasks":
@@ -229,63 +265,81 @@ function AppContent() {
       case "tasks-operations":
       case "tasks-media":
         const taskTab = activeScreen.startsWith('tasks-') ? activeScreen.replace('tasks-', '') : 'event-planning';
-        return <TasksAndDeliverables initialTab={taskTab} onNavigate={setActiveScreen} />;
+        return <TasksAndDeliverables initialTab={taskTab} onNavigate={handleNavigate} />;
       case "sponsor-detail":
-        return <SponsorDetail onNavigate={setActiveScreen} />;
+        return <SponsorDetail onNavigate={handleNavigate} />;
       case "contracts":
-        return <ContractsManager />;
+        return <ContractAnalyzer />;
       case "analytics":
-        return <ROIAnalytics onNavigate={setActiveScreen} />;
+        return <ROIAnalytics onNavigate={handleNavigate} />;
       case "events-list":
         return <Events />;
       case "sponsors":
-        return <SponsorCRM onNavigate={setActiveScreen} />;
+        return <SponsorCRMv2 onNavigate={handleNavigate} />;
       case "sponsor-profile":
-        return <SponsorProfile onNavigate={setActiveScreen} />;
+        return <SponsorProfile onNavigate={handleNavigate} />;
       case "designers":
-        return <DesignerDirectory onNavigate={setActiveScreen} />;
+        return <DesignerDirectory onNavigate={handleNavigate} />;
       case "designer-profile":
-        return <DesignerProfile onNavigate={setActiveScreen} />;
+        return <DesignerProfile onNavigate={handleNavigate} />;
       case "architecture":
         return <SiteArchitecture />;
       case "proposal":
-        return <ProposalPreview onNavigate={setActiveScreen} proposalData={wizardData} />;
+        return <ProposalPreview onNavigate={handleNavigate} proposalData={wizardData} />;
+      case "sponsorship":
+        return <SponsorshipPage />;
+      case "sponsorship-v2":
+        return <SponsorshipPageV2 />;
+      case "sponsorship-v3":
+        return <SponsorshipPageV3 />;
+      case "sponsorship-v5":
+        return <SponsorshipPageV5 />;
+      case "sponsors/cosmetics":
+        return <SponsorshipPageV5 />; // Temporary - using V5 as placeholder
+      case "sponsors/electronics":
+        return <ElectronicsSponsorshipPage />;
+      case "sponsors/electronics-v2":
+        return <ElectronicsSponsorshipPageV2 />;
+      case "sponsors/beauty":
+        return <BeautySponsorshipPage />;
+      case "sponsors/automotive":
+        return <AutomotiveSponsorshipPage />;
+      case "sponsors/real-estate":
+        return <RealEstateSponsorshipPage />;
       case "booking":
-        return <BookingFlow onNavigate={setActiveScreen} />;
+        return <BookingFlow onNavigate={handleNavigate} />;
 
       // Brand Shoot AI Flow
       case "brand-shoot-start":
-        return <BrandShootStart onNavigate={setActiveScreen} />;
+        return <BrandShootStart onNavigate={handleNavigate} />;
       case "brand-signal-capture":
-        return <BrandSignalCapture onNavigate={setActiveScreen} />;
+        return <BrandSignalCapture onNavigate={handleNavigate} />;
       case "ai-thinking":
-        return <AIThinking onNavigate={setActiveScreen} />;
+        return <AIThinking onNavigate={handleNavigate} />;
       case "campaign-summary":
-        return <CampaignSummary onNavigate={setActiveScreen} />;
+        return <CampaignSummary onNavigate={handleNavigate} />;
       case "proposal-confirmation":
-        return <ProposalConfirmation onNavigate={setActiveScreen} />;
+        return <ProposalConfirmation onNavigate={handleNavigate} />;
       case "ai-optimization":
-        return <AIOptimizationCenter onNavigate={setActiveScreen} />;
+        return <AIOptimizationCenter onNavigate={handleNavigate} />;
       case "sample-tracker":
-        return <SmartSampleTracker onBack={() => setActiveScreen('production-timeline')} />;
+        return <SmartSampleTracker onBack={() => handleNavigate('production-timeline')} />;
       case "call-sheet":
-        return <DynamicCallSheet onBack={() => setActiveScreen('production-timeline')} />;
-      case "cura-casting":
-        return <CuraCasting onNavigate={setActiveScreen} />;
+        return <DynamicCallSheet onBack={() => handleNavigate('production-timeline')} />;
       case "casting-availability":
-        return <CastingAvailability onNavigate={setActiveScreen} />;
+        return <CastingAvailability onNavigate={handleNavigate} />;
       case "casting-matchmaker":
-        return <CastingMatchmaker onNavigate={setActiveScreen} />;
+        return <CastingMatchmaker onNavigate={handleNavigate} />;
       case "scout-setup":
-        return <ScoutSetup onNavigate={setActiveScreen} />;
+        return <ScoutSetup onNavigate={handleNavigate} />;
       case "scout-finder":
-        return <ScoutFinder onNavigate={setActiveScreen} />;
+        return <ScoutFinder onNavigate={handleNavigate} />;
       case "scout-shortlist":
-        return <ScoutShortlist onNavigate={setActiveScreen} />;
+        return <ScoutShortlist onNavigate={handleNavigate} />;
       case "proposal-ready":
-        return <ProposalReady onNavigate={setActiveScreen} />;
+        return <ProposalReady onNavigate={handleNavigate} />;
       case "production-timeline":
-        return <ProductionTimeline onNavigate={setActiveScreen} />;
+        return <ProductionTimeline onNavigate={handleNavigate} />;
       
       default:
         return <HomePageV3 />;
@@ -293,68 +347,81 @@ function AppContent() {
   };
 
   // Determine if current page is a marketing page (no top nav needed)
-  const isMarketingPage = ["home", "home-v2", "home-v3", "photography", "ecommerce-photography", "clothing", "product", "video", "amazon", "instagram", "webdesign", "studio", "directory", "directorydetail", "events", "eventdetail", "style-guide", "architecture"].includes(activeScreen);
+  const isMarketingPage = [
+    "home", "home-v2", "home-v3", 
+    "photography", "ecommerce-photography", "clothing", "product", 
+    "video", "amazon", "instagram", "webdesign", "studio", 
+    "directory", "directorydetail", "events", "eventdetail", 
+    "style-guide", "architecture", 
+    "sponsorship", "sponsorship-v2", "sponsorship-v3", "sponsorship-v5",
+    "sponsors/cosmetics", "sponsors/electronics", "sponsors/electronics-v2", "sponsors/beauty", "sponsors/automotive", "sponsors/real-estate"
+  ].includes(activeScreen);
 
   // Determine if we should hide the sidebar (e.g. for the full-screen wizard)
   const isFullScreen = activeScreen === "wizard" || activeScreen === "website-wizard" || activeScreen === "designer-wizard" || activeScreen === "event-wizard" || activeScreen === "directory-wizard" || activeScreen === "proposal" || activeScreen === "booking" || 
     activeScreen === "brand-shoot-start" || activeScreen === "brand-signal-capture" || activeScreen === "ai-thinking" || activeScreen === "campaign-summary" || activeScreen === "proposal-confirmation" || activeScreen === "ai-optimization" || activeScreen === "sample-tracker" || activeScreen === "casting-matchmaker" || activeScreen === "scout-setup" || activeScreen === "scout-finder" || activeScreen === "scout-shortlist" || activeScreen === "proposal-ready" || activeScreen === "production-timeline";
 
+  // Use AppShell for application pages, standard layout for marketing pages
+  if (isMarketingPage || isFullScreen) {
+     return (
+       <div className="min-h-screen bg-white">
+          {/* Navigation Bar for Marketing Pages */}
+          {!isFullScreen && (
+            <>
+               <NavigationBar 
+                activeScreen={activeScreen}
+                onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              />
+              {/* Mobile Menu Button - Redundant if NavigationBar handles it, but keeping for safety if Nav is hidden */}
+              <div className="lg:hidden fixed top-4 left-4 z-30">
+                <button
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  className="w-10 h-10 bg-white rounded-lg shadow-lg flex items-center justify-center text-gray-700 hover:text-gray-900 border border-gray-200"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+              </div>
+            </>
+          )}
+
+          {renderContent()}
+
+          {!isFullScreen && (
+            <div className="mt-20">
+               <Footer onNavigate={handleNavigate} activeScreen={activeScreen} />
+            </div>
+          )}
+          
+          <AssistantShell currentRoute={activeScreen} onNavigate={handleNavigate} />
+          <AICopilotDrawer />
+       </div>
+     )
+  }
+
+  // Application / Dashboard Pages
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Sidebar Navigation */}
-      {!isFullScreen && !isMarketingPage && (
-        <Sidebar 
-          activeScreen={activeScreen} 
-          onNavigate={setActiveScreen}
-          isMobileOpen={isMobileMenuOpen}
-          onMobileClose={() => setIsMobileMenuOpen(false)}
-        />
-      )}
-      
-      {/* Main Content Area */}
-      <div className={`${!isFullScreen && !isMarketingPage ? 'lg:ml-64' : ''} transition-all duration-300`}>
-        {/* Show NavigationBar only for dashboard pages */}
-        {!isMarketingPage && !isFullScreen && (
-          <NavigationBar 
-            activeScreen={activeScreen}
-            onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          />
-        )}
-        
-        {/* Show mobile menu button for marketing pages (but not full screen wizard) */}
-        {isMarketingPage && !isFullScreen && (
-          <div className="lg:hidden fixed top-4 left-4 z-30">
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="w-10 h-10 bg-white rounded-lg shadow-lg flex items-center justify-center text-gray-700 hover:text-gray-900 border border-gray-200"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
-        )}
-        
-        {renderContent()}
-
-        {/* Global AI Assistant */}
-        <AIAssistant onNavigate={setActiveScreen} currentScreen={activeScreen} />
-
-        {/* Footer for Dashboard Pages */}
-        {!isMarketingPage && !isFullScreen && (
-          <div className="mt-20">
-            <Footer />
-          </div>
-        )}
-      </div>
-    </div>
+    <AppShell 
+      activeScreen={activeScreen} 
+      onNavigate={handleNavigate}
+      isFullScreen={isFullScreen}
+    >
+      {renderContent()}
+    </AppShell>
   );
 }
 
 export default function App() {
   return (
     <BrandShootProvider>
-      <AppContent />
+      <SponsorProvider>
+        <EventProvider>
+          <AgentProvider>
+            <AppContent />
+          </AgentProvider>
+        </EventProvider>
+      </SponsorProvider>
     </BrandShootProvider>
   );
 }

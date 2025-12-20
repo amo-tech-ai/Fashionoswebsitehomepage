@@ -22,7 +22,7 @@ import { Badge } from '../ui/badge';
 import { Slider } from '../ui/slider';
 
 // Mock Data for Models
-const CANDIDATES = [
+export const MOCK_MODELS = [
   {
     id: '1',
     name: 'Elara V.',
@@ -266,7 +266,7 @@ export function CuraCasting({ onNavigate }: { onNavigate?: (page: string) => voi
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               <AnimatePresence>
-                {CANDIDATES.filter(c => activeTab === 'shortlist' ? shortlisted.includes(c.id) : true).map((candidate) => (
+                {MOCK_MODELS.filter(c => activeTab === 'shortlist' ? shortlisted.includes(c.id) : true).map((candidate) => (
                   <motion.div
                     layout
                     key={candidate.id}

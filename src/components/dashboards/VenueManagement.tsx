@@ -24,7 +24,7 @@ import {
   Maximize2
 } from "lucide-react";
 
-import { VenueDetail, VenueData } from "./VenueDetail";
+import { DeepResearchTool } from "../assistant/tools/DeepResearchTool";
 
 interface VenueManagementProps {
   onNavigate?: (screen: string) => void;
@@ -32,6 +32,7 @@ interface VenueManagementProps {
 
 export function VenueManagement({ onNavigate }: VenueManagementProps) {
   const [view, setView] = useState<"list" | "detail">("list");
+  const [isFinderOpen, setIsFinderOpen] = useState(false);
   const [selectedVenue, setSelectedVenue] = useState<VenueData | null>(null);
   const [activeTab, setActiveTab] = useState("gallery");
 
@@ -147,6 +148,19 @@ export function VenueManagement({ onNavigate }: VenueManagementProps) {
             <div className="flex flex-col sm:flex-row gap-3 items-center w-full md:w-auto">
               {view === 'list' ? (
                 <>
+                  {/* AI Finder Toggle */}
+                  <button 
+                    onClick={() => setIsFinderOpen(!isFinderOpen)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors ${
+                      isFinderOpen 
+                        ? 'bg-purple-50 text-purple-700 border border-purple-200' 
+                        : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    AI Venue Finder
+                  </button>
+
                   <div className="relative w-full sm:w-64">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input 
@@ -188,6 +202,25 @@ export function VenueManagement({ onNavigate }: VenueManagementProps) {
             exit={{ opacity: 0 }}
             className="max-w-[1920px] mx-auto px-4 md:px-6 py-6 space-y-6"
           >
+            {/* AI Finder Panel */}
+            <AnimatePresence>
+               {isFinderOpen && (
+                 <motion.div 
+                   initial={{ height: 0, opacity: 0 }}
+                   animate={{ height: "auto", opacity: 1 }}
+                   exit={{ height: 0, opacity: 0 }}
+                   className="overflow-hidden"
+                 >
+                    <div className="bg-purple-50/50 rounded-2xl p-6 border border-purple-100">
+                       <h3 className="text-lg font-serif font-medium text-purple-900 mb-4">Deep Research: Venue Scout</h3>
+                       <DeepResearchTool 
+                         placeholder="Describe your ideal venue (e.g. 'Industrial warehouse in Brooklyn for 500 guests with high ceilings')..." 
+                       />
+                    </div>
+                 </motion.div>
+               )}
+            </AnimatePresence>
+
             {/* Filter Bar */}
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col lg:flex-row gap-4 items-center justify-between">
               <div className="flex flex-wrap gap-3 w-full lg:w-auto">

@@ -19,7 +19,7 @@ import {
   SheetContent, 
   SheetHeader, 
   SheetTitle, 
-  SheetDescription,
+  SheetDescription, 
   SheetFooter 
 } from "../ui/sheet";
 import { toast } from "sonner@2.0.3";
@@ -58,7 +58,7 @@ export function CastingMatchmaker({ onNavigate }: { onNavigate: (screen: string)
     channels: campaignPlan?.strategy.channels.slice(0, 3).join(", ") || "Instagram, Shopify"
   };
 
-  const isBooked = (id: number | string) => bookedTalent.includes(id);
+  const isBooked = (id: number | string) => bookedTalent.includes(id as number);
 
   const handleRequest = (e: React.MouseEvent, model: any) => {
     e.stopPropagation();

@@ -27,10 +27,17 @@ export default function Events() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("Trending");
 
+  // Navigation helper
+  const navigate = (path: string) => {
+    window.history.pushState({}, "", path);
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  };
+
   const quickFilters = ["Trending", "Free", "Workshop", "Exhibition", "AI-Powered"];
 
   const events = [
     {
+      id: "event-001", // Add ID for routing
       title: "Sustainable Fashion Trunk Show",
       date: "Dec 15, 2025",
       location: "New York, NY",
@@ -39,6 +46,7 @@ export default function Events() {
       image: "https://images.unsplash.com/photo-1565206776249-a01813727c94?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwd29ya3Nob3B8ZW58MXx8fHwxNzY0Nzg0Nzc3fDA&ixlib=rb-4.1.0&q=80&w=1080"
     },
     {
+      id: "event-002",
       title: "Emerging Designers Showcase",
       date: "Dec 18, 2025",
       location: "London, UK",
@@ -47,6 +55,7 @@ export default function Events() {
       image: "https://images.unsplash.com/photo-1762430815620-fcca603c240c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwcnVud2F5JTIwc2hvd3xlbnwxfHx8fDE3NjQ4Nzg3MzZ8MA&ixlib=rb-4.1.0&q=80&w=1080"
     },
     {
+      id: "event-003",
       title: "Street Style Meet & Greet",
       date: "Dec 20, 2025",
       location: "Tokyo, JP",
@@ -55,6 +64,7 @@ export default function Events() {
       image: "https://images.unsplash.com/photo-1676808325981-3aa9a37347c6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwc3RyZWV0JTIwc3R5bGV8ZW58MXx8fHwxNzY0NzUyNTEzfDA&ixlib=rb-4.1.0&q=80&w=1080"
     },
     {
+      id: "event-004",
       title: "Fashion Photography Masterclass",
       date: "Dec 22, 2025",
       location: "Paris, FR",
@@ -63,6 +73,7 @@ export default function Events() {
       image: "https://images.unsplash.com/photo-1719613959577-434f93b266d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxiYWNrc3RhZ2UlMjBmYXNoaW9ufGVufDF8fHx8MTc2NDg3ODczN3ww&ixlib=rb-4.1.0&q=80&w=1080"
     },
     {
+      id: "event-005",
       title: "Vintage Fashion Fair",
       date: "Dec 25, 2025",
       location: "Milan, IT",
@@ -71,6 +82,7 @@ export default function Events() {
       image: "https://images.unsplash.com/photo-1562347174-7370ad83dc47?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwZXhoaWJpdGlvbnxlbnwxfHx8fDE3NjQ4MTc2ODN8MA&ixlib=rb-4.1.0&q=80&w=1080"
     },
     {
+      id: "event-006",
       title: "Fashion Tech Conference",
       date: "Dec 28, 2025",
       location: "San Francisco, CA",
@@ -79,6 +91,7 @@ export default function Events() {
       image: "https://images.unsplash.com/photo-1762430790694-aedd36b4cb8c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwaW5kdXN0cnklMjBldmVudHxlbnwxfHx8fDE3NjQ4Nzg3Mzh8MA&ixlib=rb-4.1.0&q=80&w=1080"
     },
     {
+      id: "event-007",
       title: "New Year Fashion Gala",
       date: "Dec 31, 2025",
       location: "Dubai, UAE",
@@ -87,6 +100,7 @@ export default function Events() {
       image: "https://images.unsplash.com/photo-1761574028992-1a72e1867b3c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwZ2FsYSUyMGV2ZW50fGVufDF8fHx8MTc2NDg3ODczOHww&ixlib=rb-4.1.0&q=80&w=1080"
     },
     {
+      id: "event-008",
       title: "Luxury Pop-up Experience",
       date: "Jan 3, 2026",
       location: "Los Angeles, CA",
@@ -95,6 +109,7 @@ export default function Events() {
       image: "https://images.unsplash.com/photo-1575111507952-2d4f371374f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwcG9wdXAlMjBldmVudHxlbnwxfHx8fDE3NjQ4Nzg3Mzh8MA&ixlib=rb-4.1.0&q=80&w=1080"
     },
     {
+      id: "event-009",
       title: "Fashion Week Opening Show",
       date: "Jan 5, 2026",
       location: "Barcelona, ES",
@@ -322,12 +337,13 @@ export default function Events() {
             {events.map((event, index) => (
               <motion.div
                 key={index}
-                className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all group"
+                className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all group cursor-pointer"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: index * 0.05 }}
                 whileHover={{ y: -4 }}
+                onClick={() => navigate(`/events/${event.id}`)}
               >
                 <div className="aspect-[4/3] relative overflow-hidden">
                   <ImageWithFallback
@@ -366,8 +382,14 @@ export default function Events() {
                     ))}
                   </div>
                   
-                  <button className="w-full px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
-                    Get Tickets
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent card click
+                      navigate(`/events/${event.id}`);
+                    }}
+                    className="w-full px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+                  >
+                    View Event Dashboard
                   </button>
                 </div>
               </motion.div>
@@ -482,9 +504,7 @@ export default function Events() {
               </button>
               <button 
                 onClick={() => {
-                  window.history.pushState({}, "", "/events/create");
-                  // Dispatch a popstate event to trigger the App's router
-                  window.dispatchEvent(new PopStateEvent('popstate'));
+                  navigate("/events/create");
                 }}
                 className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border border-white/30 hover:bg-white/20 transition-colors"
               >
