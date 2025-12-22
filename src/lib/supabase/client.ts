@@ -127,3 +127,19 @@ export async function signOut() {
     throw error;
   }
 }
+
+/**
+ * Get Supabase client instance
+ * Use this if you need the client directly instead of the singleton
+ */
+export function getSupabaseClient() {
+  return supabase;
+}
+
+/**
+ * Create a new Supabase client (for compatibility)
+ * Returns the singleton instance
+ */
+export function createSupabaseClient() {
+  return supabase;
+}

@@ -91,9 +91,6 @@ import BeautySponsorshipPage from "./components/pages/BeautySponsorshipPage";
 import AutomotiveSponsorshipPage from "./components/pages/AutomotiveSponsorshipPage";
 import RealEstateSponsorshipPage from "./components/pages/RealEstateSponsorshipPage";
 
-import { RealTimeAssistant } from "./components/assistant/RealTimeAssistant";
-import { ChatBubble } from "./components/assistant/ChatBubble";
-
 // AI Demo
 import { AIWorkflowDemo } from "./components/examples/AIWorkflowDemo";
 import { FileUploadDemo } from "./components/examples/FileUploadDemo";
