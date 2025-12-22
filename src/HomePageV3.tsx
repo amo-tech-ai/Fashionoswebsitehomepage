@@ -1,7 +1,6 @@
 import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
 import { Header } from "./components/Header";
-import { Footer } from "./components/Footer";
 import { ImageWithFallback } from "./components/figma/ImageWithFallback";
 import exampleImage from 'figma:asset/20ab9239a892e6131e16968f3533c44504578092.png';
 import { 
@@ -501,8 +500,6 @@ export default function HomePageV3() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 }
